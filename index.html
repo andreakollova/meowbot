@@ -17,34 +17,32 @@
   #chaptersScreen{background:#3ced87;color:#111;align-items:center;justify-content:center;gap:0;padding:32px;position:relative}
 
   .cs-title{
-    font-size:14vw;font-weight:900;color:rgba(255,255,255,.25);
-    letter-spacing:-0.5vw;line-height:.85;
-    position:absolute;top:50%;left:50%;transform:translate(-50%,-65%);
-    white-space:nowrap;pointer-events:none;user-select:none;
+    font-size:12vw;font-weight:900;color:#fff;
+    letter-spacing:-0.4vw;line-height:.85;
+    white-space:nowrap;user-select:none;z-index:1;
   }
 
-  .cs-logo{display:flex;align-items:center;justify-content:center;z-index:1;margin-bottom:24px}
+  .cs-logo{display:flex;align-items:center;justify-content:center;z-index:1;margin-bottom:20px}
 
   .cs-streak{
-    z-index:1;display:flex;align-items:center;gap:6px;
-    font-size:13px;font-weight:600;color:rgba(0,0,0,.4);
-    margin-bottom:16px;
+    position:fixed;bottom:24px;left:24px;z-index:2;
+    display:flex;align-items:center;gap:6px;
+    font-size:12px;font-weight:600;color:rgba(0,0,0,.35);
   }
-  .cs-streak .streak-fire{font-size:18px}
-  .cs-streak .streak-num{font-size:20px;font-weight:800;color:rgba(0,0,0,.6)}
+  .cs-streak svg{opacity:.5}
+  .cs-streak .streak-num{font-weight:800;color:rgba(0,0,0,.5)}
 
-  .cs-chapters{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:720px;z-index:1}
+  .cs-chapters{display:flex;flex-direction:column;gap:6px;align-items:center;z-index:1}
   .cs-ch-card{
-    background:rgba(255,255,255,.2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-    border:none;border-radius:16px;padding:16px 24px;cursor:pointer;
-    transition:all .2s;display:flex;flex-direction:column;align-items:flex-start;gap:4px;
-    min-width:180px;text-align:left;font-family:inherit;
+    background:none;border:none;cursor:pointer;
+    transition:all .2s;display:flex;align-items:center;gap:10px;
+    font-family:inherit;padding:6px 0;
   }
-  .cs-ch-card:hover{background:rgba(255,255,255,.35);transform:scale(1.02)}
-  .cs-ch-card.empty{opacity:.4;cursor:default}
-  .cs-ch-card.empty:hover{transform:none;background:rgba(255,255,255,.2)}
-  .cs-ch-card .ch-num{font-size:11px;font-weight:600;color:rgba(0,0,0,.3);text-transform:uppercase;letter-spacing:.5px}
-  .cs-ch-card .ch-name{font-size:15px;font-weight:700;color:rgba(0,0,0,.7)}
+  .cs-ch-card:hover{opacity:.7}
+  .cs-ch-card.empty{opacity:.3;cursor:default}
+  .cs-ch-card.empty:hover{opacity:.3}
+  .cs-ch-card .ch-num{font-size:12px;font-weight:700;color:rgba(255,255,255,.5);min-width:18px}
+  .cs-ch-card .ch-name{font-size:15px;font-weight:600;color:rgba(255,255,255,.85)}
 
   /* Chapter detail screen */
   #chapterDetail{background:#3ced87;color:#111;align-items:center;justify-content:center;gap:20px;padding:32px}
@@ -108,6 +106,14 @@
   .rot-pill:hover{color:#111;border-color:#999}
   .rot-pill.on{background:#111;color:#fff;border-color:#111}
   .rot-countdown{font-size:11px;font-weight:600;color:#bbb;font-variant-numeric:tabular-nums;min-width:28px}
+
+  .mark-btn{
+    background:none;border:none;cursor:pointer;
+    color:#ddd;transition:all .2s;display:flex;align-items:center;justify-content:center;
+    width:36px;height:36px;font-size:20px;
+  }
+  .mark-btn:hover{color:#f5c518}
+  .mark-btn.marked{color:#f5c518}
   .notif-toggle{
     background:none;border:none;cursor:pointer;color:#bbb;
     transition:color .2s;display:flex;align-items:center;justify-content:center;
@@ -224,6 +230,11 @@
     <button class="cd-btn" onclick="openChapter()">Start learning</button>
     <button class="cd-btn secondary" onclick="startMeditation()">Meditation</button>
   </div>
+  <div class="cd-actions" style="margin-top:4px">
+    <button class="cd-btn secondary" onclick="openMarked()">Marked only</button>
+    <button class="cd-btn secondary" onclick="startMeditationMarked()">Meditate marked</button>
+  </div>
+  <div style="font-size:12px;color:rgba(0,0,0,.3);margin-top:4px" id="markedCount"></div>
 </div>
 
 <!-- Meditation overlay -->
@@ -242,6 +253,7 @@
   </button>
 
   <div class="term-topright">
+    <button class="mark-btn" id="markBtn" onclick="toggleMark()">&#9734;</button>
     <div class="term-nav">
       <button onclick="prevTerm()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
       <button onclick="nextTerm()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
@@ -623,7 +635,7 @@ function playVoice(idx){
 function doAlert(){
   if(notif==='sound'){
     try{ensureAudio();beep();}catch(e){}
-    setTimeout(()=>{playVoice(ti);},500);
+    setTimeout(()=>{playVoice(getRealIdx());},500);
   }
   if(notif==='vibration'&&navigator.vibrate)navigator.vibrate([80,40,80]);
 }
@@ -667,12 +679,14 @@ function buildChapters(){
 }
 function openChapterDetail(i){
   document.getElementById('cdTitle').textContent=CHAPTERS[i].name;
+  updateMarkedCount();
   document.getElementById('chaptersScreen').classList.remove('active');
   document.getElementById('chapterDetail').classList.add('active');
 }
 function goHome(){
   document.getElementById('chapterDetail').classList.remove('active');
   document.getElementById('chaptersScreen').classList.add('active');
+  updateStreak();
 }
 
 // Mascot: sits still, occasionally plays animation
@@ -700,6 +714,7 @@ function stopMascot(){
 function openChapter(){
   ensureAudio();
   markStudied();
+  markedMode=false;
   const saved=localStorage.getItem('meowbot-ti');
   ti=saved?parseInt(saved):0;
   if(ti>=TERMS.length)ti=0;
@@ -717,23 +732,28 @@ function goBack(){
   document.getElementById('chapterDetail').classList.add('active');
 }
 
+function getRealIdx(){return markedMode?markedList[ti]:ti;}
+function getTotal(){return markedMode?markedList.length:TERMS.length;}
+
 function renderTerm(){
-  const [t,d,sub,imgIdx]=TERMS[ti];
-  localStorage.setItem('meowbot-ti',ti);
+  const ri=getRealIdx();
+  const [t,d,sub,imgIdx]=TERMS[ri];
+  if(!markedMode)localStorage.setItem('meowbot-ti',ti);
   const r=document.getElementById('termRight');
   r.classList.remove('fade');void r.offsetWidth;r.classList.add('fade');
   document.getElementById('termCh').textContent=sub;
   document.getElementById('termImg').src='img/'+IMGS[imgIdx];
   document.getElementById('termWord').textContent=t;
   document.getElementById('termDef').textContent=d;
-  document.getElementById('termCount').textContent=`${ti+1} / ${TERMS.length}`;
-  document.getElementById('termProg').style.width=`${((ti+1)/TERMS.length)*100}%`;
+  document.getElementById('termCount').textContent=`${ti+1} / ${getTotal()}`;
+  document.getElementById('termProg').style.width=`${((ti+1)/getTotal())*100}%`;
+  updateMarkBtn();
 }
 
-function nextTerm(){ti=(ti+1)%TERMS.length;renderTerm();doAlert();resetRot();}
-function prevTerm(){ti=(ti-1+TERMS.length)%TERMS.length;renderTerm();doAlert();resetRot();}
+function nextTerm(){ti=(ti+1)%getTotal();renderTerm();doAlert();resetRot();}
+function prevTerm(){ti=(ti-1+getTotal())%getTotal();renderTerm();doAlert();resetRot();}
 function autoNext(){
-  ti=(ti+1)%TERMS.length;
+  ti=(ti+1)%getTotal();
   doAlert();
   playWhiteAnim(()=>{renderTerm();});
 }
@@ -791,7 +811,7 @@ function updateStreak(){
     localStorage.setItem('meowbot-last-day',today);
   }
   document.getElementById('csStreak').innerHTML=
-    streak>0?`<span class="streak-fire">&#128293;</span><span class="streak-num">${streak}</span> day${streak>1?'s':''} streak`:'';
+    streak>0?`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-4.97 0-9-2.69-9-6 0-4 5-8 5-8s1 2 3 3c2-4 5-7 5-7s4 4 4 8c0 5.5-3.5 10-8 10z"/></svg><span class="streak-num">${streak}</span> day${streak>1?'s':''} streak`:'';
 }
 function markStudied(){
   const today=new Date().toDateString();
@@ -804,6 +824,50 @@ function markStudied(){
     localStorage.setItem('meowbot-last-day',today);
   }
 }
+// Marked terms
+let marked=JSON.parse(localStorage.getItem('meowbot-marked')||'[]');
+let markedMode=false; // when true, only cycle through marked terms
+let markedList=[]; // filtered indices
+
+function toggleMark(){
+  const idx=markedMode?markedList[ti]:ti;
+  const pos=marked.indexOf(idx);
+  if(pos>=0){marked.splice(pos,1);}else{marked.push(idx);}
+  localStorage.setItem('meowbot-marked',JSON.stringify(marked));
+  updateMarkBtn();
+}
+
+function updateMarkBtn(){
+  const idx=markedMode?markedList[ti]:ti;
+  const isMarked=marked.includes(idx);
+  const btn=document.getElementById('markBtn');
+  btn.innerHTML=isMarked?'&#9733;':'&#9734;';
+  btn.classList.toggle('marked',isMarked);
+}
+
+function openMarked(){
+  markedList=[...marked];
+  if(markedList.length===0){alert('No marked terms yet. Mark terms with the star button while learning.');return;}
+  markedMode=true;
+  ti=0;
+  ensureAudio();
+  document.getElementById('chapterDetail').classList.remove('active');
+  document.getElementById('termScreen').classList.add('active');
+  renderTerm();resetRot();startMascot();
+}
+
+function startMeditationMarked(){
+  markedList=[...marked];
+  if(markedList.length===0){alert('No marked terms yet.');return;}
+  markedMode=true;
+  startMeditation();
+}
+
+function updateMarkedCount(){
+  const el=document.getElementById('markedCount');
+  if(el)el.textContent=marked.length>0?`${marked.length} term${marked.length>1?'s':''} marked`:'';
+}
+
 updateStreak();
 buildChapters();
 // Loop all anims on chapters screen logo (green + white mixed)
