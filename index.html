@@ -29,6 +29,12 @@
   .cs-streak svg{opacity:.5}
   .cs-streak .streak-num{font-weight:800;color:rgba(0,0,0,.5)}
 
+  .cs-days{
+    position:fixed;bottom:24px;right:24px;z-index:2;
+    font-size:12px;font-weight:500;color:rgba(0,0,0,.25);
+  }
+  .cs-days span{font-weight:700;color:rgba(0,0,0,.4)}
+
   .cs-chapters{display:flex;flex-direction:column;gap:6px;align-items:center;z-index:1}
   .cs-ch-card{
     background:none;border:none;cursor:pointer;
@@ -42,29 +48,31 @@
   .cs-ch-card .ch-name{font-size:15px;font-weight:600;color:rgba(255,255,255,.85)}
 
   /* Chapter detail screen */
-  #chapterDetail{background:#3ced87;color:#111;align-items:center;justify-content:center;gap:20px;padding:32px}
+  #chapterDetail{background:#3ced87;color:#111;align-items:center;justify-content:center;gap:0;padding:32px}
   .cd-back{
-    position:fixed;top:24px;left:24px;background:rgba(0,0,0,.08);border:none;
+    position:fixed;top:24px;left:24px;background:rgba(0,0,0,.06);border:none;
     border-radius:100px;padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer;
-    font-family:inherit;color:rgba(0,0,0,.5);transition:all .2s;z-index:10;
+    font-family:inherit;color:rgba(0,0,0,.4);transition:all .2s;z-index:10;
     display:flex;align-items:center;gap:6px;
   }
-  .cd-back:hover{background:rgba(0,0,0,.15);color:#111}
-  .cd-title{font-size:28px;font-weight:800;color:rgba(0,0,0,.7);letter-spacing:-.5px}
-  .cd-actions{display:flex;gap:12px}
-  .cd-btn{
-    background:#fff;border:none;border-radius:50px;
-    padding:16px 36px;cursor:pointer;
-    color:#111;font-family:inherit;font-size:15px;font-weight:700;
-    transition:all .2s;letter-spacing:-.3px;
-    box-shadow:0 2px 12px rgba(0,0,0,.08);
+  .cd-back:hover{background:rgba(0,0,0,.12);color:rgba(0,0,0,.7)}
+  .cd-title{font-size:32px;font-weight:800;color:rgba(0,0,0,.7);letter-spacing:-.5px;margin-bottom:32px}
+  .cd-menu{
+    display:flex;flex-direction:column;gap:0;
+    background:rgba(255,255,255,.18);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-radius:20px;overflow:hidden;min-width:280px;
   }
-  .cd-btn:hover{transform:scale(1.04);box-shadow:0 4px 20px rgba(0,0,0,.12)}
-  .cd-btn.secondary{
-    background:rgba(0,0,0,.08);box-shadow:none;
-    color:rgba(0,0,0,.5);font-weight:600;
+  .cd-menu-item{
+    background:none;border:none;cursor:pointer;
+    padding:18px 28px;font-family:inherit;font-size:15px;font-weight:600;
+    color:rgba(0,0,0,.65);transition:all .15s;
+    display:flex;align-items:center;gap:12px;text-align:left;
   }
-  .cd-btn.secondary:hover{background:rgba(0,0,0,.12);color:rgba(0,0,0,.7)}
+  .cd-menu-item:hover{background:rgba(255,255,255,.15)}
+  .cd-menu-item+.cd-menu-item{border-top:1px solid rgba(0,0,0,.06)}
+  .cd-menu-item svg{opacity:.4;flex-shrink:0}
+  .cd-menu-item .cd-sub{font-size:11px;font-weight:500;color:rgba(0,0,0,.3);margin-top:2px}
+  .cd-marked-info{font-size:12px;color:rgba(0,0,0,.25);margin-top:12px}
 
 
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -214,6 +222,7 @@
   <div class="cs-logo"><video id="csLogoVideo" muted playsinline autoplay loop style="width:140px;height:140px;object-fit:contain"></video></div>
   <div class="cs-streak" id="csStreak"></div>
   <div class="cs-chapters" id="csChapters"></div>
+  <div class="cs-days" id="csDays"></div>
 </div>
 
 <!-- CHAPTER DETAIL (green) -->
@@ -223,15 +232,24 @@
     Back
   </button>
   <div class="cd-title" id="cdTitle"></div>
-  <div class="cd-actions">
-    <button class="cd-btn" onclick="openChapter()">Start learning</button>
-    <button class="cd-btn secondary" onclick="startMeditation()">Meditation</button>
+  <div class="cd-menu">
+    <button class="cd-menu-item" onclick="openChapter()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <div>Start learning<div class="cd-sub">Continue where you left off</div></div>
+    </button>
+    <button class="cd-menu-item" onclick="startMeditation()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+      <div>Meditation<div class="cd-sub">Listen and relax</div></div>
+    </button>
+    <button class="cd-menu-item" onclick="openMarked()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <div>Marked only<div class="cd-sub" id="markedCount">No terms marked yet</div></div>
+    </button>
+    <button class="cd-menu-item" onclick="startMeditationMarked()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-4.97 0-9-2.69-9-6 0-4 5-8 5-8s1 2 3 3c2-4 5-7 5-7s4 4 4 8c0 5.5-3.5 10-8 10z"/></svg>
+      <div>Meditate marked<div class="cd-sub">Focus on starred terms</div></div>
+    </button>
   </div>
-  <div class="cd-actions" style="margin-top:4px">
-    <button class="cd-btn secondary" onclick="openMarked()">Marked only</button>
-    <button class="cd-btn secondary" onclick="startMeditationMarked()">Meditate marked</button>
-  </div>
-  <div style="font-size:12px;color:rgba(0,0,0,.3);margin-top:4px" id="markedCount"></div>
 </div>
 
 <!-- Meditation overlay -->
@@ -862,10 +880,18 @@ function startMeditationMarked(){
 
 function updateMarkedCount(){
   const el=document.getElementById('markedCount');
-  if(el)el.textContent=marked.length>0?`${marked.length} term${marked.length>1?'s':''} marked`:'';
+  if(el)el.textContent=marked.length>0?`${marked.length} term${marked.length>1?'s':''} marked`:'No terms marked yet';
+}
+
+function updateDaysSinceStart(){
+  let start=localStorage.getItem('meowbot-start');
+  if(!start){start=new Date().toISOString();localStorage.setItem('meowbot-start',start);}
+  const days=Math.floor((Date.now()-new Date(start).getTime())/86400000);
+  document.getElementById('csDays').innerHTML=days>0?`<span>${days}</span> day${days>1?'s':''} since start`:'Day 1';
 }
 
 updateStreak();
+updateDaysSinceStart();
 buildChapters();
 // Loop all anims on chapters screen logo (green + white mixed)
 (function loopCsLogo(){
