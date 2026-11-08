@@ -68,6 +68,7 @@
   }
   .rot-pill:hover{color:#111;border-color:#999}
   .rot-pill.on{background:#111;color:#fff;border-color:#111}
+  .rot-countdown{font-size:11px;font-weight:600;color:#bbb;font-variant-numeric:tabular-nums;min-width:28px}
   .notif-toggle{
     background:none;border:none;cursor:pointer;color:#bbb;
     transition:color .2s;display:flex;align-items:center;justify-content:center;
@@ -159,10 +160,11 @@
       <button class="rot-pill on" data-i="300" onclick="setRot(300)">5m</button>
       <button class="rot-pill" data-i="600" onclick="setRot(600)">10m</button>
     </div>
+    <span class="rot-countdown" id="rotCountdown">5:00</span>
     <div class="tr-sep"></div>
-    <button class="notif-toggle" id="notifToggle" onclick="cycleNotif()" title="Alerts off">
-      <svg id="notifIconOff" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-      <svg id="notifIconOn" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    <button class="notif-toggle active" id="notifToggle" onclick="cycleNotif()" title="Sound on">
+      <svg id="notifIconOff" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+      <svg id="notifIconOn" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
     </button>
     <div class="tr-sep"></div>
     <div class="term-timer" id="termTimer" onclick="cycleTimerPreset()" title="Click to change">25:00</div>
@@ -490,7 +492,7 @@ const TERMS=[
 ["Lifelong learning","The continued acquisition and refinement of knowledge or skills throughout operation.","Machine Learning and Adaptation",263]
 ];
 
-let ti=0,rot=300,rotT=null,notif='none';
+let ti=0,rot=300,rotT=null,notif='sound';
 let pTotal=25*60,pLeft=25*60,pRun=false,pT=null,actx=null;
 
 function getImgIndex(){return ti;}
@@ -583,7 +585,15 @@ function renderTerm(){
 function nextTerm(){ti=(ti+1)%TERMS.length;renderTerm();doAlert();resetRot();}
 function prevTerm(){ti=(ti-1+TERMS.length)%TERMS.length;renderTerm();doAlert();resetRot();}
 function autoNext(){ti=(ti+1)%TERMS.length;playWhiteAnim(()=>{renderTerm();doAlert();});}
-function resetRot(){if(rotT)clearInterval(rotT);rotT=setInterval(autoNext,rot*1000);}
+let rotLeft=300,rotTick=null;
+function fmtRot(s){const m=Math.floor(s/60),sec=s%60;return sec>0?`${m}:${String(sec).padStart(2,'0')}`:`${m}:00`;}
+function resetRot(){
+  if(rotT)clearInterval(rotT);if(rotTick)clearInterval(rotTick);
+  rotLeft=rot;
+  document.getElementById('rotCountdown').textContent=fmtRot(rotLeft);
+  rotTick=setInterval(()=>{rotLeft--;document.getElementById('rotCountdown').textContent=fmtRot(Math.max(0,rotLeft));},1000);
+  rotT=setInterval(()=>{rotLeft=rot;autoNext();},rot*1000);
+}
 
 function setNotif(m){notif=m;updateNotifIcon();if(m==='sound')beep();if(m==='vibration'&&navigator.vibrate)navigator.vibrate(80);}
 function cycleNotif(){const modes=['none','sound','vibration'];notif=modes[(modes.indexOf(notif)+1)%3];setNotif(notif);}
