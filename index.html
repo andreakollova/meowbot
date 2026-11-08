@@ -14,65 +14,28 @@
   .screen.active{display:flex}
 
   /* ===== CHAPTERS SCREEN ===== */
-  #chaptersScreen{background:#00c853;color:#fff;align-items:center;justify-content:center;gap:24px;padding:32px}
+  #chaptersScreen{background:#fff;color:#111;align-items:center;justify-content:center;gap:24px;padding:32px}
 
-  .cs-logo{display:flex;align-items:center;gap:12px}
-  .cs-logo img{width:48px;height:48px;border-radius:12px}
-  .cs-logo span{font-size:20px;font-weight:800;color:#fff}
+  .cs-logo{display:flex;align-items:center;justify-content:center}
 
-  .cs-grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:12px;
-    max-width:720px;
-    width:100%;
-  }
-
-  .cs-card{
-    background:rgba(255,255,255,.15);
-    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-    border:1px solid rgba(255,255,255,.2);
+  .cs-chapters{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:720px}
+  .cs-ch-btn{
+    background:#f5f5f5;
+    border:1.5px solid #e8e8e8;
     border-radius:16px;
-    padding:20px 16px;
+    padding:16px 28px;
     cursor:pointer;
     transition:all .2s;
     text-align:center;
-    display:flex;flex-direction:column;align-items:center;gap:6px;
+    display:flex;align-items:center;gap:10px;
+    color:#111;font-family:inherit;font-size:15px;font-weight:600;
   }
-  .cs-card:hover{background:rgba(255,255,255,.3);transform:scale(1.03)}
-  .cs-card .num{font-size:28px;font-weight:800;line-height:1}
-  .cs-card .label{font-size:11px;font-weight:500;opacity:.8;line-height:1.3}
+  .cs-ch-btn:hover{background:#00c853;color:#fff;border-color:#00c853;transform:scale(1.03)}
+  .cs-ch-btn .num{font-size:24px;font-weight:800;color:#00c853}
+  .cs-ch-btn:hover .num{color:#fff}
 
-  .cs-bottom{display:flex;gap:20px;align-items:center;flex-wrap:wrap;justify-content:center}
-  .cs-bottom .setting-group{display:flex;align-items:center;gap:8px}
-  .cs-bottom .setting-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;opacity:.6}
-  .cs-bottom .sp{
-    background:rgba(255,255,255,.15);border:none;border-radius:100px;
-    padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;
-    font-family:inherit;color:#fff;transition:all .15s;opacity:.7;
-  }
-  .cs-bottom .sp:hover{opacity:1}
-  .cs-bottom .sp.on{background:#fff;color:#00c853;opacity:1}
 
-  /* Pomodoro row on chapters screen */
-  .cs-pomodoro{display:flex;align-items:center;gap:16px}
-  .cs-pomodoro .timer-val{font-size:32px;font-weight:300;font-variant-numeric:tabular-nums;letter-spacing:-1px}
-  .cs-pomodoro .timer-val.done{animation:pulse 1s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-  .cs-pomodoro .pbtn{
-    background:rgba(255,255,255,.2);border:none;border-radius:100px;
-    padding:6px 16px;font-size:12px;font-weight:600;cursor:pointer;
-    font-family:inherit;color:#fff;transition:all .15s;
-  }
-  .cs-pomodoro .pbtn:hover{background:rgba(255,255,255,.35)}
-  .cs-pomodoro .presets{display:flex;gap:4px}
-  .cs-pomodoro .pp{
-    background:none;border:1px solid rgba(255,255,255,.3);border-radius:100px;
-    padding:4px 10px;font-size:10px;font-weight:600;cursor:pointer;
-    font-family:inherit;color:rgba(255,255,255,.6);transition:all .15s;
-  }
-  .cs-pomodoro .pp:hover{color:#fff;border-color:rgba(255,255,255,.6)}
-  .cs-pomodoro .pp.on{background:#fff;color:#00c853;border-color:#fff}
 
   /* ===== TERM SCREEN ===== */
   #termScreen{background:#fff;padding:32px 48px;flex-direction:row;align-items:center;gap:48px}
@@ -88,10 +51,25 @@
 
   .term-topright{
     position:fixed;top:24px;right:24px;
-    display:flex;align-items:center;gap:12px;z-index:10;
+    display:flex;align-items:center;gap:10px;z-index:10;
   }
-  .term-timer{font-size:15px;font-weight:500;color:#bbb;font-variant-numeric:tabular-nums;letter-spacing:-.3px}
+  .term-timer{font-size:15px;font-weight:500;color:#bbb;font-variant-numeric:tabular-nums;letter-spacing:-.3px;cursor:pointer}
   .term-timer.done{color:#00c853;animation:pulse 1s infinite}
+  .tr-btn{
+    background:none;border:1.5px solid #ddd;border-radius:100px;
+    padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;
+    font-family:inherit;color:#999;transition:all .15s;
+  }
+  .tr-btn:hover{border-color:#00c853;color:#00c853}
+  .tr-sep{width:1px;height:20px;background:#e8e8e8}
+  .rot-pills{display:flex;gap:3px}
+  .rot-pill{
+    background:none;border:1px solid #ddd;border-radius:100px;
+    padding:3px 8px;font-size:10px;font-weight:600;cursor:pointer;
+    font-family:inherit;color:#bbb;transition:all .15s;
+  }
+  .rot-pill:hover{color:#111;border-color:#999}
+  .rot-pill.on{background:#00c853;color:#fff;border-color:#00c853}
   .notif-toggle{
     background:none;border:none;cursor:pointer;color:#bbb;
     transition:color .2s;display:flex;align-items:center;justify-content:center;
@@ -100,8 +78,7 @@
   .notif-toggle:hover{color:#111}
   .notif-toggle.active{color:#00c853}
   .term-nav{
-    position:fixed;top:24px;right:200px;
-    display:flex;gap:8px;z-index:10;
+    display:flex;gap:6px;
   }
   .term-nav button{
     background:none;border:1.5px solid #ddd;border-radius:100px;
@@ -122,12 +99,13 @@
   .progress-track{flex:1;max-width:200px;height:3px;background:#e8e8e8;border-radius:2px;overflow:hidden}
   .progress-fill{height:100%;background:#00c853;border-radius:2px;transition:width .3s}
 
-  .mascot-video{
+  .mascot-corner{
     position:fixed;bottom:24px;right:24px;z-index:10;
-    width:120px;height:120px;border-radius:20px;overflow:hidden;
-    box-shadow:0 4px 24px rgba(0,0,0,.08);
+    width:140px;height:140px;
   }
-  .mascot-video video{width:100%;height:100%;object-fit:cover}
+  .mascot-corner img{width:100%;height:100%;object-fit:contain;display:block}
+  .mascot-corner video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .2s}
+  .mascot-corner video.playing{opacity:1}
 
   /* Overlays */
   .anim-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .3s}
@@ -169,39 +147,11 @@
 
 <!-- CHAPTERS SCREEN (green) -->
 <div class="screen active" id="chaptersScreen">
-  <div class="cs-logo"><img src="meowbot.png" alt=""><span>meowbot</span></div>
+  <div class="cs-logo"><img src="meowbot.png" alt="" style="width:100px;height:100px;object-fit:contain"></div>
 
-  <div class="cs-grid" id="csGrid"></div>
+  <div class="cs-chapters" id="csChapters"></div>
 
-  <div class="cs-pomodoro">
-    <div class="presets">
-      <button class="pp" onclick="setTimer(10)">10</button>
-      <button class="pp" onclick="setTimer(15)">15</button>
-      <button class="pp on" onclick="setTimer(25)">25</button>
-      <button class="pp" onclick="setTimer(30)">30</button>
-      <button class="pp" onclick="setTimer(45)">45</button>
-      <button class="pp" onclick="setTimer(60)">60</button>
-    </div>
-    <div class="timer-val" id="timerDisplay">25:00</div>
-    <button class="pbtn" id="startBtn" onclick="toggleTimer()">Start</button>
-    <button class="pbtn" onclick="resetTimer()">Reset</button>
-  </div>
 
-  <div class="cs-bottom">
-    <div class="setting-group">
-      <span class="setting-label">Alert</span>
-      <button class="sp on" data-n="none" onclick="setNotif('none')">None</button>
-      <button class="sp" data-n="sound" onclick="setNotif('sound')">Sound</button>
-      <button class="sp" data-n="vibration" onclick="setNotif('vibration')">Vibrate</button>
-    </div>
-    <div class="setting-group">
-      <span class="setting-label">Rotate</span>
-      <button class="sp" data-i="60" onclick="setRot(60)">1m</button>
-      <button class="sp" data-i="120" onclick="setRot(120)">2m</button>
-      <button class="sp on" data-i="300" onclick="setRot(300)">5m</button>
-      <button class="sp" data-i="600" onclick="setRot(600)">10m</button>
-    </div>
-  </div>
 </div>
 
 <!-- TERM SCREEN (white) -->
@@ -212,15 +162,26 @@
   </button>
 
   <div class="term-topright">
-    <div class="term-nav" style="position:static;display:flex;gap:8px">
+    <div class="term-nav">
       <button onclick="prevTerm()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
       <button onclick="nextTerm()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
     </div>
-    <button class="notif-toggle" id="notifToggle" onclick="cycleNotif()" title="Toggle alert">
+    <div class="tr-sep"></div>
+    <div class="rot-pills">
+      <button class="rot-pill" data-i="60" onclick="setRot(60)">1m</button>
+      <button class="rot-pill" data-i="120" onclick="setRot(120)">2m</button>
+      <button class="rot-pill on" data-i="300" onclick="setRot(300)">5m</button>
+      <button class="rot-pill" data-i="600" onclick="setRot(600)">10m</button>
+    </div>
+    <div class="tr-sep"></div>
+    <button class="notif-toggle" id="notifToggle" onclick="cycleNotif()" title="Alerts off">
       <svg id="notifIconOff" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
       <svg id="notifIconOn" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
     </button>
-    <div class="term-timer" id="termTimer">25:00</div>
+    <div class="tr-sep"></div>
+    <div class="term-timer" id="termTimer" onclick="cycleTimerPreset()" title="Click to change">25:00</div>
+    <button class="tr-btn" id="startBtn" onclick="toggleTimer()">Start</button>
+    <button class="tr-btn" onclick="resetTimer()">Reset</button>
   </div>
 
   <div class="term-left">
@@ -236,7 +197,8 @@
     </div>
   </div>
 
-  <div class="mascot-video">
+  <div class="mascot-corner">
+    <img src="meowbot.png" alt="">
     <video id="mascotVideo" muted playsinline></video>
   </div>
 </div>
@@ -325,28 +287,35 @@ function showPomodoroDone(){
 }
 function dismissPomodoro(){document.getElementById('pomodoroOverlay').classList.remove('show');document.getElementById('pomodoroVideo').pause();}
 
-// Build chapter grid
-function buildGrid(){
-  document.getElementById('csGrid').innerHTML=CHNAMES.map((name,i)=>
-    `<div class="cs-card" onclick="openChapter(${i})"><div class="num">${i+1}</div><div class="label">${name}</div></div>`
+// Build chapter buttons (only chapters that have data)
+function buildChapters(){
+  // For now only Chapter 1 has content
+  const available=[0]; // indexes of chapters with data, add more later
+  document.getElementById('csChapters').innerHTML=available.map(i=>
+    `<button class="cs-ch-btn" onclick="openChapter(${i})"><span class="num">${i+1}</span>${CHNAMES[i]}</button>`
   ).join('');
 }
 
-// Mascot video loop in bottom-right
-let mascotIdx=0;
+// Mascot: sits still, occasionally plays animation
+let mascotIdx=0,mascotTimer=null;
 function startMascot(){
-  const v=document.getElementById('mascotVideo');
-  function playNext(){
+  scheduleMascotAnim();
+}
+function scheduleMascotAnim(){
+  const delay=8000+Math.random()*15000; // 8-23 seconds
+  mascotTimer=setTimeout(()=>{
+    const v=document.getElementById('mascotVideo');
     v.src=whiteAnims[mascotIdx%whiteAnims.length];
     mascotIdx++;
+    v.classList.add('playing');
     v.play();
-  }
-  v.onended=playNext;
-  playNext();
+    v.onended=()=>{v.classList.remove('playing');scheduleMascotAnim();};
+  },delay);
 }
 function stopMascot(){
+  if(mascotTimer)clearTimeout(mascotTimer);
   const v=document.getElementById('mascotVideo');
-  v.pause();v.onended=null;
+  v.pause();v.classList.remove('playing');v.onended=null;
 }
 
 function openChapter(i){
@@ -384,24 +353,25 @@ function prevTerm(){ti=(ti-1+D[chs[ci]].length)%D[chs[ci]].length;renderTerm();d
 function autoNext(){ti=(ti+1)%D[chs[ci]].length;playWhiteAnim(()=>{renderTerm();doAlert();});}
 function resetRot(){if(rotT)clearInterval(rotT);rotT=setInterval(autoNext,rot*1000);}
 
-function setNotif(m){notif=m;document.querySelectorAll('[data-n]').forEach(b=>b.classList.toggle('on',b.dataset.n===m));updateNotifIcon();if(m==='sound')beep();if(m==='vibration'&&navigator.vibrate)navigator.vibrate(80);}
+function setNotif(m){notif=m;updateNotifIcon();if(m==='sound')beep();if(m==='vibration'&&navigator.vibrate)navigator.vibrate(80);}
 function cycleNotif(){const modes=['none','sound','vibration'];notif=modes[(modes.indexOf(notif)+1)%3];setNotif(notif);}
 function updateNotifIcon(){const on=notif!=='none';document.getElementById('notifIconOff').style.display=on?'none':'block';document.getElementById('notifIconOn').style.display=on?'block':'none';document.getElementById('notifToggle').classList.toggle('active',on);document.getElementById('notifToggle').title=notif==='none'?'Alerts off':notif==='sound'?'Sound on':'Vibrate on';}
-function setRot(s){rot=s;document.querySelectorAll('[data-i]').forEach(b=>b.classList.toggle('on',+b.dataset.i===s));if(rotT)resetRot();}
+function setRot(s){rot=s;document.querySelectorAll('.rot-pill').forEach(b=>b.classList.toggle('on',+b.dataset.i===s));if(rotT)resetRot();}
 
 function fmt(s){return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;}
-function syncTimers(){const f=fmt(pLeft);document.getElementById('timerDisplay').textContent=f;document.getElementById('termTimer').textContent=f;}
-function setTimer(m){pTotal=m*60;pLeft=m*60;pRun=false;if(pT)clearInterval(pT);document.getElementById('startBtn').textContent='Start';document.getElementById('timerDisplay').classList.remove('done');document.getElementById('termTimer').classList.remove('done');document.querySelectorAll('.pp').forEach(b=>b.classList.toggle('on',parseInt(b.textContent)===m));syncTimers();}
+const timerPresets=[10,15,25,30,45,60];let tpIdx=2;
+function cycleTimerPreset(){if(pRun)return;tpIdx=(tpIdx+1)%timerPresets.length;setTimer(timerPresets[tpIdx]);}
+function setTimer(m){pTotal=m*60;pLeft=m*60;pRun=false;if(pT)clearInterval(pT);document.getElementById('startBtn').textContent='Start';document.getElementById('termTimer').classList.remove('done');document.getElementById('termTimer').textContent=fmt(pLeft);}
 function toggleTimer(){
   if(pRun){pRun=false;clearInterval(pT);document.getElementById('startBtn').textContent='Start';}
   else{pRun=true;document.getElementById('startBtn').textContent='Pause';
-    pT=setInterval(()=>{pLeft--;syncTimers();
+    pT=setInterval(()=>{pLeft--;document.getElementById('termTimer').textContent=fmt(pLeft);
       if(pLeft<=0){clearInterval(pT);pRun=false;document.getElementById('startBtn').textContent='Start';
-        document.getElementById('timerDisplay').classList.add('done');document.getElementById('termTimer').classList.add('done');beep();
+        document.getElementById('termTimer').classList.add('done');beep();
         if(navigator.vibrate)navigator.vibrate([200,100,200,100,200]);showPomodoroDone();}
     },1000);}
 }
-function resetTimer(){pRun=false;if(pT)clearInterval(pT);pLeft=pTotal;document.getElementById('startBtn').textContent='Start';document.getElementById('timerDisplay').classList.remove('done');document.getElementById('termTimer').classList.remove('done');syncTimers();}
+function resetTimer(){pRun=false;if(pT)clearInterval(pT);pLeft=pTotal;document.getElementById('startBtn').textContent='Start';document.getElementById('termTimer').classList.remove('done');document.getElementById('termTimer').textContent=fmt(pLeft);}
 
 // Keyboard nav
 document.addEventListener('keydown',e=>{
@@ -411,7 +381,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape')goBack();
 });
 
-buildGrid();
+buildChapters();
 </script>
 </body>
 </html>
