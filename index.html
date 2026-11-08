@@ -20,17 +20,11 @@
 
   .cs-chapters{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:720px}
   .cs-ch-btn{
-    background:rgba(255,255,255,.2);
-    border:none;
-    border-radius:14px;
-    padding:14px 24px;
-    cursor:pointer;
-    transition:all .2s;
-    display:flex;align-items:center;gap:12px;
-    color:rgba(0,0,0,.7);font-family:inherit;font-size:16px;font-weight:600;
+    background:none;border:none;cursor:pointer;
+    color:rgba(0,0,0,.5);font-family:inherit;font-size:15px;font-weight:500;
+    transition:color .2s;padding:8px 0;letter-spacing:-.2px;
   }
-  .cs-ch-btn:hover{background:rgba(255,255,255,.4)}
-  .cs-ch-btn .num{font-size:16px;font-weight:800;color:rgba(0,0,0,.3)}
+  .cs-ch-btn:hover{color:rgba(0,0,0,.8)}
 
 
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -125,13 +119,11 @@
 
   /* Meditation mode */
   .med-btn{
-    background:rgba(255,255,255,.2);border:none;border-radius:14px;
-    padding:14px 24px;cursor:pointer;display:flex;align-items:center;gap:12px;
-    color:rgba(0,0,0,.7);font-family:inherit;font-size:16px;font-weight:600;
-    transition:all .2s;margin-top:8px;
+    background:none;border:none;cursor:pointer;
+    color:rgba(0,0,0,.35);font-family:inherit;font-size:14px;font-weight:500;
+    transition:color .2s;padding:4px 0;letter-spacing:-.2px;
   }
-  .med-btn:hover{background:rgba(255,255,255,.4)}
-  .med-btn .med-icon{font-size:20px}
+  .med-btn:hover{color:rgba(0,0,0,.6)}
 
   .med-overlay{
     position:fixed;inset:0;background:#111;z-index:200;
@@ -172,7 +164,7 @@
   <div class="cs-logo"><video id="csLogoVideo" muted playsinline autoplay loop style="width:120px;height:120px;object-fit:contain"></video></div>
 
   <div class="cs-chapters" id="csChapters"></div>
-  <button class="med-btn" onclick="startMeditation()"><span class="med-icon">&#9775;</span> Meditation</button>
+  <button class="med-btn" onclick="startMeditation()">Meditation</button>
 </div>
 
 <!-- Meditation overlay -->
@@ -618,7 +610,7 @@ function dismissPomodoro(){document.getElementById('pomodoroOverlay').classList.
 function buildChapters(){
   // For now only Chapter 1 has content
   document.getElementById('csChapters').innerHTML=
-    `<button class="cs-ch-btn" onclick="openChapter()"><span class="num">1</span>Introduction to Robotics</button>`;
+    `<button class="cs-ch-btn" onclick="openChapter()">Start learning</button>`;
 }
 
 // Mascot: sits still, occasionally plays animation
@@ -717,11 +709,15 @@ document.addEventListener('keydown',e=>{
 });
 
 buildChapters();
-// Loop green anims on chapters screen logo
+// Loop all anims on chapters screen logo (green + white mixed)
 (function loopCsLogo(){
   const v=document.getElementById('csLogoVideo');
+  const allAnims=[...greenAnims,...whiteAnims];
   let gi=0;
-  function next(){v.src=greenAnims[gi%greenAnims.length];gi++;v.play();}
+  function next(){
+    v.src=allAnims[gi%allAnims.length];gi++;
+    const p=v.play();if(p)p.catch(()=>{});
+  }
   v.onended=next;
   next();
 })();
