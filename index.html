@@ -523,7 +523,17 @@ function beep(){
     o2.start(actx.currentTime);o2.stop(actx.currentTime+0.3);
   },200);
 }
-function doAlert(){if(notif==='sound')beep();if(notif==='vibration'&&navigator.vibrate)navigator.vibrate([80,40,80]);}
+function speak(text){
+  if(!('speechSynthesis' in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-GB';u.rate=0.9;u.pitch=1;
+  speechSynthesis.speak(u);
+}
+function doAlert(){
+  if(notif==='sound'){beep();setTimeout(()=>{const [t,d]=TERMS[ti];speak(t+'. '+d);},500);}
+  if(notif==='vibration'&&navigator.vibrate)navigator.vibrate([80,40,80]);
+}
 
 function playWhiteAnim(cb){
   const ov=document.getElementById('animWhite'),v=document.getElementById('animWhiteVideo');
