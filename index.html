@@ -636,7 +636,9 @@ function stopMascot(){
 }
 
 function openChapter(){
-  ti=0;
+  const saved=localStorage.getItem('meowbot-ti');
+  ti=saved?parseInt(saved):0;
+  if(ti>=TERMS.length)ti=0;
   document.getElementById('chaptersScreen').classList.remove('active');
   document.getElementById('termScreen').classList.add('active');
   renderTerm();
@@ -653,6 +655,7 @@ function goBack(){
 
 function renderTerm(){
   const [t,d,sub,imgIdx]=TERMS[ti];
+  localStorage.setItem('meowbot-ti',ti);
   const r=document.getElementById('termRight');
   r.classList.remove('fade');void r.offsetWidth;r.classList.add('fade');
   document.getElementById('termCh').textContent=sub;
