@@ -16,11 +16,8 @@
   /* ===== CHAPTERS SCREEN ===== */
   #chaptersScreen{background:#3ced87;color:#111;align-items:center;justify-content:center;gap:0;padding:32px;position:relative}
 
-  .cs-title{
-    font-size:12vw;font-weight:900;color:#fff;
-    letter-spacing:-0.4vw;line-height:.85;
-    white-space:nowrap;user-select:none;z-index:1;
-  }
+  .cs-title{z-index:1;user-select:none;width:80%;max-width:900px}
+  .cs-title img{width:100%;height:auto;display:block}
 
   .cs-logo{display:flex;align-items:center;justify-content:center;z-index:1;margin-bottom:20px}
 
@@ -213,7 +210,7 @@
 
 <!-- CHAPTERS SCREEN (green) -->
 <div class="screen active" id="chaptersScreen">
-  <div class="cs-title">MEOWBOT</div>
+  <div class="cs-title"><img src="meowbot-logo.png" alt="MEOWBOT"></div>
   <div class="cs-logo"><video id="csLogoVideo" muted playsinline autoplay loop style="width:140px;height:140px;object-fit:contain"></video></div>
   <div class="cs-streak" id="csStreak"></div>
   <div class="cs-chapters" id="csChapters"></div>
