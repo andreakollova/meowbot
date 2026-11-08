@@ -92,31 +92,34 @@
   .cs-ch-card .ch-name{font-size:18px;font-weight:700;color:rgba(255,255,255,.9)}
 
   /* Chapter detail screen */
-  #chapterDetail{background:#07ee7b;color:#111;align-items:center;justify-content:center;gap:0;padding:32px}
+  #chapterDetail{background:#fff;color:#111;align-items:center;justify-content:center;gap:0;padding:32px}
   .cd-back{
-    position:fixed;top:24px;left:24px;background:rgba(0,0,0,.06);border:none;
+    position:fixed;top:24px;left:24px;background:#f5f5f5;border:none;
     border-radius:100px;padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer;
-    font-family:inherit;color:rgba(0,0,0,.4);transition:all .2s;z-index:10;
+    font-family:inherit;color:#999;transition:all .2s;z-index:10;
     display:flex;align-items:center;gap:6px;
   }
-  .cd-back:hover{background:rgba(0,0,0,.12);color:rgba(0,0,0,.7)}
-  .cd-title{font-size:32px;font-weight:800;color:rgba(0,0,0,.7);letter-spacing:-.5px;margin-bottom:32px}
+  .cd-back:hover{background:#eee;color:#111}
+  .cd-mascot{margin-bottom:24px}
+  .cd-mascot video{width:120px;height:120px;object-fit:contain}
+  .cd-title{font-size:28px;font-weight:800;color:#111;letter-spacing:-.5px;margin-bottom:6px}
+  .cd-subtitle{font-size:14px;color:#bbb;font-weight:500;margin-bottom:32px}
   .cd-menu{
     display:flex;flex-direction:column;gap:0;
-    background:rgba(255,255,255,.18);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-    border-radius:20px;overflow:hidden;min-width:280px;
+    background:#f8f8f8;
+    border-radius:20px;overflow:hidden;min-width:300px;
   }
   .cd-menu-item{
     background:none;border:none;cursor:pointer;
     padding:18px 28px;font-family:inherit;font-size:15px;font-weight:600;
-    color:rgba(0,0,0,.65);transition:all .15s;
-    display:flex;align-items:center;gap:12px;text-align:left;
+    color:#555;transition:all .15s;
+    display:flex;align-items:center;gap:14px;text-align:left;
   }
-  .cd-menu-item:hover{background:rgba(255,255,255,.15)}
-  .cd-menu-item+.cd-menu-item{border-top:1px solid rgba(0,0,0,.06)}
-  .cd-menu-item svg{opacity:.4;flex-shrink:0}
-  .cd-menu-item .cd-sub{font-size:11px;font-weight:500;color:rgba(0,0,0,.3);margin-top:2px}
-  .cd-marked-info{font-size:12px;color:rgba(0,0,0,.25);margin-top:12px}
+  .cd-menu-item:hover{background:#f0f0f0}
+  .cd-menu-item+.cd-menu-item{border-top:1px solid #eee}
+  .cd-menu-item svg{color:#ccc;flex-shrink:0}
+  .cd-menu-item .cd-sub{font-size:11px;font-weight:500;color:#bbb;margin-top:2px}
+  .cd-marked-info{font-size:12px;color:#ccc;margin-top:12px}
 
 
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -279,7 +282,9 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
     Back
   </button>
+  <div class="cd-mascot"><video id="cdMascotVideo" muted playsinline autoplay loop style="width:120px;height:120px;object-fit:contain"></video></div>
   <div class="cd-title" id="cdTitle"></div>
+  <div class="cd-subtitle">Chapter 1</div>
   <div class="cd-menu">
     <button class="cd-menu-item" onclick="openChapter()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -750,6 +755,11 @@ function buildChapters(){
 function openChapterDetail(i){
   document.getElementById('cdTitle').textContent=CHAPTERS[i].name;
   updateMarkedCount();
+  // Loop white anims on chapter detail mascot
+  const v=document.getElementById('cdMascotVideo');
+  let wi=0;
+  function nextW(){v.src=whiteAnims[wi%whiteAnims.length];wi++;v.play().catch(()=>{});}
+  v.onended=nextW;nextW();
   document.getElementById('chaptersScreen').classList.remove('active');
   document.getElementById('chapterDetail').classList.add('active');
 }
