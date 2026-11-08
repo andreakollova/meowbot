@@ -500,12 +500,28 @@ let pTotal=25*60,pLeft=25*60,pRun=false,pT=null,actx=null;
 
 function getImgIndex(){return ti;}
 
+function ensureAudio(){if(!actx){actx=new(window.AudioContext||window.webkitAudioContext)();}if(actx.state==='suspended')actx.resume();}
+// Unlock audio on first user tap
+document.addEventListener('click',function unlock(){ensureAudio();document.removeEventListener('click',unlock);},{once:true});
+
 function beep(){
-  if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();
+  ensureAudio();
+  // First tone
   const o=actx.createOscillator(),g=actx.createGain();
-  o.connect(g);g.connect(actx.destination);o.frequency.value=880;o.type='sine';g.gain.value=.25;
-  o.start();o.stop(actx.currentTime+.12);
-  setTimeout(()=>{const o2=actx.createOscillator(),g2=actx.createGain();o2.connect(g2);g2.connect(actx.destination);o2.frequency.value=1100;o2.type='sine';g2.gain.value=.25;o2.start();o2.stop(actx.currentTime+.15);},150);
+  o.connect(g);g.connect(actx.destination);
+  o.frequency.value=800;o.type='sine';g.gain.value=0.5;
+  g.gain.setValueAtTime(0.5,actx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.01,actx.currentTime+0.3);
+  o.start(actx.currentTime);o.stop(actx.currentTime+0.3);
+  // Second tone
+  setTimeout(()=>{
+    const o2=actx.createOscillator(),g2=actx.createGain();
+    o2.connect(g2);g2.connect(actx.destination);
+    o2.frequency.value=1200;o2.type='sine';g2.gain.value=0.5;
+    g2.gain.setValueAtTime(0.5,actx.currentTime);
+    g2.gain.exponentialRampToValueAtTime(0.01,actx.currentTime+0.3);
+    o2.start(actx.currentTime);o2.stop(actx.currentTime+0.3);
+  },200);
 }
 function doAlert(){if(notif==='sound')beep();if(notif==='vibration'&&navigator.vibrate)navigator.vibrate([80,40,80]);}
 
