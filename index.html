@@ -123,6 +123,38 @@
   .green-overlay .green-dismiss{background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:100px;padding:12px 32px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .2s}
   .green-overlay .green-dismiss:hover{background:rgba(255,255,255,.35)}
 
+  /* Meditation mode */
+  .med-btn{
+    background:rgba(255,255,255,.2);border:none;border-radius:14px;
+    padding:14px 24px;cursor:pointer;display:flex;align-items:center;gap:12px;
+    color:rgba(0,0,0,.7);font-family:inherit;font-size:16px;font-weight:600;
+    transition:all .2s;margin-top:8px;
+  }
+  .med-btn:hover{background:rgba(255,255,255,.4)}
+  .med-btn .med-icon{font-size:20px}
+
+  .med-overlay{
+    position:fixed;inset:0;background:#111;z-index:200;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;transition:opacity .8s;
+  }
+  .med-overlay.show{opacity:1;pointer-events:auto}
+  .med-term{font-size:48px;font-weight:700;color:#fff;margin-bottom:12px;text-align:center;
+    opacity:0;transition:opacity .8s;max-width:80vw}
+  .med-term.visible{opacity:1}
+  .med-def{font-size:22px;font-weight:400;color:rgba(255,255,255,.5);line-height:1.6;
+    text-align:center;max-width:700px;opacity:0;transition:opacity .8s .3s}
+  .med-def.visible{opacity:1}
+  .med-count{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);
+    font-size:13px;color:rgba(255,255,255,.2);font-variant-numeric:tabular-nums}
+  .med-close{
+    position:fixed;top:24px;right:24px;z-index:210;
+    background:rgba(255,255,255,.1);border:none;border-radius:100px;
+    padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;
+    font-family:inherit;color:rgba(255,255,255,.5);transition:all .2s;
+  }
+  .med-close:hover{background:rgba(255,255,255,.2);color:#fff}
+
   @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   .fade{animation:fadeUp .25s ease}
 
@@ -140,8 +172,15 @@
   <div class="cs-logo"><video id="csLogoVideo" muted playsinline autoplay loop style="width:120px;height:120px;object-fit:contain"></video></div>
 
   <div class="cs-chapters" id="csChapters"></div>
+  <button class="med-btn" onclick="startMeditation()"><span class="med-icon">&#9775;</span> Meditation</button>
+</div>
 
-
+<!-- Meditation overlay -->
+<div class="med-overlay" id="medOverlay">
+  <button class="med-close" onclick="stopMeditation()">Stop</button>
+  <div class="med-term" id="medTerm"></div>
+  <div class="med-def" id="medDef"></div>
+  <div class="med-count" id="medCount"></div>
 </div>
 
 <!-- TERM SCREEN (white) -->
@@ -686,6 +725,128 @@ buildChapters();
   v.onended=next;
   next();
 })();
+
+// ===== MEDITATION MODE =====
+let medRunning=false,medIdx=0,medDrone=null,medDroneGain=null,medTimeout=null;
+
+function createDrone(){
+  ensureAudio();
+  medDroneGain=actx.createGain();
+  medDroneGain.gain.value=0;
+  medDroneGain.connect(actx.destination);
+
+  // Layered soft pad: three detuned oscillators
+  const freqs=[130.81,196,261.63]; // C3, G3, C4
+  freqs.forEach(f=>{
+    const o=actx.createOscillator();
+    const g=actx.createGain();
+    o.type='sine';o.frequency.value=f;
+    g.gain.value=0.06;
+    o.connect(g);g.connect(medDroneGain);
+    o.start();
+
+    // Subtle LFO for movement
+    const lfo=actx.createOscillator();
+    const lfoG=actx.createGain();
+    lfo.frequency.value=0.15+Math.random()*0.1;
+    lfoG.gain.value=3;
+    lfo.connect(lfoG);lfoG.connect(o.frequency);
+    lfo.start();
+  });
+
+  // Fade in
+  medDroneGain.gain.setValueAtTime(0,actx.currentTime);
+  medDroneGain.gain.linearRampToValueAtTime(1,actx.currentTime+3);
+}
+
+function chime(){
+  ensureAudio();
+  const notes=[523.25,659.25,783.99]; // C5, E5, G5
+  notes.forEach((f,i)=>{
+    setTimeout(()=>{
+      const o=actx.createOscillator(),g=actx.createGain();
+      o.type='sine';o.frequency.value=f;
+      g.gain.value=0.15;
+      g.gain.setValueAtTime(0.15,actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+2);
+      o.connect(g);g.connect(actx.destination);
+      o.start();o.stop(actx.currentTime+2);
+    },i*300);
+  });
+}
+
+function medSpeak(text,cb){
+  if(!('speechSynthesis' in window)){if(cb)setTimeout(cb,2000);return;}
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-GB';u.rate=0.75;u.pitch=0.9;u.volume=1;
+  u.onend=()=>{if(cb)cb();};
+  u.onerror=()=>{if(cb)cb();};
+  speechSynthesis.speak(u);
+}
+
+function showMedTerm(idx){
+  if(!medRunning)return;
+  const [t,d]=TERMS[idx];
+  const termEl=document.getElementById('medTerm');
+  const defEl=document.getElementById('medDef');
+  document.getElementById('medCount').textContent=`${idx+1} / ${TERMS.length}`;
+
+  // Fade out
+  termEl.classList.remove('visible');
+  defEl.classList.remove('visible');
+
+  setTimeout(()=>{
+    termEl.textContent=t;
+    defEl.textContent=d;
+    // Fade in
+    termEl.classList.add('visible');
+    defEl.classList.add('visible');
+
+    // Speak term, then definition, then chime, then pause, then next
+    medSpeak(t,()=>{
+      if(!medRunning)return;
+      setTimeout(()=>{
+        medSpeak(d,()=>{
+          if(!medRunning)return;
+          // Chime + pause
+          setTimeout(()=>{
+            chime();
+            medTimeout=setTimeout(()=>{
+              if(!medRunning)return;
+              medIdx=(medIdx+1)%TERMS.length;
+              showMedTerm(medIdx);
+            },4000); // 4s pause between terms
+          },800);
+        });
+      },500);
+    });
+  },600);
+}
+
+function startMeditation(){
+  ensureAudio();
+  medRunning=true;
+  medIdx=0;
+  document.getElementById('medOverlay').classList.add('show');
+  createDrone();
+  // Start after 2s to let drone fade in
+  medTimeout=setTimeout(()=>{showMedTerm(medIdx);},2000);
+}
+
+function stopMeditation(){
+  medRunning=false;
+  if(medTimeout)clearTimeout(medTimeout);
+  speechSynthesis.cancel();
+  // Fade out drone
+  if(medDroneGain){
+    medDroneGain.gain.linearRampToValueAtTime(0,actx.currentTime+1.5);
+    setTimeout(()=>{medDroneGain.disconnect();medDroneGain=null;},2000);
+  }
+  document.getElementById('medOverlay').classList.remove('show');
+  document.getElementById('medTerm').classList.remove('visible');
+  document.getElementById('medDef').classList.remove('visible');
+}
 </script>
 </body>
 </html>
