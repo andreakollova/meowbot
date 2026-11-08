@@ -228,8 +228,6 @@ const IMGS=[
 "193-decision-making.png","194-planning.png","195-motion-planning.png","196-path-planning.png","197-collision-free-trajectory.png","198-search-space.png","199-graph-search.png","200-sampling-based-planner.png","201-optimization.png","202-heuristic.png","203-autonomous-navigation.png","204-obstacle-avoidance.png","205-high-level-planning.png","206-automated-planning.png","207-symbolic-ai.png","208-symbolic-planner.png","209-reasoning.png","210-replanning.png","211-task-allocation.png","212-coordination.png","213-control-law.png","214-controller.png","215-adaptive-control.png","216-intelligent-control.png","217-learning-based-controller.png","218-control-policy.png","219-dynamics.png","220-gait.png","221-predictive-model.png","222-decision-network.png","223-game-theoretic-planning.png","224-cognitive-architecture.png","225-knowledge-base.png","226-human-robot-interaction.png","227-human-robot-collaboration.png",
 "228-machine-learning-ml.png","229-supervised-learning.png","230-unsupervised-learning.png","231-reinforcement-learning-rl.png","232-deep-learning.png","233-neural-network.png","234-deep-neural-network.png","235-convolutional-neural-network-cnn.png","236-deep-reinforcement-learning.png","237-training-data.png","238-labeled-data.png","239-feature-learning.png","240-generalization.png","241-trial-and-error-learning.png","242-reward.png","243-penalty.png","244-cumulative-reward.png","245-learning-from-demonstration.png","246-imitation-learning.png","247-online-learning.png","248-calibration.png","249-learning-based-calibration.png","250-simulation.png","251-simulator.png","252-sim-to-real-transfer.png","253-big-data.png","254-collective-learning.png","255-robot-fleet.png","256-black-box-system.png","257-explainability.png","258-trust-in-robots.png","259-safety-constraint.png","260-robot-locomotion.png","261-robotic-manipulation.png","262-robotic-grasping.png","263-multi-agent-reinforcement-learning.png","264-lifelong-learning.png"
 ];
-const CHSIZES=[16,8,19,20,15,22,21,20,20,31,35,37];
-const CHNAMES=["Basics & Definitions","Classification","Joints & Kinematics","Coordinate Systems","Interdisciplinary Foundations","History","Trends & Challenges","Generations","Robot Types","AI & Perception","Decision & Planning","Machine Learning"];
 
 const whiteAnims=['anim-white-1.mp4','anim-white-2.mp4','anim-white-3.mp4','anim-white-4.mp4'];
 const greenAnims=['anim1.mp4','anim2.mp4','anim3.mp4'];
@@ -238,26 +236,278 @@ function shuffleWhite(){for(let i=whiteAnims.length-1;i>0;i--){const j=Math.floo
 shuffleWhite();
 function nextWhiteAnim(){if(whiteIdx>=whiteAnims.length)shuffleWhite();return whiteAnims[whiteIdx++];}
 
-const D={
-"Chapter 1: Basics & Definitions":[["Robotics","The interdisciplinary field concerned with designing, building, programming, operating, and applying robots."],["Robot","A programmable physical machine that performs tasks through controlled movements and actions."],["Robota","The Slavic word meaning subordinate or forced labour from which the word \"robot\" originated."],["Automation","The use of technology to perform tasks with reduced human involvement."],["Flexible automation","Automation that can be adapted to different tasks or production requirements."],["Industrial robot","An automatically controlled, programmable, multipurpose manipulator with at least three programmable axes, used for industrial tasks."],["Mobile robot","A robot that moves through its environment and adapts its actions using information from sensors."],["Autonomous mobile robot (AMR)","A mobile robot that navigates and performs tasks without continuous human control."],["Manipulator","A mechanical structure, usually a robotic arm, used to move or handle objects."],["End effector","A tool or device attached to the end of a robot arm to perform a task."],["Gripper","An end effector used to grasp, hold, and release objects."],["Control unit","The hardware and software that process instructions and control a robot's actions."],["Sensor","A device that measures properties of a robot or its environment."],["Actuator","A component that converts energy into physical movement."],["Actuation","The process of producing movement through an actuator."],["Workpiece","An object being handled, processed, or manufactured by a robot."]],
-"Chapter 2: Classification":[["Robot classification","The grouping of robots according to characteristics such as intelligence, application, control, or geometry."],["Japanese Industrial Robot Association (JIRA)","The association associated with the six-category robot classification presented in the lesson."],["Manual handling device - Class 1","A device with multiple axes that is directly operated by a person."],["Fixed-sequence robot - Class 2","A robot that repeats a predefined sequence of actions that is difficult to change."],["Variable-sequence robot - Class 3","A robot whose predefined sequence of actions can be changed to support flexible automation."],["Playback robot - Class 4","A robot that records movements demonstrated by an operator and repeats them automatically."],["Numerically controlled robot - Class 5","A robot whose movements are specified through numerical instructions in program code."],["Intelligent robot - Class 6","A robot that uses information about its environment to perform tasks under changing conditions."]],
-"Chapter 3: Joints & Kinematics":[["Link","A rigid part of a robot that can move relative to other parts."],["Joint","A connection between links that allows relative movement."],["Axis","A reference line along which translation occurs or around which rotation occurs."],["Degree of freedom (DOF)","An independent movement available to a mechanical system, such as translation or rotation."],["Six degrees of freedom","Three independent translational movements and three independent rotational movements in three-dimensional space."],["Rotation","Movement around an axis."],["Translation","Linear movement without a change in orientation."],["Revolute joint (R)","A joint that allows rotation around an axis."],["Prismatic joint (P)","A joint that allows linear movement along an axis."],["Parallel axes","Axes that run in the same direction and remain a constant distance apart."],["Orthogonal axes","Axes whose directions form a right angle."],["Perpendicular arrangement","The lesson's notation for an axis relationship described using a right angle relative to the axes' common normal."],["Geometric robot classification","The classification of robots according to the arrangement of their joints, links, and axes."],["R||R||P configuration","A joint arrangement with two revolute joints and one prismatic joint whose axes are parallel."],["Kinematics","The study of motion without considering the forces that cause it."],["Robot configuration","The arrangement of a robot's joints and links, or their positions at a particular moment."],["Position","The location of an object relative to a reference system."],["Orientation","The rotational alignment of an object relative to a reference system."],["Trajectory","A description of how a robot's position or joint values change over time."]],
-"Chapter 4: Coordinate Systems":[["Coordinate system","A reference framework used to describe positions and movements."],["Origin","The reference point at which all coordinates are zero."],["Coordinate axes","Reference directions used to specify coordinates."],["Vector","A mathematical quantity with magnitude and direction, used to represent position or displacement."],["Coordinate transformation","A mathematical conversion of coordinates from one reference system to another."],["Cartesian coordinates","Coordinates that describe a position using distances along the x, y, and z axes."],["Joint coordinates","Values describing the position of each robot joint, such as its angle or linear displacement."],["World coordinate system","A fixed reference system associated with the robot's overall environment."],["Base coordinate system","A reference system attached to the robot's base."],["Joint coordinate system","A reference system associated with a joint and described relative to another joint or frame."],["Tool coordinate system","A reference system attached to the robot's tool."],["Object coordinate system","A reference system attached to the object being handled."],["Mechanical interface coordinate system","A reference system attached to the flange where the end effector is mounted."],["Flange","The mechanical mounting surface used to attach an end effector to a robot."],["Workpiece coordinate system","A reference system associated with a workpiece or its placement."],["Cartesian coordinate system","A coordinate system using mutually perpendicular axes, usually x, y, and z."],["Polar coordinate system","A two-dimensional coordinate system describing a point by its distance r from the origin and its angle \u03c6."],["Cylindrical coordinate system","A three-dimensional coordinate system describing a point using radius r, angle \u03c6, and height z."],["Radius (r)","The distance from an origin or axis of rotation."],["Rotation angle (\u03c6)","The angular displacement measured from a reference direction."]],
-"Chapter 5: Interdisciplinary Foundations":[["Mechanical engineering","The discipline concerned with mechanical structures, motion, and physical systems."],["Electrical engineering","The discipline concerned with electrical power, circuits, electronics, and related systems."],["Computer science","The study of computation, algorithms, software, and information processing."],["Manufacturing technology","The methods and equipment used to produce goods."],["Systems engineering","An interdisciplinary approach to designing and integrating components into a functioning system."],["Measurement technology","The methods and devices used to measure physical quantities."],["Sensor technology","The development and application of devices that collect information about physical conditions."],["Robot control","The process of directing a robot's movements and actions."],["Regulation","The use of feedback to keep a measured quantity close to a desired value."],["Hardware","The physical components of a robotic system."],["Software","The programs and instructions that determine how a robotic system operates."],["Ethics in robotics","The consideration of moral questions about the design, use, and effects of robots."],["Regulatory framework","The rules and requirements governing the development and use of robots."],["Workplace safety","Measures that protect people from hazards in working environments."],["Social acceptance","People's willingness to use, trust, or support robots."]],
-"Chapter 6: History":[["Artifact","An object created by humans."],["Water clock","A device that measures time through the controlled flow of water."],["Stanford Arm","A robot arm developed in 1969 with six degrees of freedom and a design that simplified movement calculations."],["MIT Arm","A robot arm developed by Victor Scheinman in 1972 that contributed to the development of programmable industrial manipulators."],["PUMA","Programmable Universal Manipulation Arm; a programmable industrial robot arm associated with the development of Scheinman's designs."],["SCARA","Selective Compliance Assembly Robot Arm; a robot arm designed for efficient assembly, with compliance in selected directions."],["Parallel robot","A robot whose moving platform or end effector is connected to its base through multiple mechanical chains."],["Electro-light-sensitive Internal-External","An early mobile robotic device that responded to light and interacted with its surroundings."],["Shakey","An early mobile robot that combined sensing, environmental reasoning, and action planning."],["Hierarchical control","A control structure organised into levels, from basic movements to complex planning."],["Low-level routine","A basic control operation used as a building block for more complex actions."],["Cognitive robot","A robot that uses internal representations and reasoning to plan and perform actions."],["World model","An internal representation of the environment used for reasoning and planning."],["Localization","The process of estimating a robot's position within an environment."],["Navigation","The process of determining and following a route to a destination."],["Triangulation sensor","A sensor that estimates distance using geometric relationships between observation points and a target."],["Stereo vision","The use of images from two viewpoints to estimate depth and three-dimensional structure."],["Stanford Cart","An early mobile robot that used camera-based perception to navigate around obstacles."],["WAVE","A programming language described in the lesson as having been developed specifically for robotics."],["Micromouse robot","A small mobile robot designed to navigate a maze."],["KAMRO","Karlsruhe Autonomous Mobile Robot; a mobile robotic system developed to perform autonomous assembly tasks."],["Mars rover","A mobile robot designed to explore and investigate the surface of Mars."]],
-"Chapter 7: Trends & Challenges":[["Production cell","A group of machines and equipment organised to carry out a set of manufacturing tasks."],["Human-machine interaction","The exchange of commands and information between people and machines."],["Human-friendly task specification","A way of describing robot tasks that is easy for human operators to understand and use."],["Mobile manipulation","The combination of mobility and object handling in one robotic system."],["Low-cost actuation","The use of affordable components to generate robotic movement."],["Subsystem","A component system that performs a specific function within a larger system."],["Composition of subsystems","The integration of separate modules into a complete robotic system."],["Standardized interface","A shared connection or communication specification that allows different components to work together."],["Embodiment of engineering and research results","The practical implementation of research findings in working robotic systems."],["Open dependable system","A system intended to support interoperability while maintaining reliable operation."],["Interconnectivity","The ability of devices or systems to connect and exchange information."],["Sustainable manufacturing","Production that reduces resource consumption, waste, and environmental impact."],["Robot synchronization","The coordination of robots' actions and timing."],["Multi-robot system","A group of robots that operate together or share a working environment."],["Robot networking","The connection of robots to exchange data or coordinate control and maintenance."],["Microprocessor","An electronic processor that executes computational instructions."],["Computational power","The capacity of a system to process information and perform calculations."],["Moore's law","The historical observation that the number of transistors on integrated circuits tends to double approximately every two years."],["Vision system","A combination of sensors and software used to obtain and interpret visual information."],["Cybersecurity","The protection of robotic systems, networks, and data against unauthorized access or attacks."],["Remote control","The operation of a robot from another location through a communication connection."]],
-"Chapter 8: Generations":[["Robotics 1.0","The first generation of robotics, focused on repetitive industrial automation in structured environments."],["4Ds","Dull, dirty, dumb, and dangerous; the lesson's description of tasks associated with Robotics 1.0."],["Robotics 2.0","The generation characterised by improved intelligence, sensing, safety, mobility, and ease of use."],["Personal robot","A robot intended to assist individual users, associated in the lesson with second-generation robotics."],["4Ss","Smarter, safer, sensors, and simple; the lesson's description of the transition to Robotics 2.0."],["Robotics 3.0","The emerging vision of connected, context-aware robots that interact with people and perform complex tasks autonomously."],["4Ms","Multitasking, emotive, morphing, and multiagent systems; the lesson's description of Robotics 3.0."],["Multitasking","The ability to manage or perform multiple tasks."],["Emotive robotics","Robotics involving the recognition, expression, or simulation of emotional signals."],["Morphing","The ability to change physical shape or configuration."],["Multiagent system","A system containing multiple agents that interact, coordinate, or cooperate."],["Context awareness","The ability to use information about the current situation to choose appropriate actions."],["Ubiquitous robotics","Robotics in which robots are widely present and exchange information with other robots and surrounding devices."],["Networked robot","A robot connected to other robots or systems through a communication network."],["Cloud robotics","The use of remote computing resources, shared data, and network services to support robots."],["Cloud computing infrastructure","Remote computing and storage resources accessed through a network."],["Computation offloading","The transfer of computational work from a robot to another computer or cloud service."],["Social awareness","The ability to recognise people, social situations, and relevant social expectations."],["Affective interaction","Interaction involving emotional signals or responses."],["Ubirobots' engineering","The design and integration of robots within interconnected, ubiquitous environments."]],
-"Chapter 9: Robot Types":[["Humanoid robot","A robot whose physical structure resembles the human body."],["ASIMO","A humanoid robot developed by Honda."],["Social robot","A robot designed to interact socially with people."],["Service robot","A robot that performs useful tasks for people or equipment outside industrial automation."],["Pepper","A social robot used in the lesson as an example of speech- and gesture-based human interaction."],["Wearable robotics","The field of robotic devices worn on the body to assist, restore, or enhance human abilities."],["Exoskeleton","An external wearable structure that supports or assists body movements."],["Exosuit","A wearable assistive device that mainly uses soft structures to support movement."],["Wearable user interface","A body-worn device used to send commands to or receive feedback from a robotic system."],["Rehabilitation robotics","The use of robotic systems to help people recover or practise physical abilities."],["Walking assist system","A device that supports a person's walking movements."],["Robotic prosthesis","An artificial body part using robotic mechanisms or control to replace lost function."],["Soft robotics","The field concerned with robots made partly or mainly from flexible, deformable materials."],["Soft robot","A robot whose flexible components allow substantial deformation during operation."],["Rigid body","An idealised object whose shape and internal distances do not change."],["Deformation","A change in an object's shape or size."],["Pneumatic control","The use of pressurized gas to produce or regulate movement."],["Hydraulic control","The use of pressurized liquid to produce or regulate movement."],["Bio-inspired robotics","The design of robots using principles or solutions found in living organisms."],["Bio-inspired robot","A robot whose design or behaviour draws inspiration from biological systems."]],
-"Chapter 10: AI & Perception":[["Artificial intelligence (AI)","Computational methods that enable machines to perform tasks involving perception, reasoning, planning, or learning."],["Autonomy","The ability to perform tasks and make operational decisions without continuous human control."],["Adaptability","The ability to adjust behaviour to new tasks or changing conditions."],["Structured environment","An environment whose layout and operating conditions are relatively predictable."],["Unstructured environment","An environment that is variable and not fully arranged or known in advance."],["Dynamic environment","An environment that changes while a robot operates."],["Robotic perception","The process of interpreting sensor data to understand the robot and its surroundings."],["Computer vision","Methods that extract useful information from images or video."],["Pattern recognition","The identification of meaningful patterns in data."],["Object detection","The identification and location of objects in sensor data, especially images."],["Object recognition","The identification of what an observed object is."],["Image classification","The assignment of an image or image region to a category."],["Scene understanding","The interpretation of objects, relationships, and activities within an environment."],["Spatial relationship","The position or orientation of one object relative to another."],["Semantic information","Information about what objects or observations mean."],["Semantic perception","The interpretation of sensor data in terms of meaningful objects, categories, and relationships."],["Lidar","A sensing technology that measures distance using laser light."],["Sonar","A sensing technology that detects objects or measures distance using sound waves."],["Touch sensor","A device that detects physical contact or related quantities such as pressure."],["Tactile feedback","Information obtained through physical contact."],["Depth sensor","A sensor that measures distances to surfaces or objects."],["Sensor fusion","The combination of information from multiple sensors to obtain a more reliable estimate."],["Multimodal perception","The combined interpretation of different types of sensory input, such as vision, sound, and touch."],["Simultaneous localization and mapping (SLAM)","The process of building a map while estimating the robot's location within it."],["Loop closure","The recognition that a robot has returned to a previously visited place, allowing mapping and localization errors to be corrected."],["Probabilistic AI","AI methods that represent and reason about uncertainty using probabilities."],["Bayesian estimation","The updating of an estimate by combining prior knowledge with new evidence."],["Natural language processing (NLP)","Methods that allow computers to process and interpret human language."],["Speech recognition","The conversion of spoken language into a machine-processable representation."],["Gesture recognition","The identification and interpretation of body or hand movements."],["Facial expression recognition","The identification of facial movements associated with expressions."]],
-"Chapter 11: Decision & Planning":[["Decision-making","The selection of actions based on goals, available information, and possible outcomes."],["Planning","The process of determining actions needed to achieve a goal."],["Motion planning","The computation of feasible robot movements that achieve a task while respecting constraints."],["Path planning","The computation of a route from a starting point to a destination."],["Collision-free trajectory","A sequence of movements over time that avoids contact with obstacles."],["Search space","The set of possible states or solutions explored by an algorithm."],["Graph search","A method that explores connected states to find a route or solution."],["Sampling-based planner","A motion-planning method that samples possible configurations and attempts to connect them into a feasible path."],["Optimization","The process of finding the best solution according to a defined objective and constraints."],["Heuristic","A practical estimate or rule that guides a search toward promising solutions."],["Autonomous navigation","The ability to determine and follow routes without continuous human guidance."],["Obstacle avoidance","The adjustment of movement to prevent collisions."],["High-level planning","The selection and ordering of broader actions needed to complete a task."],["Automated planning","The automatic generation of action sequences from descriptions of goals and available actions."],["Symbolic AI","AI that uses explicit symbols, rules, and logical representations."],["Symbolic planner","A planning system that uses symbolic descriptions of actions, conditions, and goals."],["Reasoning","The use of available knowledge to draw conclusions or choose actions."],["Replanning","The revision of a plan when conditions or information change."],["Task allocation","The assignment of tasks to robots or other agents."],["Coordination","The organisation of actions so that multiple robots or agents work effectively together."],["Control law","A rule that determines control commands from a system's state and desired behaviour."],["Controller","A component that calculates commands to guide a system toward desired behaviour."],["Adaptive control","Control that adjusts its parameters in response to changes or uncertainty."],["Intelligent control","Control that uses AI methods to select or improve actions."],["Learning-based controller","A controller whose behaviour is learned from data or experience."],["Control policy","A rule or strategy that maps observations or states to actions."],["Dynamics","The study of motion in relation to forces and torques."],["Gait","A coordinated pattern of movements used for walking or other locomotion."],["Predictive model","A model used to estimate future states or outcomes."],["Decision network","A model representing relationships among uncertain events, decisions, and their consequences."],["Game-theoretic planning","Planning that considers how other decision-makers may act."],["Cognitive architecture","An integrated framework connecting perception, memory, reasoning, planning, and learning."],["Knowledge base","An organised collection of information used for reasoning and decision-making."],["Human-robot interaction","The ways people and robots communicate and respond to one another."],["Human-robot collaboration","People and robots working together toward a shared goal."]],
-"Chapter 12: Machine Learning":[["Machine learning (ML)","Methods that enable a system to improve or acquire capabilities through data and experience."],["Supervised learning","Learning from examples that include the correct labels or outputs."],["Unsupervised learning","Learning patterns or structure from data without provided target labels."],["Reinforcement learning (RL)","Learning through interaction by selecting actions and using rewards to improve future behaviour."],["Deep learning","Machine learning using neural networks with multiple processing layers."],["Neural network","A computational model made of connected processing units whose parameters are adjusted during learning."],["Deep neural network","A neural network containing multiple layers that learn increasingly complex representations."],["Convolutional neural network (CNN)","A neural network architecture especially suited to processing images and other grid-like data."],["Deep reinforcement learning","Reinforcement learning that uses deep neural networks to represent policies or other learned functions."],["Training data","Examples or experiences used to adjust a machine-learning model."],["Labeled data","Data paired with information specifying the desired category or output."],["Feature learning","The automatic discovery of useful representations from data."],["Generalization","The ability to apply learned knowledge to new examples or situations."],["Trial-and-error learning","Learning by attempting actions and using their outcomes to improve."],["Reward","A numerical feedback signal indicating how desirable an outcome or action is."],["Penalty","Negative feedback that discourages an action or outcome."],["Cumulative reward","The total reward collected over a sequence of interactions, sometimes weighted by time."],["Learning from demonstration","Learning how to perform a task from examples provided by a human or another robot."],["Imitation learning","Learning a policy by reproducing or generalizing demonstrated behaviour."],["Online learning","Updating a model while new data arrive during operation."],["Calibration","The adjustment of system parameters so that measurements or actions match relevant references."],["Learning-based calibration","The use of learning methods to adjust a robot's parameters from data or feedback."],["Simulation","A computer-based representation of a robot and its environment used for testing or training."],["Simulator","Software that reproduces relevant aspects of a physical system and its behaviour."],["Sim-to-real transfer","The application of knowledge or behaviours learned in simulation to a physical robot."],["Big data","Large or complex datasets used to support analysis and learning."],["Collective learning","Learning in which experience or knowledge is shared among multiple robots."],["Robot fleet","A group of robots managed or operated together."],["Black-box system","A system whose internal decision process is difficult to inspect or understand."],["Explainability","The ability to provide understandable reasons for a system's outputs or actions."],["Trust in robots","Confidence that a robot will behave reliably and appropriately."],["Safety constraint","A restriction intended to prevent unsafe actions or outcomes."],["Robot locomotion","The movement of a robot from one place to another."],["Robotic manipulation","The controlled movement and handling of objects."],["Robotic grasping","The process of securing and holding an object with a robotic hand or gripper."],["Multi-agent reinforcement learning","Reinforcement learning involving multiple interacting agents."],["Lifelong learning","The continued acquisition and refinement of knowledge or skills throughout operation."]]
-};
+// All 264 terms in order, each with [term, definition, subchapter]
+const TERMS=[
+["Automation","The use of technology to perform tasks with reduced human involvement.","Introduction"],
+["Robotics","The interdisciplinary field concerned with designing, building, programming, operating, and applying robots.","Basics and Definitions"],
+["Robot","A programmable physical machine that performs tasks through controlled movements and actions.","Basics and Definitions"],
+["Robota","The Slavic word meaning subordinate or forced labour from which the word \"robot\" originated.","Basics and Definitions"],
+["Industrial robot","An automatically controlled, programmable, multipurpose manipulator with at least three programmable axes, used for industrial tasks.","Industrial Robots and Mobile Robots"],
+["Mobile robot","A robot that moves through its environment and adapts its actions using information from sensors.","Industrial Robots and Mobile Robots"],
+["Manipulator","A mechanical structure, usually a robotic arm, used to move or handle objects.","Industrial Robots and Mobile Robots"],
+["End effector","A tool or device attached to the end of a robot arm to perform a task.","Industrial Robots and Mobile Robots"],
+["Gripper","An end effector used to grasp, hold, and release objects.","Industrial Robots and Mobile Robots"],
+["Control unit","The hardware and software that process instructions and control a robot's actions.","Industrial Robots and Mobile Robots"],
+["Sensor","A device that measures properties of a robot or its environment.","Industrial Robots and Mobile Robots"],
+["Flexible automation","Automation that can be adapted to different tasks or production requirements.","Classification of Robots"],
+["Robot classification","The grouping of robots according to characteristics such as intelligence, application, control, or geometry.","Classification of Robots"],
+["Japanese Industrial Robot Association (JIRA)","The association associated with the six-category robot classification presented in the lesson.","Classification of Robots"],
+["Manual handling device - Class 1","A device with multiple axes that is directly operated by a person.","Classification of Robots"],
+["Fixed-sequence robot - Class 2","A robot that repeats a predefined sequence of actions that is difficult to change.","Classification of Robots"],
+["Variable-sequence robot - Class 3","A robot whose predefined sequence of actions can be changed to support flexible automation.","Classification of Robots"],
+["Playback robot - Class 4","A robot that records movements demonstrated by an operator and repeats them automatically.","Classification of Robots"],
+["Numerically controlled robot - Class 5","A robot whose movements are specified through numerical instructions in program code.","Classification of Robots"],
+["Intelligent robot - Class 6","A robot that uses information about its environment to perform tasks under changing conditions.","Classification of Robots"],
+["Link","A rigid part of a robot that can move relative to other parts.","Classification of Robots"],
+["Joint","A connection between links that allows relative movement.","Classification of Robots"],
+["Axis","A reference line along which translation occurs or around which rotation occurs.","Classification of Robots"],
+["Degree of freedom (DOF)","An independent movement available to a mechanical system, such as translation or rotation.","Classification of Robots"],
+["Six degrees of freedom","Three independent translational movements and three independent rotational movements in three-dimensional space.","Classification of Robots"],
+["Rotation","Movement around an axis.","Classification of Robots"],
+["Translation","Linear movement without a change in orientation.","Classification of Robots"],
+["Revolute joint (R)","A joint that allows rotation around an axis.","Classification of Robots"],
+["Prismatic joint (P)","A joint that allows linear movement along an axis.","Classification of Robots"],
+["Parallel axes","Axes that run in the same direction and remain a constant distance apart.","Classification of Robots"],
+["Orthogonal axes","Axes whose directions form a right angle.","Classification of Robots"],
+["Perpendicular arrangement","The lesson's notation for an axis relationship described using a right angle relative to the axes' common normal.","Classification of Robots"],
+["Geometric robot classification","The classification of robots according to the arrangement of their joints, links, and axes.","Classification of Robots"],
+["R||R||P configuration","A joint arrangement with two revolute joints and one prismatic joint whose axes are parallel.","Classification of Robots"],
+["Robot configuration","The arrangement of a robot's joints and links, or their positions at a particular moment.","Classification of Robots"],
+["Kinematics","The study of motion without considering the forces that cause it.","Coordinate Systems for Robots"],
+["Position","The location of an object relative to a reference system.","Coordinate Systems for Robots"],
+["Orientation","The rotational alignment of an object relative to a reference system.","Coordinate Systems for Robots"],
+["Trajectory","A description of how a robot's position or joint values change over time.","Coordinate Systems for Robots"],
+["Coordinate system","A reference framework used to describe positions and movements.","Coordinate Systems for Robots"],
+["Origin","The reference point at which all coordinates are zero.","Coordinate Systems for Robots"],
+["Coordinate axes","Reference directions used to specify coordinates.","Coordinate Systems for Robots"],
+["Vector","A mathematical quantity with magnitude and direction, used to represent position or displacement.","Coordinate Systems for Robots"],
+["Coordinate transformation","A mathematical conversion of coordinates from one reference system to another.","Coordinate Systems for Robots"],
+["Cartesian coordinates","Coordinates that describe a position using distances along the x, y, and z axes.","Coordinate Systems for Robots"],
+["Joint coordinates","Values describing the position of each robot joint, such as its angle or linear displacement.","Coordinate Systems for Robots"],
+["World coordinate system","A fixed reference system associated with the robot's overall environment.","Coordinate Systems for Robots"],
+["Base coordinate system","A reference system attached to the robot's base.","Coordinate Systems for Robots"],
+["Joint coordinate system","A reference system associated with a joint and described relative to another joint or frame.","Coordinate Systems for Robots"],
+["Tool coordinate system","A reference system attached to the robot's tool.","Coordinate Systems for Robots"],
+["Object coordinate system","A reference system attached to the object being handled.","Coordinate Systems for Robots"],
+["Mechanical interface coordinate system","A reference system attached to the flange where the end effector is mounted.","Coordinate Systems for Robots"],
+["Flange","The mechanical mounting surface used to attach an end effector to a robot.","Coordinate Systems for Robots"],
+["Workpiece coordinate system","A reference system associated with a workpiece or its placement.","Coordinate Systems for Robots"],
+["Cartesian coordinate system","A coordinate system using mutually perpendicular axes, usually x, y, and z.","Coordinate Systems for Robots"],
+["Polar coordinate system","A two-dimensional coordinate system describing a point by its distance r from the origin and its angle \u03c6.","Coordinate Systems for Robots"],
+["Cylindrical coordinate system","A three-dimensional coordinate system describing a point using radius r, angle \u03c6, and height z.","Coordinate Systems for Robots"],
+["Radius (r)","The distance from an origin or axis of rotation.","Coordinate Systems for Robots"],
+["Rotation angle (\u03c6)","The angular displacement measured from a reference direction.","Coordinate Systems for Robots"],
+["Workpiece","An object being handled, processed, or manufactured by a robot.","Coordinate Systems for Robots"],
+["Mechanical engineering","The discipline concerned with mechanical structures, motion, and physical systems.","Aspects of Robotics"],
+["Electrical engineering","The discipline concerned with electrical power, circuits, electronics, and related systems.","Aspects of Robotics"],
+["Computer science","The study of computation, algorithms, software, and information processing.","Aspects of Robotics"],
+["Manufacturing technology","The methods and equipment used to produce goods.","Aspects of Robotics"],
+["Systems engineering","An interdisciplinary approach to designing and integrating components into a functioning system.","Aspects of Robotics"],
+["Measurement technology","The methods and devices used to measure physical quantities.","Aspects of Robotics"],
+["Sensor technology","The development and application of devices that collect information about physical conditions.","Aspects of Robotics"],
+["Robot control","The process of directing a robot's movements and actions.","Aspects of Robotics"],
+["Regulation","The use of feedback to keep a measured quantity close to a desired value.","Aspects of Robotics"],
+["Hardware","The physical components of a robotic system.","Aspects of Robotics"],
+["Software","The programs and instructions that determine how a robotic system operates.","Aspects of Robotics"],
+["Ethics in robotics","The consideration of moral questions about the design, use, and effects of robots.","Aspects of Robotics"],
+["Regulatory framework","The rules and requirements governing the development and use of robots.","Aspects of Robotics"],
+["Workplace safety","Measures that protect people from hazards in working environments.","Aspects of Robotics"],
+["Social acceptance","People's willingness to use, trust, or support robots.","Aspects of Robotics"],
+["Artifact","An object created by humans.","History and Cultural Influence"],
+["Water clock","A device that measures time through the controlled flow of water.","History and Cultural Influence"],
+["Human-robot interaction","The ways people and robots communicate and respond to one another.","History and Cultural Influence"],
+["Stanford Arm","A robot arm developed in 1969 with six degrees of freedom and a design that simplified movement calculations.","History of Industrial Robots"],
+["MIT Arm","A robot arm developed by Victor Scheinman in 1972 that contributed to the development of programmable industrial manipulators.","History of Industrial Robots"],
+["PUMA","Programmable Universal Manipulation Arm; a programmable industrial robot arm associated with the development of Scheinman's designs.","History of Industrial Robots"],
+["SCARA","Selective Compliance Assembly Robot Arm; a robot arm designed for efficient assembly, with compliance in selected directions.","History of Industrial Robots"],
+["Parallel robot","A robot whose moving platform or end effector is connected to its base through multiple mechanical chains.","History of Industrial Robots"],
+["Autonomous mobile robot (AMR)","A mobile robot that navigates and performs tasks without continuous human control.","History of Mobile Robots"],
+["Electro-light-sensitive Internal-External","An early mobile robotic device that responded to light and interacted with its surroundings.","History of Mobile Robots"],
+["Shakey","An early mobile robot that combined sensing, environmental reasoning, and action planning.","History of Mobile Robots"],
+["Hierarchical control","A control structure organised into levels, from basic movements to complex planning.","History of Mobile Robots"],
+["Low-level routine","A basic control operation used as a building block for more complex actions.","History of Mobile Robots"],
+["Cognitive robot","A robot that uses internal representations and reasoning to plan and perform actions.","History of Mobile Robots"],
+["World model","An internal representation of the environment used for reasoning and planning.","History of Mobile Robots"],
+["Localization","The process of estimating a robot's position within an environment.","History of Mobile Robots"],
+["Navigation","The process of determining and following a route to a destination.","History of Mobile Robots"],
+["Triangulation sensor","A sensor that estimates distance using geometric relationships between observation points and a target.","History of Mobile Robots"],
+["Stereo vision","The use of images from two viewpoints to estimate depth and three-dimensional structure.","History of Mobile Robots"],
+["Stanford Cart","An early mobile robot that used camera-based perception to navigate around obstacles.","History of Mobile Robots"],
+["WAVE","A programming language described in the lesson as having been developed specifically for robotics.","History of Mobile Robots"],
+["Micromouse robot","A small mobile robot designed to navigate a maze.","History of Mobile Robots"],
+["KAMRO","Karlsruhe Autonomous Mobile Robot; a mobile robotic system developed to perform autonomous assembly tasks.","History of Mobile Robots"],
+["Mars rover","A mobile robot designed to explore and investigate the surface of Mars.","History of Mobile Robots"],
+["Production cell","A group of machines and equipment organised to carry out a set of manufacturing tasks.","Production at Different Scales"],
+["Human-machine interaction","The exchange of commands and information between people and machines.","Technological Thresholds"],
+["Human-friendly task specification","A way of describing robot tasks that is easy for human operators to understand and use.","Technological Thresholds"],
+["Mobile manipulation","The combination of mobility and object handling in one robotic system.","Technological Thresholds"],
+["Actuator","A component that converts energy into physical movement.","Technological Thresholds"],
+["Actuation","The process of producing movement through an actuator.","Technological Thresholds"],
+["Low-cost actuation","The use of affordable components to generate robotic movement.","Technological Thresholds"],
+["Subsystem","A component system that performs a specific function within a larger system.","Technological Thresholds"],
+["Composition of subsystems","The integration of separate modules into a complete robotic system.","Technological Thresholds"],
+["Standardized interface","A shared connection or communication specification that allows different components to work together.","Technological Thresholds"],
+["Embodiment of engineering and research results","The practical implementation of research findings in working robotic systems.","Technological Thresholds"],
+["Open dependable system","A system intended to support interoperability while maintaining reliable operation.","Technological Thresholds"],
+["Interconnectivity","The ability of devices or systems to connect and exchange information.","Technological Thresholds"],
+["Sustainable manufacturing","Production that reduces resource consumption, waste, and environmental impact.","Technological Thresholds"],
+["Robot synchronization","The coordination of robots' actions and timing.","Technological Thresholds"],
+["Multi-robot system","A group of robots that operate together or share a working environment.","Technological Thresholds"],
+["Robot networking","The connection of robots to exchange data or coordinate control and maintenance.","Technological Thresholds"],
+["Microprocessor","An electronic processor that executes computational instructions.","Technological Thresholds"],
+["Computational power","The capacity of a system to process information and perform calculations.","Technological Thresholds"],
+["Moore's law","The historical observation that the number of transistors on integrated circuits tends to double approximately every two years.","Technological Thresholds"],
+["Vision system","A combination of sensors and software used to obtain and interpret visual information.","Technological Thresholds"],
+["Cybersecurity","The protection of robotic systems, networks, and data against unauthorized access or attacks.","Technological Thresholds"],
+["Remote control","The operation of a robot from another location through a communication connection.","Different Generations of Robotics"],
+["Robotics 1.0","The first generation of robotics, focused on repetitive industrial automation in structured environments.","Different Generations of Robotics"],
+["4Ds","Dull, dirty, dumb, and dangerous; the lesson's description of tasks associated with Robotics 1.0.","Different Generations of Robotics"],
+["Robotics 2.0","The generation characterised by improved intelligence, sensing, safety, mobility, and ease of use.","Different Generations of Robotics"],
+["Personal robot","A robot intended to assist individual users, associated in the lesson with second-generation robotics.","Different Generations of Robotics"],
+["4Ss","Smarter, safer, sensors, and simple; the lesson's description of the transition to Robotics 2.0.","Different Generations of Robotics"],
+["Robotics 3.0","The emerging vision of connected, context-aware robots that interact with people and perform complex tasks autonomously.","Different Generations of Robotics"],
+["4Ms","Multitasking, emotive, morphing, and multiagent systems; the lesson's description of Robotics 3.0.","Different Generations of Robotics"],
+["Multitasking","The ability to manage or perform multiple tasks.","Different Generations of Robotics"],
+["Emotive robotics","Robotics involving the recognition, expression, or simulation of emotional signals.","Different Generations of Robotics"],
+["Morphing","The ability to change physical shape or configuration.","Different Generations of Robotics"],
+["Multiagent system","A system containing multiple agents that interact, coordinate, or cooperate.","Different Generations of Robotics"],
+["Context awareness","The ability to use information about the current situation to choose appropriate actions.","Different Generations of Robotics"],
+["Ubiquitous robotics","Robotics in which robots are widely present and exchange information with other robots and surrounding devices.","New Fields of Robotics"],
+["Networked robot","A robot connected to other robots or systems through a communication network.","New Fields of Robotics"],
+["Cloud robotics","The use of remote computing resources, shared data, and network services to support robots.","New Fields of Robotics"],
+["Cloud computing infrastructure","Remote computing and storage resources accessed through a network.","New Fields of Robotics"],
+["Computation offloading","The transfer of computational work from a robot to another computer or cloud service.","New Fields of Robotics"],
+["Social awareness","The ability to recognise people, social situations, and relevant social expectations.","New Fields of Robotics"],
+["Affective interaction","Interaction involving emotional signals or responses.","New Fields of Robotics"],
+["Ubirobots' engineering","The design and integration of robots within interconnected, ubiquitous environments.","New Fields of Robotics"],
+["Humanoid robot","A robot whose physical structure resembles the human body.","New Fields of Robotics"],
+["ASIMO","A humanoid robot developed by Honda.","New Fields of Robotics"],
+["Social robot","A robot designed to interact socially with people.","New Fields of Robotics"],
+["Wearable robotics","The field of robotic devices worn on the body to assist, restore, or enhance human abilities.","New Fields of Robotics"],
+["Exoskeleton","An external wearable structure that supports or assists body movements.","New Fields of Robotics"],
+["Exosuit","A wearable assistive device that mainly uses soft structures to support movement.","New Fields of Robotics"],
+["Wearable user interface","A body-worn device used to send commands to or receive feedback from a robotic system.","New Fields of Robotics"],
+["Rehabilitation robotics","The use of robotic systems to help people recover or practise physical abilities.","New Fields of Robotics"],
+["Walking assist system","A device that supports a person's walking movements.","New Fields of Robotics"],
+["Robotic prosthesis","An artificial body part using robotic mechanisms or control to replace lost function.","New Fields of Robotics"],
+["Soft robotics","The field concerned with robots made partly or mainly from flexible, deformable materials.","New Fields of Robotics"],
+["Soft robot","A robot whose flexible components allow substantial deformation during operation.","New Fields of Robotics"],
+["Rigid body","An idealised object whose shape and internal distances do not change.","New Fields of Robotics"],
+["Deformation","A change in an object's shape or size.","New Fields of Robotics"],
+["Pneumatic control","The use of pressurized gas to produce or regulate movement.","New Fields of Robotics"],
+["Hydraulic control","The use of pressurized liquid to produce or regulate movement.","New Fields of Robotics"],
+["Bio-inspired robotics","The design of robots using principles or solutions found in living organisms.","New Fields of Robotics"],
+["Bio-inspired robot","A robot whose design or behaviour draws inspiration from biological systems.","New Fields of Robotics"],
+["Artificial intelligence (AI)","Computational methods that enable machines to perform tasks involving perception, reasoning, planning, or learning.","AI in Robotics"],
+["Autonomy","The ability to perform tasks and make operational decisions without continuous human control.","AI in Robotics"],
+["Adaptability","The ability to adjust behaviour to new tasks or changing conditions.","AI in Robotics"],
+["Structured environment","An environment whose layout and operating conditions are relatively predictable.","AI in Robotics"],
+["Unstructured environment","An environment that is variable and not fully arranged or known in advance.","AI in Robotics"],
+["Dynamic environment","An environment that changes while a robot operates.","AI in Robotics"],
+["Robotic perception","The process of interpreting sensor data to understand the robot and its surroundings.","AI for Robotic Perception"],
+["Computer vision","Methods that extract useful information from images or video.","AI for Robotic Perception"],
+["Pattern recognition","The identification of meaningful patterns in data.","AI for Robotic Perception"],
+["Object detection","The identification and location of objects in sensor data, especially images.","AI for Robotic Perception"],
+["Object recognition","The identification of what an observed object is.","AI for Robotic Perception"],
+["Image classification","The assignment of an image or image region to a category.","AI for Robotic Perception"],
+["Scene understanding","The interpretation of objects, relationships, and activities within an environment.","AI for Robotic Perception"],
+["Spatial relationship","The position or orientation of one object relative to another.","AI for Robotic Perception"],
+["Semantic information","Information about what objects or observations mean.","AI for Robotic Perception"],
+["Semantic perception","The interpretation of sensor data in terms of meaningful objects, categories, and relationships.","AI for Robotic Perception"],
+["Lidar","A sensing technology that measures distance using laser light.","AI for Robotic Perception"],
+["Sonar","A sensing technology that detects objects or measures distance using sound waves.","AI for Robotic Perception"],
+["Touch sensor","A device that detects physical contact or related quantities such as pressure.","AI for Robotic Perception"],
+["Tactile feedback","Information obtained through physical contact.","AI for Robotic Perception"],
+["Depth sensor","A sensor that measures distances to surfaces or objects.","AI for Robotic Perception"],
+["Sensor fusion","The combination of information from multiple sensors to obtain a more reliable estimate.","AI for Robotic Perception"],
+["Multimodal perception","The combined interpretation of different types of sensory input, such as vision, sound, and touch.","AI for Robotic Perception"],
+["Simultaneous localization and mapping (SLAM)","The process of building a map while estimating the robot's location within it.","AI for Robotic Perception"],
+["Loop closure","The recognition that a robot has returned to a previously visited place, allowing mapping and localization errors to be corrected.","AI for Robotic Perception"],
+["Probabilistic AI","AI methods that represent and reason about uncertainty using probabilities.","AI for Robotic Perception"],
+["Bayesian estimation","The updating of an estimate by combining prior knowledge with new evidence.","AI for Robotic Perception"],
+["Natural language processing (NLP)","Methods that allow computers to process and interpret human language.","AI for Robotic Perception"],
+["Speech recognition","The conversion of spoken language into a machine-processable representation.","AI for Robotic Perception"],
+["Gesture recognition","The identification and interpretation of body or hand movements.","AI for Robotic Perception"],
+["Facial expression recognition","The identification of facial movements associated with expressions.","AI for Robotic Perception"],
+["Service robot","A robot that performs useful tasks for people or equipment outside industrial automation.","AI for Robotic Perception"],
+["Pepper","A social robot used in the lesson as an example of speech- and gesture-based human interaction.","AI for Robotic Perception"],
+["Decision-making","The selection of actions based on goals, available information, and possible outcomes.","AI for Decision-Making and Planning"],
+["Planning","The process of determining actions needed to achieve a goal.","AI for Decision-Making and Planning"],
+["Motion planning","The computation of feasible robot movements that achieve a task while respecting constraints.","AI for Decision-Making and Planning"],
+["Path planning","The computation of a route from a starting point to a destination.","AI for Decision-Making and Planning"],
+["Collision-free trajectory","A sequence of movements over time that avoids contact with obstacles.","AI for Decision-Making and Planning"],
+["Search space","The set of possible states or solutions explored by an algorithm.","AI for Decision-Making and Planning"],
+["Graph search","A method that explores connected states to find a route or solution.","AI for Decision-Making and Planning"],
+["Sampling-based planner","A motion-planning method that samples possible configurations and attempts to connect them into a feasible path.","AI for Decision-Making and Planning"],
+["Optimization","The process of finding the best solution according to a defined objective and constraints.","AI for Decision-Making and Planning"],
+["Heuristic","A practical estimate or rule that guides a search toward promising solutions.","AI for Decision-Making and Planning"],
+["Autonomous navigation","The ability to determine and follow routes without continuous human guidance.","AI for Decision-Making and Planning"],
+["Obstacle avoidance","The adjustment of movement to prevent collisions.","AI for Decision-Making and Planning"],
+["High-level planning","The selection and ordering of broader actions needed to complete a task.","AI for Decision-Making and Planning"],
+["Automated planning","The automatic generation of action sequences from descriptions of goals and available actions.","AI for Decision-Making and Planning"],
+["Symbolic AI","AI that uses explicit symbols, rules, and logical representations.","AI for Decision-Making and Planning"],
+["Symbolic planner","A planning system that uses symbolic descriptions of actions, conditions, and goals.","AI for Decision-Making and Planning"],
+["Reasoning","The use of available knowledge to draw conclusions or choose actions.","AI for Decision-Making and Planning"],
+["Replanning","The revision of a plan when conditions or information change.","AI for Decision-Making and Planning"],
+["Task allocation","The assignment of tasks to robots or other agents.","AI for Decision-Making and Planning"],
+["Coordination","The organisation of actions so that multiple robots or agents work effectively together.","AI for Decision-Making and Planning"],
+["Control law","A rule that determines control commands from a system's state and desired behaviour.","AI for Decision-Making and Planning"],
+["Controller","A component that calculates commands to guide a system toward desired behaviour.","AI for Decision-Making and Planning"],
+["Adaptive control","Control that adjusts its parameters in response to changes or uncertainty.","AI for Decision-Making and Planning"],
+["Intelligent control","Control that uses AI methods to select or improve actions.","AI for Decision-Making and Planning"],
+["Learning-based controller","A controller whose behaviour is learned from data or experience.","AI for Decision-Making and Planning"],
+["Control policy","A rule or strategy that maps observations or states to actions.","AI for Decision-Making and Planning"],
+["Dynamics","The study of motion in relation to forces and torques.","AI for Decision-Making and Planning"],
+["Gait","A coordinated pattern of movements used for walking or other locomotion.","AI for Decision-Making and Planning"],
+["Predictive model","A model used to estimate future states or outcomes.","AI for Decision-Making and Planning"],
+["Decision network","A model representing relationships among uncertain events, decisions, and their consequences.","AI for Decision-Making and Planning"],
+["Game-theoretic planning","Planning that considers how other decision-makers may act.","AI for Decision-Making and Planning"],
+["Cognitive architecture","An integrated framework connecting perception, memory, reasoning, planning, and learning.","AI for Decision-Making and Planning"],
+["Knowledge base","An organised collection of information used for reasoning and decision-making.","AI for Decision-Making and Planning"],
+["Human-robot collaboration","People and robots working together toward a shared goal.","Machine Learning and Adaptation"],
+["Machine learning (ML)","Methods that enable a system to improve or acquire capabilities through data and experience.","Machine Learning and Adaptation"],
+["Supervised learning","Learning from examples that include the correct labels or outputs.","Machine Learning and Adaptation"],
+["Unsupervised learning","Learning patterns or structure from data without provided target labels.","Machine Learning and Adaptation"],
+["Reinforcement learning (RL)","Learning through interaction by selecting actions and using rewards to improve future behaviour.","Machine Learning and Adaptation"],
+["Deep learning","Machine learning using neural networks with multiple processing layers.","Machine Learning and Adaptation"],
+["Neural network","A computational model made of connected processing units whose parameters are adjusted during learning.","Machine Learning and Adaptation"],
+["Deep neural network","A neural network containing multiple layers that learn increasingly complex representations.","Machine Learning and Adaptation"],
+["Convolutional neural network (CNN)","A neural network architecture especially suited to processing images and other grid-like data.","Machine Learning and Adaptation"],
+["Deep reinforcement learning","Reinforcement learning that uses deep neural networks to represent policies or other learned functions.","Machine Learning and Adaptation"],
+["Training data","Examples or experiences used to adjust a machine-learning model.","Machine Learning and Adaptation"],
+["Labeled data","Data paired with information specifying the desired category or output.","Machine Learning and Adaptation"],
+["Feature learning","The automatic discovery of useful representations from data.","Machine Learning and Adaptation"],
+["Generalization","The ability to apply learned knowledge to new examples or situations.","Machine Learning and Adaptation"],
+["Trial-and-error learning","Learning by attempting actions and using their outcomes to improve.","Machine Learning and Adaptation"],
+["Reward","A numerical feedback signal indicating how desirable an outcome or action is.","Machine Learning and Adaptation"],
+["Penalty","Negative feedback that discourages an action or outcome.","Machine Learning and Adaptation"],
+["Cumulative reward","The total reward collected over a sequence of interactions, sometimes weighted by time.","Machine Learning and Adaptation"],
+["Learning from demonstration","Learning how to perform a task from examples provided by a human or another robot.","Machine Learning and Adaptation"],
+["Imitation learning","Learning a policy by reproducing or generalizing demonstrated behaviour.","Machine Learning and Adaptation"],
+["Online learning","Updating a model while new data arrive during operation.","Machine Learning and Adaptation"],
+["Calibration","The adjustment of system parameters so that measurements or actions match relevant references.","Machine Learning and Adaptation"],
+["Learning-based calibration","The use of learning methods to adjust a robot's parameters from data or feedback.","Machine Learning and Adaptation"],
+["Simulation","A computer-based representation of a robot and its environment used for testing or training.","Machine Learning and Adaptation"],
+["Simulator","Software that reproduces relevant aspects of a physical system and its behaviour.","Machine Learning and Adaptation"],
+["Sim-to-real transfer","The application of knowledge or behaviours learned in simulation to a physical robot.","Machine Learning and Adaptation"],
+["Big data","Large or complex datasets used to support analysis and learning.","Machine Learning and Adaptation"],
+["Collective learning","Learning in which experience or knowledge is shared among multiple robots.","Machine Learning and Adaptation"],
+["Robot fleet","A group of robots managed or operated together.","Machine Learning and Adaptation"],
+["Black-box system","A system whose internal decision process is difficult to inspect or understand.","Machine Learning and Adaptation"],
+["Explainability","The ability to provide understandable reasons for a system's outputs or actions.","Machine Learning and Adaptation"],
+["Trust in robots","Confidence that a robot will behave reliably and appropriately.","Machine Learning and Adaptation"],
+["Safety constraint","A restriction intended to prevent unsafe actions or outcomes.","Machine Learning and Adaptation"],
+["Robot locomotion","The movement of a robot from one place to another.","Machine Learning and Adaptation"],
+["Robotic manipulation","The controlled movement and handling of objects.","Machine Learning and Adaptation"],
+["Robotic grasping","The process of securing and holding an object with a robotic hand or gripper.","Machine Learning and Adaptation"],
+["Multi-agent reinforcement learning","Reinforcement learning involving multiple interacting agents.","Machine Learning and Adaptation"],
+["Lifelong learning","The continued acquisition and refinement of knowledge or skills throughout operation.","Machine Learning and Adaptation"]
+];
 
-const chs=Object.keys(D);
-let ci=0,ti=0,rot=300,rotT=null,notif='none';
+let ti=0,rot=300,rotT=null,notif='none';
 let pTotal=25*60,pLeft=25*60,pRun=false,pT=null,actx=null;
 
-function getImgIndex(){let idx=0;for(let i=0;i<ci;i++)idx+=CHSIZES[i];return idx+ti;}
+function getImgIndex(){return ti;}
 
 function beep(){
   if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();
@@ -290,10 +540,8 @@ function dismissPomodoro(){document.getElementById('pomodoroOverlay').classList.
 // Build chapter buttons (only chapters that have data)
 function buildChapters(){
   // For now only Chapter 1 has content
-  const available=[0]; // indexes of chapters with data, add more later
-  document.getElementById('csChapters').innerHTML=available.map(i=>
-    `<button class="cs-ch-btn" onclick="openChapter(${i})"><span class="num">${i+1}</span>${CHNAMES[i]}</button>`
-  ).join('');
+  document.getElementById('csChapters').innerHTML=
+    `<button class="cs-ch-btn" onclick="openChapter()"><span class="num">1</span>Introduction to Robotics</button>`;
 }
 
 // Mascot: sits still, occasionally plays animation
@@ -318,15 +566,13 @@ function stopMascot(){
   v.pause();v.classList.remove('playing');v.onended=null;
 }
 
-function openChapter(i){
-  ci=i;ti=0;
-  playGreenAnim(()=>{
-    document.getElementById('chaptersScreen').classList.remove('active');
-    document.getElementById('termScreen').classList.add('active');
-    renderTerm();
-    resetRot();
-    startMascot();
-  });
+function openChapter(){
+  ti=0;
+  document.getElementById('chaptersScreen').classList.remove('active');
+  document.getElementById('termScreen').classList.add('active');
+  renderTerm();
+  resetRot();
+  startMascot();
 }
 
 function goBack(){
@@ -337,20 +583,20 @@ function goBack(){
 }
 
 function renderTerm(){
-  const ts=D[chs[ci]],[t,d]=ts[ti];
+  const [t,d,sub]=TERMS[ti];
   const r=document.getElementById('termRight');
   r.classList.remove('fade');void r.offsetWidth;r.classList.add('fade');
-  document.getElementById('termCh').textContent=chs[ci];
-  document.getElementById('termImg').src='img/'+IMGS[getImgIndex()];
+  document.getElementById('termCh').textContent=sub;
+  document.getElementById('termImg').src='img/'+IMGS[ti];
   document.getElementById('termWord').textContent=t;
   document.getElementById('termDef').textContent=d;
-  document.getElementById('termCount').textContent=`${ti+1} / ${ts.length}`;
-  document.getElementById('termProg').style.width=`${((ti+1)/ts.length)*100}%`;
+  document.getElementById('termCount').textContent=`${ti+1} / ${TERMS.length}`;
+  document.getElementById('termProg').style.width=`${((ti+1)/TERMS.length)*100}%`;
 }
 
-function nextTerm(){ti=(ti+1)%D[chs[ci]].length;renderTerm();doAlert();resetRot();}
-function prevTerm(){ti=(ti-1+D[chs[ci]].length)%D[chs[ci]].length;renderTerm();doAlert();resetRot();}
-function autoNext(){ti=(ti+1)%D[chs[ci]].length;playWhiteAnim(()=>{renderTerm();doAlert();});}
+function nextTerm(){ti=(ti+1)%TERMS.length;renderTerm();doAlert();resetRot();}
+function prevTerm(){ti=(ti-1+TERMS.length)%TERMS.length;renderTerm();doAlert();resetRot();}
+function autoNext(){ti=(ti+1)%TERMS.length;playWhiteAnim(()=>{renderTerm();doAlert();});}
 function resetRot(){if(rotT)clearInterval(rotT);rotT=setInterval(autoNext,rot*1000);}
 
 function setNotif(m){notif=m;updateNotifIcon();if(m==='sound')beep();if(m==='vibration'&&navigator.vibrate)navigator.vibrate(80);}
