@@ -122,6 +122,13 @@
   .progress-track{flex:1;max-width:200px;height:3px;background:#e8e8e8;border-radius:2px;overflow:hidden}
   .progress-fill{height:100%;background:#00c853;border-radius:2px;transition:width .3s}
 
+  .mascot-video{
+    position:fixed;bottom:24px;right:24px;z-index:10;
+    width:120px;height:120px;border-radius:20px;overflow:hidden;
+    box-shadow:0 4px 24px rgba(0,0,0,.08);
+  }
+  .mascot-video video{width:100%;height:100%;object-fit:cover}
+
   /* Overlays */
   .anim-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .3s}
   .anim-overlay.show{opacity:1;pointer-events:auto}
@@ -228,6 +235,10 @@
       <div class="progress-track"><div class="progress-fill" id="termProg"></div></div>
     </div>
   </div>
+
+  <div class="mascot-video">
+    <video id="mascotVideo" muted playsinline></video>
+  </div>
 </div>
 
 <!-- Overlays -->
@@ -321,6 +332,23 @@ function buildGrid(){
   ).join('');
 }
 
+// Mascot video loop in bottom-right
+let mascotIdx=0;
+function startMascot(){
+  const v=document.getElementById('mascotVideo');
+  function playNext(){
+    v.src=whiteAnims[mascotIdx%whiteAnims.length];
+    mascotIdx++;
+    v.play();
+  }
+  v.onended=playNext;
+  playNext();
+}
+function stopMascot(){
+  const v=document.getElementById('mascotVideo');
+  v.pause();v.onended=null;
+}
+
 function openChapter(i){
   ci=i;ti=0;
   playGreenAnim(()=>{
@@ -328,11 +356,13 @@ function openChapter(i){
     document.getElementById('termScreen').classList.add('active');
     renderTerm();
     resetRot();
+    startMascot();
   });
 }
 
 function goBack(){
   if(rotT)clearInterval(rotT);
+  stopMascot();
   document.getElementById('termScreen').classList.remove('active');
   document.getElementById('chaptersScreen').classList.add('active');
 }
