@@ -16,10 +16,10 @@
   /* ===== CHAPTERS SCREEN ===== */
   #chaptersScreen{background:#3ced87;color:#111;align-items:center;justify-content:center;gap:0;padding:32px;position:relative}
 
-  .cs-title{z-index:1;user-select:none;width:80%;max-width:900px}
+  .cs-title{z-index:1;user-select:none;width:80%;max-width:900px;margin-bottom:-10px}
   .cs-title img{width:100%;height:auto;display:block}
 
-  .cs-logo{display:flex;align-items:center;justify-content:center;z-index:1;margin-bottom:20px}
+  .cs-logo{display:flex;align-items:center;justify-content:center;z-index:1;margin-bottom:12px}
 
   .cs-streak{
     position:fixed;bottom:24px;left:24px;z-index:2;
@@ -31,9 +31,53 @@
 
   .cs-days{
     position:fixed;bottom:24px;right:24px;z-index:2;
-    font-size:12px;font-weight:500;color:rgba(0,0,0,.25);
+    font-size:12px;font-weight:600;color:rgba(0,0,0,.35);
+    display:flex;align-items:center;gap:6px;
   }
-  .cs-days span{font-weight:700;color:rgba(0,0,0,.4)}
+  .cs-days svg{opacity:.5}
+  .cs-days span{font-weight:800;color:rgba(0,0,0,.5)}
+
+  .cs-search-btn{
+    position:fixed;top:24px;right:24px;z-index:2;
+    background:rgba(0,0,0,.06);border:none;border-radius:100px;
+    padding:8px 16px 8px 12px;cursor:pointer;font-family:inherit;
+    font-size:13px;font-weight:500;color:rgba(0,0,0,.35);
+    display:flex;align-items:center;gap:6px;transition:all .2s;
+  }
+  .cs-search-btn:hover{background:rgba(0,0,0,.1);color:rgba(0,0,0,.5)}
+
+  .search-overlay{
+    position:fixed;inset:0;background:rgba(255,255,255,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    z-index:200;display:flex;flex-direction:column;align-items:center;
+    padding:80px 32px 32px;opacity:0;pointer-events:none;transition:opacity .25s;
+  }
+  .search-overlay.show{opacity:1;pointer-events:auto}
+  .search-input{
+    width:100%;max-width:500px;background:#f5f5f5;border:none;border-radius:14px;
+    padding:16px 20px;font-size:17px;font-family:inherit;font-weight:500;
+    color:#111;outline:none;margin-bottom:20px;
+  }
+  .search-input::placeholder{color:#bbb}
+  .search-results{
+    width:100%;max-width:500px;max-height:60vh;overflow-y:auto;
+    display:flex;flex-direction:column;gap:2px;
+  }
+  .search-item{
+    background:none;border:none;cursor:pointer;font-family:inherit;
+    padding:14px 16px;border-radius:12px;text-align:left;transition:background .15s;
+  }
+  .search-item:hover{background:#f5f5f5}
+  .search-item .si-term{font-size:15px;font-weight:700;color:#111;margin-bottom:3px}
+  .search-item .si-def{font-size:13px;color:#888;line-height:1.4}
+  .search-item .si-sub{font-size:11px;color:#ccc;margin-top:2px}
+  .search-close{
+    position:fixed;top:24px;right:24px;z-index:210;
+    background:#f0f0f0;border:none;border-radius:100px;
+    width:36px;height:36px;cursor:pointer;font-size:18px;color:#999;
+    display:flex;align-items:center;justify-content:center;transition:all .2s;
+  }
+  .search-close:hover{background:#e0e0e0;color:#111}
+  .search-empty{font-size:14px;color:#ccc;margin-top:20px}
 
   .cs-chapters{display:flex;flex-direction:column;gap:6px;align-items:center;z-index:1}
   .cs-ch-card{
@@ -44,8 +88,8 @@
   .cs-ch-card:hover{opacity:.7}
   .cs-ch-card.empty{opacity:.3;cursor:default}
   .cs-ch-card.empty:hover{opacity:.3}
-  .cs-ch-card .ch-num{font-size:12px;font-weight:700;color:rgba(255,255,255,.5);min-width:18px}
-  .cs-ch-card .ch-name{font-size:15px;font-weight:600;color:rgba(255,255,255,.85)}
+  .cs-ch-card .ch-num{font-size:13px;font-weight:700;color:rgba(255,255,255,.5);min-width:20px}
+  .cs-ch-card .ch-name{font-size:18px;font-weight:700;color:rgba(255,255,255,.9)}
 
   /* Chapter detail screen */
   #chapterDetail{background:#3ced87;color:#111;align-items:center;justify-content:center;gap:0;padding:32px}
@@ -218,6 +262,10 @@
 
 <!-- CHAPTERS SCREEN (green) -->
 <div class="screen active" id="chaptersScreen">
+  <button class="cs-search-btn" onclick="openSearch()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Search
+  </button>
   <div class="cs-title"><img src="meowbot-logo.png" alt="MEOWBOT"></div>
   <div class="cs-logo"><video id="csLogoVideo" muted playsinline autoplay loop style="width:140px;height:140px;object-fit:contain"></video></div>
   <div class="cs-streak" id="csStreak"></div>
@@ -319,6 +367,13 @@
   <div class="green-title">Time's up!</div>
   <div class="green-sub">Great study session</div>
   <button class="green-dismiss" onclick="dismissPomodoro()">Continue</button>
+</div>
+
+<!-- Search overlay -->
+<div class="search-overlay" id="searchOverlay">
+  <button class="search-close" onclick="closeSearch()">&times;</button>
+  <input class="search-input" id="searchInput" type="text" placeholder="Search terms..." oninput="doSearch()">
+  <div class="search-results" id="searchResults"></div>
 </div>
 
 <script>
@@ -887,7 +942,7 @@ function updateDaysSinceStart(){
   let start=localStorage.getItem('meowbot-start');
   if(!start){start=new Date().toISOString();localStorage.setItem('meowbot-start',start);}
   const days=Math.floor((Date.now()-new Date(start).getTime())/86400000);
-  document.getElementById('csDays').innerHTML=days>0?`<span>${days}</span> day${days>1?'s':''} since start`:'Day 1';
+  document.getElementById('csDays').innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`+(days>0?`<span>${days}</span> day${days>1?'s':''} since start`:'Day 1');
 }
 
 updateStreak();
@@ -1027,6 +1082,49 @@ function stopMeditation(){
   document.getElementById('medTerm').classList.remove('visible');
   document.getElementById('medDef').classList.remove('visible');
 }
+
+// Search
+function openSearch(){
+  document.getElementById('searchOverlay').classList.add('show');
+  document.getElementById('searchInput').value='';
+  document.getElementById('searchResults').innerHTML='';
+  setTimeout(()=>document.getElementById('searchInput').focus(),100);
+}
+function closeSearch(){
+  document.getElementById('searchOverlay').classList.remove('show');
+}
+function doSearch(){
+  const q=document.getElementById('searchInput').value.toLowerCase().trim();
+  const res=document.getElementById('searchResults');
+  if(!q){res.innerHTML='';return;}
+  const matches=[];
+  TERMS.forEach((t,i)=>{
+    if(t[0].toLowerCase().includes(q)||t[1].toLowerCase().includes(q)){
+      matches.push(i);
+    }
+  });
+  if(matches.length===0){
+    res.innerHTML='<div class="search-empty">No results</div>';
+    return;
+  }
+  res.innerHTML=matches.slice(0,20).map(i=>{
+    const [term,def,sub]=TERMS[i];
+    return `<button class="search-item" onclick="goToTerm(${i})"><div class="si-term">${term}</div><div class="si-def">${def.substring(0,80)}${def.length>80?'...':''}</div><div class="si-sub">${sub}</div></button>`;
+  }).join('');
+}
+function goToTerm(i){
+  closeSearch();
+  markedMode=false;
+  ti=i;
+  ensureAudio();
+  document.getElementById('chaptersScreen').classList.remove('active');
+  document.getElementById('chapterDetail').classList.remove('active');
+  document.getElementById('termScreen').classList.add('active');
+  renderTerm();resetRot();startMascot();
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&document.getElementById('searchOverlay').classList.contains('show')){closeSearch();}
+});
 </script>
 </body>
 </html>
