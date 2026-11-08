@@ -532,8 +532,8 @@ let pTotal=25*60,pLeft=25*60,pRun=false,pT=null,actx=null;
 function getImgIndex(){return ti;}
 
 function ensureAudio(){if(!actx){actx=new(window.AudioContext||window.webkitAudioContext)();}if(actx.state==='suspended')actx.resume();}
-// Unlock audio on first user tap
-document.addEventListener('click',function unlock(){ensureAudio();document.removeEventListener('click',unlock);},{once:true});
+// Keep unlocking audio on every click (some browsers re-suspend)
+document.addEventListener('click',()=>{ensureAudio();});
 
 function beep(){
   ensureAudio();
@@ -569,29 +569,24 @@ document.addEventListener('click',function unlockSpeech(){
 
 function doAlert(){
   if(notif==='sound'){
-    ensureAudio();beep();
+    try{ensureAudio();beep();}catch(e){}
     const [t,d]=TERMS[ti];
-    setTimeout(()=>{speak(t+'. '+d);},600);
+    setTimeout(()=>{try{speak(t+'. '+d);}catch(e){}},600);
   }
   if(notif==='vibration'&&navigator.vibrate)navigator.vibrate([80,40,80]);
 }
 
 function playWhiteAnim(cb){
   const ov=document.getElementById('animWhite'),v=document.getElementById('animWhiteVideo');
-  const count=Math.random()<.4?2:1;let played=0;
-  function done(){ov.classList.remove('show');if(cb)cb();}
-  function go(){
-    v.src=nextWhiteAnim();ov.classList.add('show');
-    const p=v.play();
-    if(p)p.catch(()=>{done();});
-    v.onended=()=>{played++;if(played<count)go();else done();};
-    v.onerror=()=>{done();};
-  }
-  // Fallback: if video takes too long, skip
-  const fallback=setTimeout(done,8000);
-  const origDone=done;
-  done=function(){clearTimeout(fallback);origDone();};
-  go();
+  let finished=false;
+  function done(){if(finished)return;finished=true;ov.classList.remove('show');if(cb)cb();}
+  v.src=nextWhiteAnim();
+  ov.classList.add('show');
+  const p=v.play();
+  if(p)p.catch(()=>{done();});
+  v.onended=()=>{done();};
+  v.onerror=()=>{done();};
+  setTimeout(done,5000); // fallback
 }
 function playGreenAnim(cb){
   const ov=document.getElementById('animGreen'),v=document.getElementById('animGreenVideo');
@@ -636,6 +631,9 @@ function stopMascot(){
 }
 
 function openChapter(){
+  // Unlock audio + speech on user click
+  ensureAudio();
+  if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance('');u.volume=0;speechSynthesis.speak(u);}
   const saved=localStorage.getItem('meowbot-ti');
   ti=saved?parseInt(saved):0;
   if(ti>=TERMS.length)ti=0;
