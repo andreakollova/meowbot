@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meowbot</title>
+<link rel="icon" href="meowbot.png" type="image/png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;color:#111;min-height:100vh;display:flex;justify-content:center;-webkit-font-smoothing:antialiased;background:#fff}
+  .app{width:100%;max-width:480px;padding:48px 24px 120px}
+
+  .logo{display:flex;align-items:center;gap:10px;margin-bottom:48px}
+  .logo img{width:32px;height:32px;border-radius:8px}
+  .logo span{font-size:15px;font-weight:700;letter-spacing:-0.3px}
+
+  /* Pomodoro */
+  .timer-section{margin-bottom:48px}
+  .timer-display{font-size:72px;font-weight:200;letter-spacing:-4px;line-height:1;margin-bottom:20px;font-variant-numeric:tabular-nums}
+  .timer-display.done{color:#00c853}
+  .timer-presets{display:flex;gap:6px;margin-bottom:16px}
+  .pill{background:none;border:1.5px solid #ddd;border-radius:100px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;color:#999;transition:all .2s}
+  .pill:hover{border-color:#111;color:#111}
+  .pill.on{background:#111;color:#fff;border-color:#111}
+  .timer-actions{display:flex;gap:8px}
+  .btn{background:#00c853;color:#fff;border:none;border-radius:100px;padding:10px 28px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .2s}
+  .btn:hover{opacity:.85}
+  .btn.ghost{background:none;color:#999;padding:10px 16px}
+  .btn.ghost:hover{color:#111}
+
+  .divider{height:1px;background:#e8e8e8;margin-bottom:32px}
+
+  /* Chapters */
+  .chapters{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:32px;padding-bottom:2px}
+  .chapters::-webkit-scrollbar{display:none}
+  .ch{flex-shrink:0;background:none;border:none;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;color:#bbb;border-radius:100px;transition:all .15s;white-space:nowrap}
+  .ch:hover{color:#111}
+  .ch.on{background:#00c853;color:#fff}
+
+  /* Settings */
+  .settings{display:flex;gap:24px;margin-bottom:40px;flex-wrap:wrap}
+  .setting-group{display:flex;align-items:center;gap:8px}
+  .setting-label{font-size:11px;font-weight:500;color:#bbb;text-transform:uppercase;letter-spacing:.8px}
+  .setting-pills{display:flex;gap:4px}
+  .sp{background:none;border:1px solid transparent;border-radius:100px;padding:4px 10px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;color:#bbb;transition:all .15s}
+  .sp:hover{color:#111}
+  .sp.on{background:#eafff0;color:#00c853;border-color:#b9f6ca}
+
+  /* Animation overlays */
+  .anim-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .3s}
+  .anim-overlay.show{opacity:1;pointer-events:auto}
+  .anim-overlay video{max-width:320px;max-height:320px;border-radius:24px}
+  .anim-overlay.white{background:rgba(255,255,255,0.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+  .anim-overlay.green{background:rgba(0,200,83,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+
+  /* Term card */
+  .term-area{margin-bottom:24px;min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .term-chapter{font-size:11px;font-weight:500;color:#bbb;text-transform:uppercase;letter-spacing:1px;margin-bottom:20px;align-self:flex-start}
+  .term-illustration{width:160px;height:160px;object-fit:contain;margin-bottom:20px;border-radius:12px}
+  .term-word{font-size:28px;font-weight:700;letter-spacing:-.5px;line-height:1.2;margin-bottom:12px;color:#00c853;text-align:center}
+  .term-def{font-size:16px;font-weight:400;line-height:1.65;color:#555;text-align:center}
+  .term-meta{display:flex;align-items:center;justify-content:space-between;margin-top:24px;width:100%}
+  .term-count{font-size:12px;color:#ccc;font-weight:500;font-variant-numeric:tabular-nums}
+  .progress-track{flex:1;height:2px;background:#e8e8e8;border-radius:1px;margin-left:12px;overflow:hidden}
+  .progress-fill{height:100%;background:#00c853;border-radius:1px;transition:width .3s}
+
+  .skip{width:100%;background:none;border:1.5px solid #e8e8e8;border-radius:12px;padding:14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:#999;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+  .skip:hover{border-color:#00c853;color:#00c853}
+  .skip svg{transition:transform .2s}
+  .skip:hover svg{transform:translateX(2px)}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  .fade{animation:fadeUp .25s ease}
+
+  .mascot{position:fixed;bottom:24px;right:24px;width:48px;height:48px;border-radius:50%;overflow:hidden;box-shadow:0 2px 16px rgba(0,200,83,.25);animation:float 3s ease-in-out infinite}
+  .mascot img{width:100%;height:100%;object-fit:cover}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
+  /* Green overlay for chapters/pomodoro done */
+  .green-overlay{position:fixed;inset:0;background:#00c853;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s}
+  .green-overlay.show{opacity:1;pointer-events:auto}
+  .green-overlay .green-title{color:#fff;font-size:24px;font-weight:700;margin-bottom:8px}
+  .green-overlay .green-sub{color:rgba(255,255,255,.7);font-size:14px;font-weight:500;margin-bottom:32px}
+  .green-overlay .green-dismiss{background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:100px;padding:10px 28px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;backdrop-filter:blur(10px);transition:background .2s}
+  .green-overlay .green-dismiss:hover{background:rgba(255,255,255,.35)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="logo"><img src="meowbot.png" alt=""><span>meowbot</span></div>
+
+  <div class="timer-section">
+    <div class="timer-display" id="timerDisplay">25:00</div>
+    <div class="timer-presets">
+      <button class="pill" onclick="setTimer(10)">10m</button>
+      <button class="pill" onclick="setTimer(15)">15m</button>
+      <button class="pill on" onclick="setTimer(25)">25m</button>
+      <button class="pill" onclick="setTimer(30)">30m</button>
+      <button class="pill" onclick="setTimer(45)">45m</button>
+      <button class="pill" onclick="setTimer(60)">60m</button>
+    </div>
+    <div class="timer-actions">
+      <button class="btn" id="startBtn" onclick="toggleTimer()">Start</button>
+      <button class="btn ghost" onclick="resetTimer()">Reset</button>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="chapters" id="chapters"></div>
+
+  <div class="settings">
+    <div class="setting-group">
+      <span class="setting-label">Alert</span>
+      <div class="setting-pills">
+        <button class="sp on" data-n="none" onclick="setNotif('none')">None</button>
+        <button class="sp" data-n="sound" onclick="setNotif('sound')">Sound</button>
+        <button class="sp" data-n="vibration" onclick="setNotif('vibration')">Vibrate</button>
+      </div>
+    </div>
+    <div class="setting-group">
+      <span class="setting-label">Rotate</span>
+      <div class="setting-pills">
+        <button class="sp" data-i="60" onclick="setRot(60)">1m</button>
+        <button class="sp" data-i="120" onclick="setRot(120)">2m</button>
+        <button class="sp on" data-i="300" onclick="setRot(300)">5m</button>
+        <button class="sp" data-i="600" onclick="setRot(600)">10m</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="term-area" id="termArea">
+    <div class="term-chapter" id="termCh"></div>
+    <img class="term-illustration" id="termImg" src="" alt="">
+    <div class="term-word" id="termWord"></div>
+    <div class="term-def" id="termDef"></div>
+    <div class="term-meta">
+      <span class="term-count" id="termCount"></span>
+      <div class="progress-track"><div class="progress-fill" id="termProg"></div></div>
+    </div>
+  </div>
+
+  <button class="skip" onclick="nextTerm()">
+    Next
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </button>
+</div>
+
+<!-- White overlay for term transitions -->
+<div class="anim-overlay white" id="animWhite">
+  <video id="animWhiteVideo" muted playsinline></video>
+</div>
+
+<!-- Green overlay for chapter switch + pomodoro done -->
+<div class="anim-overlay green" id="animGreen">
+  <video id="animGreenVideo" muted playsinline></video>
+</div>
+
+<!-- Green screen for pomodoro done -->
+<div class="green-overlay" id="pomodoroOverlay">
+  <video id="pomodoroVideo" muted playsinline style="max-width:240px;max-height:240px;border-radius:24px;margin-bottom:24px"></video>
+  <div class="green-title">Time's up!</div>
+  <div class="green-sub">Great study session</div>
+  <button class="green-dismiss" onclick="dismissPomodoro()">Continue</button>
+</div>
+
+<div class="mascot"><img src="meowbot.png" alt=""></div>
+
+<script>
+const IMGS=[
+"001-robotics.png","002-robot.png","003-robota.png","004-automation.png","005-flexible-automation.png","006-industrial-robot.png","007-mobile-robot.png","008-autonomous-mobile-robot-amr.png","009-manipulator.png","010-end-effector.png","011-gripper.png","012-control-unit.png","013-sensor.png","014-actuator.png","015-actuation.png","016-workpiece.png",
+"017-robot-classification.png","018-jira.png","019-manual-handling-device-class-1.png","020-fixed-sequence-robot-class-2.png","021-variable-sequence-robot-class-3.png","022-playback-robot-class-4.png","023-numerically-controlled-robot-class-5.png","024-intelligent-robot-class-6.png",
+"025-link.png","026-joint.png","027-axis.png","028-degree-of-freedom-dof.png","029-six-degrees-of-freedom.png","030-rotation.png","031-translation.png","032-revolute-joint-r.png","033-prismatic-joint-p.png","034-parallel-axes.png","035-orthogonal-axes.png","036-perpendicular-arrangement.png","037-geometric-robot-classification.png","038-r-r-p-configuration.png","039-kinematics.png","040-robot-configuration.png","041-position.png","042-orientation.png","043-trajectory.png",
+"044-coordinate-system.png","045-origin.png","046-coordinate-axes.png","047-vector.png","048-coordinate-transformation.png","049-cartesian-coordinates.png","050-joint-coordinates.png","051-world-coordinate-system.png","052-base-coordinate-system.png","053-joint-coordinate-system.png","054-tool-coordinate-system.png","055-object-coordinate-system.png","056-mechanical-interface-coordinate-system.png","057-flange.png","058-workpiece-coordinate-system.png","059-cartesian-coordinate-system.png","060-polar-coordinate-system.png","061-cylindrical-coordinate-system.png","062-radius-r.png","063-rotation-angle.png",
+"064-mechanical-engineering.png","065-electrical-engineering.png","066-computer-science.png","067-manufacturing-technology.png","068-systems-engineering.png","069-measurement-technology.png","070-sensor-technology.png","071-robot-control.png","072-regulation.png","073-hardware.png","074-software.png","075-ethics-in-robotics.png","076-regulatory-framework.png","077-workplace-safety.png","078-social-acceptance.png",
+"079-artifact.png","080-water-clock.png","081-stanford-arm.png","082-mit-arm.png","083-puma.png","084-scara.png","085-parallel-robot.png","086-electro-light-sensitive-internal-external.png","087-shakey.png","088-hierarchical-control.png","089-low-level-routine.png","090-cognitive-robot.png","091-world-model.png","092-localization.png","093-navigation.png","094-triangulation-sensor.png","095-stereo-vision.png","096-stanford-cart.png","097-wave.png","098-micromouse-robot.png","099-kamro.png","100-mars-rover.png",
+"101-production-cell.png","102-human-machine-interaction.png","103-human-friendly-task-specification.png","104-mobile-manipulation.png","105-low-cost-actuation.png","106-subsystem.png","107-composition-of-subsystems.png","108-standardized-interface.png","109-embodiment-of-engineering-and-research-results.png","110-open-dependable-system.png","111-interconnectivity.png","112-sustainable-manufacturing.png","113-robot-synchronization.png","114-multi-robot-system.png","115-robot-networking.png","116-microprocessor.png","117-computational-power.png","118-moore-s-law.png","119-vision-system.png","120-cybersecurity.png","121-remote-control.png",
+"122-robotics-1-0.png","123-4ds-dull-dirty-dumb-dangerous.png","124-robotics-2-0.png","125-personal-robot.png","126-4ss-smarter-safer-sensors-simple.png","127-robotics-3-0.png","128-4ms-multitasking-emotive-morphing-multiagent.png","129-multitasking.png","130-emotive-robotics.png","131-morphing.png","132-multiagent-system.png","133-context-awareness.png","134-ubiquitous-robotics.png","135-networked-robot.png","136-cloud-robotics.png","137-cloud-computing-infrastructure.png","138-computation-offloading.png","139-social-awareness.png","140-affective-interaction.png","141-ubirobots-engineering.png",
+"142-humanoid-robot.png","143-asimo.png","144-social-robot.png","145-service-robot.png","146-pepper.png","147-wearable-robotics.png","148-exoskeleton.png","149-exosuit.png","150-wearable-user-interface.png","151-rehabilitation-robotics.png","152-walking-assist-system.png","153-robotic-prosthesis.png","154-soft-robotics.png","155-soft-robot.png","156-rigid-body.png","157-deformation.png","158-pneumatic-control.png","159-hydraulic-control.png","160-bio-inspired-robotics.png","161-bio-inspired-robot.png",
+"162-artificial-intelligence-ai.png","163-autonomy.png","164-adaptability.png","165-structured-environment.png","166-unstructured-environment.png","167-dynamic-environment.png","168-robotic-perception.png","169-computer-vision.png","170-pattern-recognition.png","171-object-detection.png","172-object-recognition.png","173-image-classification.png","174-scene-understanding.png","175-spatial-relationship.png","176-semantic-information.png","177-semantic-perception.png","178-lidar.png","179-sonar.png","180-touch-sensor.png","181-tactile-feedback.png","182-depth-sensor.png","183-sensor-fusion.png","184-multimodal-perception.png","185-slam.png","186-loop-closure.png","187-probabilistic-ai.png","188-bayesian-estimation.png","189-natural-language-processing-nlp.png","190-speech-recognition.png","191-gesture-recognition.png","192-facial-expression-recognition.png",
+"193-decision-making.png","194-planning.png","195-motion-planning.png","196-path-planning.png","197-collision-free-trajectory.png","198-search-space.png","199-graph-search.png","200-sampling-based-planner.png","201-optimization.png","202-heuristic.png","203-autonomous-navigation.png","204-obstacle-avoidance.png","205-high-level-planning.png","206-automated-planning.png","207-symbolic-ai.png","208-symbolic-planner.png","209-reasoning.png","210-replanning.png","211-task-allocation.png","212-coordination.png","213-control-law.png","214-controller.png","215-adaptive-control.png","216-intelligent-control.png","217-learning-based-controller.png","218-control-policy.png","219-dynamics.png","220-gait.png","221-predictive-model.png","222-decision-network.png","223-game-theoretic-planning.png","224-cognitive-architecture.png","225-knowledge-base.png","226-human-robot-interaction.png","227-human-robot-collaboration.png",
+"228-machine-learning-ml.png","229-supervised-learning.png","230-unsupervised-learning.png","231-reinforcement-learning-rl.png","232-deep-learning.png","233-neural-network.png","234-deep-neural-network.png","235-convolutional-neural-network-cnn.png","236-deep-reinforcement-learning.png","237-training-data.png","238-labeled-data.png","239-feature-learning.png","240-generalization.png","241-trial-and-error-learning.png","242-reward.png","243-penalty.png","244-cumulative-reward.png","245-learning-from-demonstration.png","246-imitation-learning.png","247-online-learning.png","248-calibration.png","249-learning-based-calibration.png","250-simulation.png","251-simulator.png","252-sim-to-real-transfer.png","253-big-data.png","254-collective-learning.png","255-robot-fleet.png","256-black-box-system.png","257-explainability.png","258-trust-in-robots.png","259-safety-constraint.png","260-robot-locomotion.png","261-robotic-manipulation.png","262-robotic-grasping.png","263-multi-agent-reinforcement-learning.png","264-lifelong-learning.png"
+];
+
+const CHSIZES=[16,8,19,20,15,22,21,20,20,31,35,37];
+
+const whiteAnims=['anim-white-1.mp4','anim-white-2.mp4','anim-white-3.mp4','anim-white-4.mp4'];
+const greenAnims=['anim1.mp4','anim2.mp4','anim3.mp4'];
+
+// Shuffle-rotate white anims so we don't repeat the same one back-to-back
+let whiteIdx=0;
+function shuffleWhite(){
+  for(let i=whiteAnims.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[whiteAnims[i],whiteAnims[j]]=[whiteAnims[j],whiteAnims[i]];}
+  whiteIdx=0;
+}
+shuffleWhite();
+function nextWhiteAnim(){
+  if(whiteIdx>=whiteAnims.length){shuffleWhite();}
+  return whiteAnims[whiteIdx++];
+}
+
+const D={
+"Chapter 1: Basics & Definitions":[
+["Robotics","The interdisciplinary field concerned with designing, building, programming, operating, and applying robots."],
+["Robot","A programmable physical machine that performs tasks through controlled movements and actions."],
+["Robota","The Slavic word meaning subordinate or forced labour from which the word \"robot\" originated."],
+["Automation","The use of technology to perform tasks with reduced human involvement."],
+["Flexible automation","Automation that can be adapted to different tasks or production requirements."],
+["Industrial robot","An automatically controlled, programmable, multipurpose manipulator with at least three programmable axes, used for industrial tasks."],
+["Mobile robot","A robot that moves through its environment and adapts its actions using information from sensors."],
+["Autonomous mobile robot (AMR)","A mobile robot that navigates and performs tasks without continuous human control."],
+["Manipulator","A mechanical structure, usually a robotic arm, used to move or handle objects."],
+["End effector","A tool or device attached to the end of a robot arm to perform a task."],
+["Gripper","An end effector used to grasp, hold, and release objects."],
+["Control unit","The hardware and software that process instructions and control a robot's actions."],
+["Sensor","A device that measures properties of a robot or its environment."],
+["Actuator","A component that converts energy into physical movement."],
+["Actuation","The process of producing movement through an actuator."],
+["Workpiece","An object being handled, processed, or manufactured by a robot."]
+],
+"Chapter 2: Classification":[
+["Robot classification","The grouping of robots according to characteristics such as intelligence, application, control, or geometry."],
+["Japanese Industrial Robot Association (JIRA)","The association associated with the six-category robot classification presented in the lesson."],
+["Manual handling device - Class 1","A device with multiple axes that is directly operated by a person."],
+["Fixed-sequence robot - Class 2","A robot that repeats a predefined sequence of actions that is difficult to change."],
+["Variable-sequence robot - Class 3","A robot whose predefined sequence of actions can be changed to support flexible automation."],
+["Playback robot - Class 4","A robot that records movements demonstrated by an operator and repeats them automatically."],
+["Numerically controlled robot - Class 5","A robot whose movements are specified through numerical instructions in program code."],
+["Intelligent robot - Class 6","A robot that uses information about its environment to perform tasks under changing conditions."]
+],
+"Chapter 3: Joints & Kinematics":[
+["Link","A rigid part of a robot that can move relative to other parts."],
+["Joint","A connection between links that allows relative movement."],
+["Axis","A reference line along which translation occurs or around which rotation occurs."],
+["Degree of freedom (DOF)","An independent movement available to a mechanical system, such as translation or rotation."],
+["Six degrees of freedom","Three independent translational movements and three independent rotational movements in three-dimensional space."],
+["Rotation","Movement around an axis."],
+["Translation","Linear movement without a change in orientation."],
+["Revolute joint (R)","A joint that allows rotation around an axis."],
+["Prismatic joint (P)","A joint that allows linear movement along an axis."],
+["Parallel axes","Axes that run in the same direction and remain a constant distance apart."],
+["Orthogonal axes","Axes whose directions form a right angle."],
+["Perpendicular arrangement","The lesson's notation for an axis relationship described using a right angle relative to the axes' common normal."],
+["Geometric robot classification","The classification of robots according to the arrangement of their joints, links, and axes."],
+["R||R||P configuration","A joint arrangement with two revolute joints and one prismatic joint whose axes are parallel."],
+["Kinematics","The study of motion without considering the forces that cause it."],
+["Robot configuration","The arrangement of a robot's joints and links, or their positions at a particular moment."],
+["Position","The location of an object relative to a reference system."],
+["Orientation","The rotational alignment of an object relative to a reference system."],
+["Trajectory","A description of how a robot's position or joint values change over time."]
+],
+"Chapter 4: Coordinate Systems":[
+["Coordinate system","A reference framework used to describe positions and movements."],
+["Origin","The reference point at which all coordinates are zero."],
+["Coordinate axes","Reference directions used to specify coordinates."],
+["Vector","A mathematical quantity with magnitude and direction, used to represent position or displacement."],
+["Coordinate transformation","A mathematical conversion of coordinates from one reference system to another."],
+["Cartesian coordinates","Coordinates that describe a position using distances along the x, y, and z axes."],
+["Joint coordinates","Values describing the position of each robot joint, such as its angle or linear displacement."],
+["World coordinate system","A fixed reference system associated with the robot's overall environment."],
+["Base coordinate system","A reference system attached to the robot's base."],
+["Joint coordinate system","A reference system associated with a joint and described relative to another joint or frame."],
+["Tool coordinate system","A reference system attached to the robot's tool."],
+["Object coordinate system","A reference system attached to the object being handled."],
+["Mechanical interface coordinate system","A reference system attached to the flange where the end effector is mounted."],
+["Flange","The mechanical mounting surface used to attach an end effector to a robot."],
+["Workpiece coordinate system","A reference system associated with a workpiece or its placement."],
+["Cartesian coordinate system","A coordinate system using mutually perpendicular axes, usually x, y, and z."],
+["Polar coordinate system","A two-dimensional coordinate system describing a point by its distance r from the origin and its angle \u03c6."],
+["Cylindrical coordinate system","A three-dimensional coordinate system describing a point using radius r, angle \u03c6, and height z."],
+["Radius (r)","The distance from an origin or axis of rotation."],
+["Rotation angle (\u03c6)","The angular displacement measured from a reference direction."]
+],
+"Chapter 5: Interdisciplinary Foundations":[
+["Mechanical engineering","The discipline concerned with mechanical structures, motion, and physical systems."],
+["Electrical engineering","The discipline concerned with electrical power, circuits, electronics, and related systems."],
+["Computer science","The study of computation, algorithms, software, and information processing."],
+["Manufacturing technology","The methods and equipment used to produce goods."],
+["Systems engineering","An interdisciplinary approach to designing and integrating components into a functioning system."],
+["Measurement technology","The methods and devices used to measure physical quantities."],
+["Sensor technology","The development and application of devices that collect information about physical conditions."],
+["Robot control","The process of directing a robot's movements and actions."],
+["Regulation","The use of feedback to keep a measured quantity close to a desired value."],
+["Hardware","The physical components of a robotic system."],
+["Software","The programs and instructions that determine how a robotic system operates."],
+["Ethics in robotics","The consideration of moral questions about the design, use, and effects of robots."],
+["Regulatory framework","The rules and requirements governing the development and use of robots."],
+["Workplace safety","Measures that protect people from hazards in working environments."],
+["Social acceptance","People's willingness to use, trust, or support robots."]
+],
+"Chapter 6: History":[
+["Artifact","An object created by humans."],
+["Water clock","A device that measures time through the controlled flow of water."],
+["Stanford Arm","A robot arm developed in 1969 with six degrees of freedom and a design that simplified movement calculations."],
+["MIT Arm","A robot arm developed by Victor Scheinman in 1972 that contributed to the development of programmable industrial manipulators."],
+["PUMA","Programmable Universal Manipulation Arm; a programmable industrial robot arm associated with the development of Scheinman's designs."],
+["SCARA","Selective Compliance Assembly Robot Arm; a robot arm designed for efficient assembly, with compliance in selected directions."],
+["Parallel robot","A robot whose moving platform or end effector is connected to its base through multiple mechanical chains."],
+["Electro-light-sensitive Internal-External","An early mobile robotic device that responded to light and interacted with its surroundings."],
+["Shakey","An early mobile robot that combined sensing, environmental reasoning, and action planning."],
+["Hierarchical control","A control structure organised into levels, from basic movements to complex planning."],
+["Low-level routine","A basic control operation used as a building block for more complex actions."],
+["Cognitive robot","A robot that uses internal representations and reasoning to plan and perform actions."],
+["World model","An internal representation of the environment used for reasoning and planning."],
+["Localization","The process of estimating a robot's position within an environment."],
+["Navigation","The process of determining and following a route to a destination."],
+["Triangulation sensor","A sensor that estimates distance using geometric relationships between observation points and a target."],
+["Stereo vision","The use of images from two viewpoints to estimate depth and three-dimensional structure."],
+["Stanford Cart","An early mobile robot that used camera-based perception to navigate around obstacles."],
+["WAVE","A programming language described in the lesson as having been developed specifically for robotics."],
+["Micromouse robot","A small mobile robot designed to navigate a maze."],
+["KAMRO","Karlsruhe Autonomous Mobile Robot; a mobile robotic system developed to perform autonomous assembly tasks."],
+["Mars rover","A mobile robot designed to explore and investigate the surface of Mars."]
+],
+"Chapter 7: Trends & Challenges":[
+["Production cell","A group of machines and equipment organised to carry out a set of manufacturing tasks."],
+["Human-machine interaction","The exchange of commands and information between people and machines."],
+["Human-friendly task specification","A way of describing robot tasks that is easy for human operators to understand and use."],
+["Mobile manipulation","The combination of mobility and object handling in one robotic system."],
+["Low-cost actuation","The use of affordable components to generate robotic movement."],
+["Subsystem","A component system that performs a specific function within a larger system."],
+["Composition of subsystems","The integration of separate modules into a complete robotic system."],
+["Standardized interface","A shared connection or communication specification that allows different components to work together."],
+["Embodiment of engineering and research results","The practical implementation of research findings in working robotic systems."],
+["Open dependable system","A system intended to support interoperability while maintaining reliable operation."],
+["Interconnectivity","The ability of devices or systems to connect and exchange information."],
+["Sustainable manufacturing","Production that reduces resource consumption, waste, and environmental impact."],
+["Robot synchronization","The coordination of robots' actions and timing."],
+["Multi-robot system","A group of robots that operate together or share a working environment."],
+["Robot networking","The connection of robots to exchange data or coordinate control and maintenance."],
+["Microprocessor","An electronic processor that executes computational instructions."],
+["Computational power","The capacity of a system to process information and perform calculations."],
+["Moore's law","The historical observation that the number of transistors on integrated circuits tends to double approximately every two years."],
+["Vision system","A combination of sensors and software used to obtain and interpret visual information."],
+["Cybersecurity","The protection of robotic systems, networks, and data against unauthorized access or attacks."],
+["Remote control","The operation of a robot from another location through a communication connection."]
+],
+"Chapter 8: Generations":[
+["Robotics 1.0","The first generation of robotics, focused on repetitive industrial automation in structured environments."],
+["4Ds","Dull, dirty, dumb, and dangerous; the lesson's description of tasks associated with Robotics 1.0."],
+["Robotics 2.0","The generation characterised by improved intelligence, sensing, safety, mobility, and ease of use."],
+["Personal robot","A robot intended to assist individual users, associated in the lesson with second-generation robotics."],
+["4Ss","Smarter, safer, sensors, and simple; the lesson's description of the transition to Robotics 2.0."],
+["Robotics 3.0","The emerging vision of connected, context-aware robots that interact with people and perform complex tasks autonomously."],
+["4Ms","Multitasking, emotive, morphing, and multiagent systems; the lesson's description of Robotics 3.0."],
+["Multitasking","The ability to manage or perform multiple tasks."],
+["Emotive robotics","Robotics involving the recognition, expression, or simulation of emotional signals."],
+["Morphing","The ability to change physical shape or configuration."],
+["Multiagent system","A system containing multiple agents that interact, coordinate, or cooperate."],
+["Context awareness","The ability to use information about the current situation to choose appropriate actions."],
+["Ubiquitous robotics","Robotics in which robots are widely present and exchange information with other robots and surrounding devices."],
+["Networked robot","A robot connected to other robots or systems through a communication network."],
+["Cloud robotics","The use of remote computing resources, shared data, and network services to support robots."],
+["Cloud computing infrastructure","Remote computing and storage resources accessed through a network."],
+["Computation offloading","The transfer of computational work from a robot to another computer or cloud service."],
+["Social awareness","The ability to recognise people, social situations, and relevant social expectations."],
+["Affective interaction","Interaction involving emotional signals or responses."],
+["Ubirobots' engineering","The design and integration of robots within interconnected, ubiquitous environments."]
+],
+"Chapter 9: Robot Types":[
+["Humanoid robot","A robot whose physical structure resembles the human body."],
+["ASIMO","A humanoid robot developed by Honda."],
+["Social robot","A robot designed to interact socially with people."],
+["Service robot","A robot that performs useful tasks for people or equipment outside industrial automation."],
+["Pepper","A social robot used in the lesson as an example of speech- and gesture-based human interaction."],
+["Wearable robotics","The field of robotic devices worn on the body to assist, restore, or enhance human abilities."],
+["Exoskeleton","An external wearable structure that supports or assists body movements."],
+["Exosuit","A wearable assistive device that mainly uses soft structures to support movement."],
+["Wearable user interface","A body-worn device used to send commands to or receive feedback from a robotic system."],
+["Rehabilitation robotics","The use of robotic systems to help people recover or practise physical abilities."],
+["Walking assist system","A device that supports a person's walking movements."],
+["Robotic prosthesis","An artificial body part using robotic mechanisms or control to replace lost function."],
+["Soft robotics","The field concerned with robots made partly or mainly from flexible, deformable materials."],
+["Soft robot","A robot whose flexible components allow substantial deformation during operation."],
+["Rigid body","An idealised object whose shape and internal distances do not change."],
+["Deformation","A change in an object's shape or size."],
+["Pneumatic control","The use of pressurized gas to produce or regulate movement."],
+["Hydraulic control","The use of pressurized liquid to produce or regulate movement."],
+["Bio-inspired robotics","The design of robots using principles or solutions found in living organisms."],
+["Bio-inspired robot","A robot whose design or behaviour draws inspiration from biological systems."]
+],
+"Chapter 10: AI & Perception":[
+["Artificial intelligence (AI)","Computational methods that enable machines to perform tasks involving perception, reasoning, planning, or learning."],
+["Autonomy","The ability to perform tasks and make operational decisions without continuous human control."],
+["Adaptability","The ability to adjust behaviour to new tasks or changing conditions."],
+["Structured environment","An environment whose layout and operating conditions are relatively predictable."],
+["Unstructured environment","An environment that is variable and not fully arranged or known in advance."],
+["Dynamic environment","An environment that changes while a robot operates."],
+["Robotic perception","The process of interpreting sensor data to understand the robot and its surroundings."],
+["Computer vision","Methods that extract useful information from images or video."],
+["Pattern recognition","The identification of meaningful patterns in data."],
+["Object detection","The identification and location of objects in sensor data, especially images."],
+["Object recognition","The identification of what an observed object is."],
+["Image classification","The assignment of an image or image region to a category."],
+["Scene understanding","The interpretation of objects, relationships, and activities within an environment."],
+["Spatial relationship","The position or orientation of one object relative to another."],
+["Semantic information","Information about what objects or observations mean."],
+["Semantic perception","The interpretation of sensor data in terms of meaningful objects, categories, and relationships."],
+["Lidar","A sensing technology that measures distance using laser light."],
+["Sonar","A sensing technology that detects objects or measures distance using sound waves."],
+["Touch sensor","A device that detects physical contact or related quantities such as pressure."],
+["Tactile feedback","Information obtained through physical contact."],
+["Depth sensor","A sensor that measures distances to surfaces or objects."],
+["Sensor fusion","The combination of information from multiple sensors to obtain a more reliable estimate."],
+["Multimodal perception","The combined interpretation of different types of sensory input, such as vision, sound, and touch."],
+["Simultaneous localization and mapping (SLAM)","The process of building a map while estimating the robot's location within it."],
+["Loop closure","The recognition that a robot has returned to a previously visited place, allowing mapping and localization errors to be corrected."],
+["Probabilistic AI","AI methods that represent and reason about uncertainty using probabilities."],
+["Bayesian estimation","The updating of an estimate by combining prior knowledge with new evidence."],
+["Natural language processing (NLP)","Methods that allow computers to process and interpret human language."],
+["Speech recognition","The conversion of spoken language into a machine-processable representation."],
+["Gesture recognition","The identification and interpretation of body or hand movements."],
+["Facial expression recognition","The identification of facial movements associated with expressions."]
+],
+"Chapter 11: Decision & Planning":[
+["Decision-making","The selection of actions based on goals, available information, and possible outcomes."],
+["Planning","The process of determining actions needed to achieve a goal."],
+["Motion planning","The computation of feasible robot movements that achieve a task while respecting constraints."],
+["Path planning","The computation of a route from a starting point to a destination."],
+["Collision-free trajectory","A sequence of movements over time that avoids contact with obstacles."],
+["Search space","The set of possible states or solutions explored by an algorithm."],
+["Graph search","A method that explores connected states to find a route or solution."],
+["Sampling-based planner","A motion-planning method that samples possible configurations and attempts to connect them into a feasible path."],
+["Optimization","The process of finding the best solution according to a defined objective and constraints."],
+["Heuristic","A practical estimate or rule that guides a search toward promising solutions."],
+["Autonomous navigation","The ability to determine and follow routes without continuous human guidance."],
+["Obstacle avoidance","The adjustment of movement to prevent collisions."],
+["High-level planning","The selection and ordering of broader actions needed to complete a task."],
+["Automated planning","The automatic generation of action sequences from descriptions of goals and available actions."],
+["Symbolic AI","AI that uses explicit symbols, rules, and logical representations."],
+["Symbolic planner","A planning system that uses symbolic descriptions of actions, conditions, and goals."],
+["Reasoning","The use of available knowledge to draw conclusions or choose actions."],
+["Replanning","The revision of a plan when conditions or information change."],
+["Task allocation","The assignment of tasks to robots or other agents."],
+["Coordination","The organisation of actions so that multiple robots or agents work effectively together."],
+["Control law","A rule that determines control commands from a system's state and desired behaviour."],
+["Controller","A component that calculates commands to guide a system toward desired behaviour."],
+["Adaptive control","Control that adjusts its parameters in response to changes or uncertainty."],
+["Intelligent control","Control that uses AI methods to select or improve actions."],
+["Learning-based controller","A controller whose behaviour is learned from data or experience."],
+["Control policy","A rule or strategy that maps observations or states to actions."],
+["Dynamics","The study of motion in relation to forces and torques."],
+["Gait","A coordinated pattern of movements used for walking or other locomotion."],
+["Predictive model","A model used to estimate future states or outcomes."],
+["Decision network","A model representing relationships among uncertain events, decisions, and their consequences."],
+["Game-theoretic planning","Planning that considers how other decision-makers may act."],
+["Cognitive architecture","An integrated framework connecting perception, memory, reasoning, planning, and learning."],
+["Knowledge base","An organised collection of information used for reasoning and decision-making."],
+["Human-robot interaction","The ways people and robots communicate and respond to one another."],
+["Human-robot collaboration","People and robots working together toward a shared goal."]
+],
+"Chapter 12: Machine Learning":[
+["Machine learning (ML)","Methods that enable a system to improve or acquire capabilities through data and experience."],
+["Supervised learning","Learning from examples that include the correct labels or outputs."],
+["Unsupervised learning","Learning patterns or structure from data without provided target labels."],
+["Reinforcement learning (RL)","Learning through interaction by selecting actions and using rewards to improve future behaviour."],
+["Deep learning","Machine learning using neural networks with multiple processing layers."],
+["Neural network","A computational model made of connected processing units whose parameters are adjusted during learning."],
+["Deep neural network","A neural network containing multiple layers that learn increasingly complex representations."],
+["Convolutional neural network (CNN)","A neural network architecture especially suited to processing images and other grid-like data."],
+["Deep reinforcement learning","Reinforcement learning that uses deep neural networks to represent policies or other learned functions."],
+["Training data","Examples or experiences used to adjust a machine-learning model."],
+["Labeled data","Data paired with information specifying the desired category or output."],
+["Feature learning","The automatic discovery of useful representations from data."],
+["Generalization","The ability to apply learned knowledge to new examples or situations."],
+["Trial-and-error learning","Learning by attempting actions and using their outcomes to improve."],
+["Reward","A numerical feedback signal indicating how desirable an outcome or action is."],
+["Penalty","Negative feedback that discourages an action or outcome."],
+["Cumulative reward","The total reward collected over a sequence of interactions, sometimes weighted by time."],
+["Learning from demonstration","Learning how to perform a task from examples provided by a human or another robot."],
+["Imitation learning","Learning a policy by reproducing or generalizing demonstrated behaviour."],
+["Online learning","Updating a model while new data arrive during operation."],
+["Calibration","The adjustment of system parameters so that measurements or actions match relevant references."],
+["Learning-based calibration","The use of learning methods to adjust a robot's parameters from data or feedback."],
+["Simulation","A computer-based representation of a robot and its environment used for testing or training."],
+["Simulator","Software that reproduces relevant aspects of a physical system and its behaviour."],
+["Sim-to-real transfer","The application of knowledge or behaviours learned in simulation to a physical robot."],
+["Big data","Large or complex datasets used to support analysis and learning."],
+["Collective learning","Learning in which experience or knowledge is shared among multiple robots."],
+["Robot fleet","A group of robots managed or operated together."],
+["Black-box system","A system whose internal decision process is difficult to inspect or understand."],
+["Explainability","The ability to provide understandable reasons for a system's outputs or actions."],
+["Trust in robots","Confidence that a robot will behave reliably and appropriately."],
+["Safety constraint","A restriction intended to prevent unsafe actions or outcomes."],
+["Robot locomotion","The movement of a robot from one place to another."],
+["Robotic manipulation","The controlled movement and handling of objects."],
+["Robotic grasping","The process of securing and holding an object with a robotic hand or gripper."],
+["Multi-agent reinforcement learning","Reinforcement learning involving multiple interacting agents."],
+["Lifelong learning","The continued acquisition and refinement of knowledge or skills throughout operation."]
+]
+};
+
+const chs=Object.keys(D);
+let ci=0,ti=0,rot=300,rotT=null,notif='none';
+let pTotal=25*60,pLeft=25*60,pRun=false,pT=null,actx=null;
+
+function getImgIndex(){let idx=0;for(let i=0;i<ci;i++)idx+=CHSIZES[i];return idx+ti;}
+
+function beep(){
+  if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();
+  const o=actx.createOscillator(),g=actx.createGain();
+  o.connect(g);g.connect(actx.destination);o.frequency.value=880;o.type='sine';g.gain.value=.25;
+  o.start();o.stop(actx.currentTime+.12);
+  setTimeout(()=>{const o2=actx.createOscillator(),g2=actx.createGain();o2.connect(g2);g2.connect(actx.destination);o2.frequency.value=1100;o2.type='sine';g2.gain.value=.25;o2.start();o2.stop(actx.currentTime+.15);},150);
+}
+
+function doAlert(){
+  if(notif==='sound')beep();
+  if(notif==='vibration'&&navigator.vibrate)navigator.vibrate([80,40,80]);
+}
+
+// Play white animation(s) - sometimes 1, sometimes 2 back-to-back
+function playWhiteAnim(cb){
+  const overlay=document.getElementById('animWhite');
+  const video=document.getElementById('animWhiteVideo');
+  const count=Math.random()<0.4?2:1; // 40% chance of playing 2
+  let played=0;
+  function playOne(){
+    video.src=nextWhiteAnim();
+    overlay.classList.add('show');
+    video.play();
+    video.onended=()=>{
+      played++;
+      if(played<count){playOne();}
+      else{overlay.classList.remove('show');if(cb)cb();}
+    };
+  }
+  playOne();
+}
+
+// Play green animation
+function playGreenAnim(cb){
+  const overlay=document.getElementById('animGreen');
+  const video=document.getElementById('animGreenVideo');
+  video.src=greenAnims[Math.floor(Math.random()*greenAnims.length)];
+  overlay.classList.add('show');
+  video.play();
+  video.onended=()=>{overlay.classList.remove('show');if(cb)cb();};
+}
+
+// Pomodoro done - green screen with animation
+function showPomodoroDone(){
+  const overlay=document.getElementById('pomodoroOverlay');
+  const video=document.getElementById('pomodoroVideo');
+  video.src=greenAnims[Math.floor(Math.random()*greenAnims.length)];
+  overlay.classList.add('show');
+  video.play();
+  video.onended=()=>{video.src=greenAnims[Math.floor(Math.random()*greenAnims.length)];video.play();};
+}
+
+function dismissPomodoro(){
+  const overlay=document.getElementById('pomodoroOverlay');
+  const video=document.getElementById('pomodoroVideo');
+  overlay.classList.remove('show');
+  video.pause();
+}
+
+function renderChs(){
+  document.getElementById('chapters').innerHTML=chs.map((c,i)=>{
+    const l=c.replace('Chapter ','').split(':')[0];
+    return `<button class="ch${i===ci?' on':''}" onclick="selCh(${i})">${l}</button>`;
+  }).join('');
+}
+
+function selCh(i){
+  if(i===ci){return;}
+  const prev=ci;
+  ci=i;ti=0;
+  renderChs();
+  // Green animation for chapter switch
+  playGreenAnim(()=>{renderTerm();});
+}
+
+function renderTerm(){
+  const ts=D[chs[ci]],[t,d]=ts[ti],a=document.getElementById('termArea');
+  a.classList.remove('fade');void a.offsetWidth;a.classList.add('fade');
+  document.getElementById('termCh').textContent=chs[ci];
+  document.getElementById('termImg').src='img/'+IMGS[getImgIndex()];
+  document.getElementById('termWord').textContent=t;
+  document.getElementById('termDef').textContent=d;
+  document.getElementById('termCount').textContent=`${ti+1} / ${ts.length}`;
+  document.getElementById('termProg').style.width=`${((ti+1)/ts.length)*100}%`;
+}
+
+function nextTerm(){
+  ti=(ti+1)%D[chs[ci]].length;
+  renderTerm();doAlert();resetRot();
+}
+
+function autoNext(){
+  ti=(ti+1)%D[chs[ci]].length;
+  playWhiteAnim(()=>{renderTerm();doAlert();});
+}
+
+function resetRot(){
+  if(rotT)clearInterval(rotT);
+  rotT=setInterval(autoNext,rot*1000);
+}
+
+function setNotif(m){
+  notif=m;
+  document.querySelectorAll('[data-n]').forEach(b=>b.classList.toggle('on',b.dataset.n===m));
+  if(m==='sound')beep();
+  if(m==='vibration'&&navigator.vibrate)navigator.vibrate(80);
+}
+
+function setRot(s){
+  rot=s;
+  document.querySelectorAll('[data-i]').forEach(b=>b.classList.toggle('on',+b.dataset.i===s));
+  resetRot();
+}
+
+function fmt(s){return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;}
+
+function setTimer(m){
+  pTotal=m*60;pLeft=m*60;pRun=false;if(pT)clearInterval(pT);
+  document.getElementById('startBtn').textContent='Start';
+  document.getElementById('timerDisplay').classList.remove('done');
+  document.querySelectorAll('.pill').forEach(b=>b.classList.toggle('on',parseInt(b.textContent)===m));
+  document.getElementById('timerDisplay').textContent=fmt(pLeft);
+}
+
+function toggleTimer(){
+  if(pRun){pRun=false;clearInterval(pT);document.getElementById('startBtn').textContent='Start';}
+  else{pRun=true;document.getElementById('startBtn').textContent='Pause';
+    pT=setInterval(()=>{pLeft--;document.getElementById('timerDisplay').textContent=fmt(pLeft);
+      if(pLeft<=0){clearInterval(pT);pRun=false;document.getElementById('startBtn').textContent='Start';
+        document.getElementById('timerDisplay').classList.add('done');
+        beep();if(navigator.vibrate)navigator.vibrate([200,100,200,100,200]);
+        showPomodoroDone();
+      }
+    },1000);}
+}
+
+function resetTimer(){
+  pRun=false;if(pT)clearInterval(pT);pLeft=pTotal;
+  document.getElementById('startBtn').textContent='Start';
+  document.getElementById('timerDisplay').classList.remove('done');
+  document.getElementById('timerDisplay').textContent=fmt(pLeft);
+}
+
+renderChs();renderTerm();resetRot();
+</script>
+</body>
+</html>
