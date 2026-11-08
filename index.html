@@ -14,20 +14,62 @@
   .screen.active{display:flex}
 
   /* ===== CHAPTERS SCREEN ===== */
-  #chaptersScreen{background:#3ced87;color:#111;align-items:center;justify-content:center;gap:24px;padding:32px}
+  #chaptersScreen{background:#3ced87;color:#111;align-items:center;justify-content:center;gap:0;padding:32px;position:relative}
 
-  .cs-logo{display:flex;align-items:center;justify-content:center}
+  .cs-title{
+    font-size:14vw;font-weight:900;color:rgba(255,255,255,.25);
+    letter-spacing:-0.5vw;line-height:.85;
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-65%);
+    white-space:nowrap;pointer-events:none;user-select:none;
+  }
 
-  .cs-chapters{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:720px}
-  .cs-actions{display:flex;flex-direction:column;gap:10px;align-items:center}
-  .cs-ch-btn{
+  .cs-logo{display:flex;align-items:center;justify-content:center;z-index:1;margin-bottom:24px}
+
+  .cs-streak{
+    z-index:1;display:flex;align-items:center;gap:6px;
+    font-size:13px;font-weight:600;color:rgba(0,0,0,.4);
+    margin-bottom:16px;
+  }
+  .cs-streak .streak-fire{font-size:18px}
+  .cs-streak .streak-num{font-size:20px;font-weight:800;color:rgba(0,0,0,.6)}
+
+  .cs-chapters{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:720px;z-index:1}
+  .cs-ch-card{
+    background:rgba(255,255,255,.2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    border:none;border-radius:16px;padding:16px 24px;cursor:pointer;
+    transition:all .2s;display:flex;flex-direction:column;align-items:flex-start;gap:4px;
+    min-width:180px;text-align:left;font-family:inherit;
+  }
+  .cs-ch-card:hover{background:rgba(255,255,255,.35);transform:scale(1.02)}
+  .cs-ch-card.empty{opacity:.4;cursor:default}
+  .cs-ch-card.empty:hover{transform:none;background:rgba(255,255,255,.2)}
+  .cs-ch-card .ch-num{font-size:11px;font-weight:600;color:rgba(0,0,0,.3);text-transform:uppercase;letter-spacing:.5px}
+  .cs-ch-card .ch-name{font-size:15px;font-weight:700;color:rgba(0,0,0,.7)}
+
+  /* Chapter detail screen */
+  #chapterDetail{background:#3ced87;color:#111;align-items:center;justify-content:center;gap:20px;padding:32px}
+  .cd-back{
+    position:fixed;top:24px;left:24px;background:rgba(0,0,0,.08);border:none;
+    border-radius:100px;padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer;
+    font-family:inherit;color:rgba(0,0,0,.5);transition:all .2s;z-index:10;
+    display:flex;align-items:center;gap:6px;
+  }
+  .cd-back:hover{background:rgba(0,0,0,.15);color:#111}
+  .cd-title{font-size:28px;font-weight:800;color:rgba(0,0,0,.7);letter-spacing:-.5px}
+  .cd-actions{display:flex;gap:12px}
+  .cd-btn{
     background:#fff;border:none;border-radius:50px;
-    padding:16px 40px;cursor:pointer;
-    color:#111;font-family:inherit;font-size:16px;font-weight:700;
+    padding:16px 36px;cursor:pointer;
+    color:#111;font-family:inherit;font-size:15px;font-weight:700;
     transition:all .2s;letter-spacing:-.3px;
     box-shadow:0 2px 12px rgba(0,0,0,.08);
   }
-  .cs-ch-btn:hover{transform:scale(1.04);box-shadow:0 4px 20px rgba(0,0,0,.12)}
+  .cd-btn:hover{transform:scale(1.04);box-shadow:0 4px 20px rgba(0,0,0,.12)}
+  .cd-btn.secondary{
+    background:rgba(0,0,0,.08);box-shadow:none;
+    color:rgba(0,0,0,.5);font-weight:600;
+  }
+  .cd-btn.secondary:hover{background:rgba(0,0,0,.12);color:rgba(0,0,0,.7)}
 
 
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -165,11 +207,22 @@
 
 <!-- CHAPTERS SCREEN (green) -->
 <div class="screen active" id="chaptersScreen">
-  <div class="cs-logo"><video id="csLogoVideo" muted playsinline autoplay loop style="width:120px;height:120px;object-fit:contain"></video></div>
+  <div class="cs-title">MEOWBOT</div>
+  <div class="cs-logo"><video id="csLogoVideo" muted playsinline autoplay loop style="width:140px;height:140px;object-fit:contain"></video></div>
+  <div class="cs-streak" id="csStreak"></div>
+  <div class="cs-chapters" id="csChapters"></div>
+</div>
 
-  <div class="cs-actions">
-    <div class="cs-chapters" id="csChapters"></div>
-    <button class="med-btn" onclick="startMeditation()">Meditation</button>
+<!-- CHAPTER DETAIL (green) -->
+<div class="screen" id="chapterDetail">
+  <button class="cd-back" onclick="goHome()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back
+  </button>
+  <div class="cd-title" id="cdTitle"></div>
+  <div class="cd-actions">
+    <button class="cd-btn" onclick="openChapter()">Start learning</button>
+    <button class="cd-btn secondary" onclick="startMeditation()">Meditation</button>
   </div>
 </div>
 
@@ -560,42 +613,17 @@ function beep(){
     o2.start(actx.currentTime);o2.stop(actx.currentTime+0.3);
   },200);
 }
-let bestVoice=null;
-function findVoice(){
-  const voices=speechSynthesis.getVoices();
-  // Prefer natural/premium voices
-  const prefs=['Samantha','Karen','Daniel','Moira','Google UK English Female','Google US English'];
-  for(const p of prefs){
-    const v=voices.find(v=>v.name.includes(p));
-    if(v){bestVoice=v;return;}
-  }
-  // Fallback: any English voice
-  bestVoice=voices.find(v=>v.lang.startsWith('en'))||null;
+let voiceAudio=null;
+function playVoice(idx){
+  if(voiceAudio){voiceAudio.pause();voiceAudio=null;}
+  voiceAudio=new Audio(`audio/${String(idx).padStart(3,'0')}.mp3`);
+  voiceAudio.play().catch(()=>{});
 }
-if('speechSynthesis' in window){
-  speechSynthesis.onvoiceschanged=findVoice;
-  findVoice();
-}
-
-function speak(text){
-  if(!('speechSynthesis' in window))return;
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);
-  if(bestVoice)u.voice=bestVoice;
-  u.lang='en-GB';u.rate=0.9;u.pitch=1.05;u.volume=1;
-  speechSynthesis.speak(u);
-}
-// Unlock speech on first tap (iOS/Safari requirement)
-document.addEventListener('click',function unlockSpeech(){
-  const u=new SpeechSynthesisUtterance('');u.volume=0;speechSynthesis.speak(u);
-  document.removeEventListener('click',unlockSpeech);
-},{once:true});
 
 function doAlert(){
   if(notif==='sound'){
     try{ensureAudio();beep();}catch(e){}
-    const [t,d]=TERMS[ti];
-    setTimeout(()=>{try{speak(t+'. '+d);}catch(e){}},600);
+    setTimeout(()=>{playVoice(ti);},500);
   }
   if(notif==='vibration'&&navigator.vibrate)navigator.vibrate([80,40,80]);
 }
@@ -626,10 +654,25 @@ function showPomodoroDone(){
 function dismissPomodoro(){document.getElementById('pomodoroOverlay').classList.remove('show');document.getElementById('pomodoroVideo').pause();}
 
 // Build chapter buttons (only chapters that have data)
+const CHAPTERS=[
+  {name:'Introduction to Robotics',hasContent:true},
+  {name:'Coming soon',hasContent:false},
+];
 function buildChapters(){
-  // For now only Chapter 1 has content
-  document.getElementById('csChapters').innerHTML=
-    `<button class="cs-ch-btn" onclick="openChapter()">Start learning</button>`;
+  document.getElementById('csChapters').innerHTML=CHAPTERS.map((ch,i)=>
+    ch.hasContent
+      ? `<button class="cs-ch-card" onclick="openChapterDetail(${i})"><span class="ch-num">Chapter ${i+1}</span><span class="ch-name">${ch.name}</span></button>`
+      : `<div class="cs-ch-card empty"><span class="ch-num">Chapter ${i+1}</span><span class="ch-name">${ch.name}</span></div>`
+  ).join('');
+}
+function openChapterDetail(i){
+  document.getElementById('cdTitle').textContent=CHAPTERS[i].name;
+  document.getElementById('chaptersScreen').classList.remove('active');
+  document.getElementById('chapterDetail').classList.add('active');
+}
+function goHome(){
+  document.getElementById('chapterDetail').classList.remove('active');
+  document.getElementById('chaptersScreen').classList.add('active');
 }
 
 // Mascot: sits still, occasionally plays animation
@@ -655,13 +698,12 @@ function stopMascot(){
 }
 
 function openChapter(){
-  // Unlock audio + speech on user click
   ensureAudio();
-  if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance('');u.volume=0;speechSynthesis.speak(u);}
+  markStudied();
   const saved=localStorage.getItem('meowbot-ti');
   ti=saved?parseInt(saved):0;
   if(ti>=TERMS.length)ti=0;
-  document.getElementById('chaptersScreen').classList.remove('active');
+  document.getElementById('chapterDetail').classList.remove('active');
   document.getElementById('termScreen').classList.add('active');
   renderTerm();
   resetRot();
@@ -672,7 +714,7 @@ function goBack(){
   if(rotT)clearInterval(rotT);
   stopMascot();
   document.getElementById('termScreen').classList.remove('active');
-  document.getElementById('chaptersScreen').classList.add('active');
+  document.getElementById('chapterDetail').classList.add('active');
 }
 
 function renderTerm(){
@@ -733,6 +775,36 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape')goBack();
 });
 
+// Streak tracking
+function updateStreak(){
+  const today=new Date().toDateString();
+  const lastDay=localStorage.getItem('meowbot-last-day');
+  let streak=parseInt(localStorage.getItem('meowbot-streak')||'0');
+  if(lastDay===today){
+    // Already studied today
+  }else{
+    const yesterday=new Date(Date.now()-86400000).toDateString();
+    if(lastDay===yesterday){streak++;}
+    else if(lastDay){streak=1;}
+    else{streak=1;}
+    localStorage.setItem('meowbot-streak',streak);
+    localStorage.setItem('meowbot-last-day',today);
+  }
+  document.getElementById('csStreak').innerHTML=
+    streak>0?`<span class="streak-fire">&#128293;</span><span class="streak-num">${streak}</span> day${streak>1?'s':''} streak`:'';
+}
+function markStudied(){
+  const today=new Date().toDateString();
+  const lastDay=localStorage.getItem('meowbot-last-day');
+  if(lastDay!==today){
+    const yesterday=new Date(Date.now()-86400000).toDateString();
+    let streak=parseInt(localStorage.getItem('meowbot-streak')||'0');
+    if(lastDay===yesterday){streak++;}else{streak=1;}
+    localStorage.setItem('meowbot-streak',streak);
+    localStorage.setItem('meowbot-last-day',today);
+  }
+}
+updateStreak();
 buildChapters();
 // Loop all anims on chapters screen logo (green + white mixed)
 (function loopCsLogo(){
@@ -796,14 +868,13 @@ function chime(){
   });
 }
 
-function medSpeak(text,cb){
-  if(!('speechSynthesis' in window)){if(cb)setTimeout(cb,2000);return;}
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);
-  u.lang='en-GB';u.rate=0.75;u.pitch=0.9;u.volume=1;
-  u.onend=()=>{if(cb)cb();};
-  u.onerror=()=>{if(cb)cb();};
-  speechSynthesis.speak(u);
+let medAudio=null;
+function medPlayVoice(idx,cb){
+  if(medAudio){medAudio.pause();medAudio=null;}
+  medAudio=new Audio(`audio/${String(idx).padStart(3,'0')}.mp3`);
+  medAudio.onended=()=>{if(cb)cb();};
+  medAudio.onerror=()=>{if(cb)cb();};
+  medAudio.play().catch(()=>{if(cb)cb();});
 }
 
 function showMedTerm(idx){
@@ -824,11 +895,12 @@ function showMedTerm(idx){
     termEl.classList.add('visible');
     defEl.classList.add('visible');
 
-    // Speak term, then definition, then chime, then pause, then next
-    medSpeak(t,()=>{
+    // Play voice (1st time), then again (2nd time), then chime, then next
+    medPlayVoice(idx,()=>{
       if(!medRunning)return;
-      setTimeout(()=>{
-        medSpeak(d,()=>{
+      // 2s pause then play again
+      medTimeout=setTimeout(()=>{
+        medPlayVoice(idx,()=>{
           if(!medRunning)return;
           // Chime + pause
           setTimeout(()=>{
@@ -837,10 +909,10 @@ function showMedTerm(idx){
               if(!medRunning)return;
               medIdx=(medIdx+1)%TERMS.length;
               showMedTerm(medIdx);
-            },4000); // 4s pause between terms
+            },4000);
           },800);
         });
-      },500);
+      },2000);
     });
   },600);
 }
@@ -858,7 +930,7 @@ function startMeditation(){
 function stopMeditation(){
   medRunning=false;
   if(medTimeout)clearTimeout(medTimeout);
-  speechSynthesis.cancel();
+  if(medAudio){medAudio.pause();medAudio=null;}
   // Fade out drone
   if(medDroneGain){
     medDroneGain.gain.linearRampToValueAtTime(0,actx.currentTime+1.5);
