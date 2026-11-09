@@ -1056,19 +1056,22 @@ buildChapters();
 // ===== MEDITATION MODE =====
 let medRunning=false,medIdx=0,medDrone=null,medDroneGain=null,medTimeout=null;
 
-let medBgMusic=null;
+let medBgMusic=null,medBgGain=null;
 function createDrone(){
+  ensureAudio();
   medBgMusic=new Audio('meditation-bg.mp3');
   medBgMusic.loop=true;
-  medBgMusic.volume=0;
+  medBgMusic.volume=1;
+  // Route through Web Audio API gain node (iOS ignores .volume)
+  const source=actx.createMediaElementSource(medBgMusic);
+  medBgGain=actx.createGain();
+  medBgGain.gain.value=0;
+  source.connect(medBgGain);
+  medBgGain.connect(actx.destination);
   medBgMusic.play().catch(()=>{});
-  // Fade in
-  let vol=0;
-  const fadeIn=setInterval(()=>{
-    vol+=0.005;
-    if(vol>=0.005){vol=0.005;clearInterval(fadeIn);}
-    if(medBgMusic)medBgMusic.volume=vol;
-  },50);
+  // Fade in to very quiet
+  medBgGain.gain.setValueAtTime(0,actx.currentTime);
+  medBgGain.gain.linearRampToValueAtTime(0.08,actx.currentTime+3);
 }
 
 function chime(){
@@ -1190,13 +1193,9 @@ function stopMeditation(){
   if(medTimeout)clearTimeout(medTimeout);
   if(medVoiceEl){medVoiceEl.pause();medVoiceEl.onended=null;}
   // Fade out music
-  if(medBgMusic){
-    let vol=medBgMusic.volume;
-    const fadeOut=setInterval(()=>{
-      vol-=0.005;
-      if(vol<=0){vol=0;clearInterval(fadeOut);medBgMusic.pause();medBgMusic=null;}
-      else if(medBgMusic)medBgMusic.volume=vol;
-    },50);
+  if(medBgGain&&medBgMusic){
+    medBgGain.gain.linearRampToValueAtTime(0,actx.currentTime+1.5);
+    setTimeout(()=>{if(medBgMusic){medBgMusic.pause();medBgMusic=null;}medBgGain=null;},2000);
   }
   document.getElementById('medOverlay').classList.remove('show');
   document.getElementById('medTerm').classList.remove('visible');
