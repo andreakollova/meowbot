@@ -125,7 +125,7 @@
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
   /* ===== TERM SCREEN ===== */
-  #termScreen{background:#ffffff;padding:32px 48px;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:80px;gap:0}
+  #termScreen{background:#ffffff;padding:32px 48px;flex-direction:column;align-items:center;justify-content:center;gap:0}
 
   .term-back{
     position:fixed;top:24px;left:24px;
@@ -780,11 +780,14 @@ function beep(){
   },200);
 }
 let voiceAudio=null;
+let termAudioEl=null;
 function playVoice(idx,lang){
-  if(voiceAudio){voiceAudio.pause();voiceAudio=null;}
+  if(termAudioEl){try{termAudioEl.pause();}catch(e){}}
   const folder=lang==='sk'?'audio-sk':'audio';
-  voiceAudio=new Audio(`${folder}/${String(idx).padStart(3,'0')}.mp3`);
-  voiceAudio.play().catch(()=>{});
+  if(!termAudioEl){termAudioEl=new Audio();}
+  termAudioEl.src=`${folder}/${String(idx).padStart(3,'0')}.mp3`;
+  termAudioEl.load();
+  termAudioEl.play().catch(()=>{});
 }
 function playCurrentEN(){playVoice(getRealIdx(),'en');}
 function playCurrentSK(){playVoice(getRealIdx(),'sk');}
@@ -875,6 +878,9 @@ function stopMascot(){
 
 function openChapter(){
   ensureAudio();
+  // Create audio element on user gesture for mobile
+  if(!termAudioEl){termAudioEl=new Audio();}
+  termAudioEl.src='audio/000.mp3';termAudioEl.play().then(()=>termAudioEl.pause()).catch(()=>{});
   markStudied();
   markedMode=false;
   const saved=localStorage.getItem('meowbot-ti');
