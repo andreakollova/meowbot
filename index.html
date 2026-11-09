@@ -166,6 +166,14 @@
   }
   .mark-btn:hover{color:#f5c518}
   .mark-btn.marked{color:#f5c518}
+
+  .lang-btns{display:flex;gap:3px}
+  .lang-btn{
+    background:#f5f5f5;border:none;border-radius:100px;
+    padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;
+    font-family:inherit;color:#bbb;transition:all .15s;
+  }
+  .lang-btn:hover{background:#eee;color:#111}
   .notif-toggle{
     background:none;border:none;cursor:pointer;color:#bbb;
     transition:color .2s;display:flex;align-items:center;justify-content:center;
@@ -353,17 +361,21 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
       <div>Start learning<div class="cd-sub">Continue where you left off</div></div>
     </button>
-    <button class="cd-menu-item" onclick="startMeditation()">
+    <button class="cd-menu-item" onclick="startMeditation('en')">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-      <div>Meditation<div class="cd-sub">Listen and relax</div></div>
+      <div>Meditation EN<div class="cd-sub">English voice, 2x repeat</div></div>
+    </button>
+    <button class="cd-menu-item" onclick="startMeditation('sk')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+      <div>Meditation SK<div class="cd-sub">Slovak voice, 2x repeat</div></div>
+    </button>
+    <button class="cd-menu-item" onclick="startMeditation('ensk')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+      <div>Meditation EN + SK<div class="cd-sub">English then Slovak</div></div>
     </button>
     <button class="cd-menu-item" onclick="openMarked()">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
       <div>Marked only<div class="cd-sub" id="markedCount">No terms marked yet</div></div>
-    </button>
-    <button class="cd-menu-item" onclick="startMeditationMarked()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-4.97 0-9-2.69-9-6 0-4 5-8 5-8s1 2 3 3c2-4 5-7 5-7s4 4 4 8c0 5.5-3.5 10-8 10z"/></svg>
-      <div>Meditate marked<div class="cd-sub">Focus on starred terms</div></div>
     </button>
   </div>
 </div>
@@ -384,6 +396,10 @@
   </button>
 
   <div class="term-topright">
+    <div class="lang-btns">
+      <button class="lang-btn" onclick="playCurrentEN()">EN</button>
+      <button class="lang-btn" onclick="playCurrentSK()">SK</button>
+    </div>
     <button class="mark-btn" id="markBtn" onclick="toggleMark()">&#9734;</button>
     <div class="term-nav">
       <button onclick="prevTerm()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
@@ -764,11 +780,14 @@ function beep(){
   },200);
 }
 let voiceAudio=null;
-function playVoice(idx){
+function playVoice(idx,lang){
   if(voiceAudio){voiceAudio.pause();voiceAudio=null;}
-  voiceAudio=new Audio(`audio/${String(idx).padStart(3,'0')}.mp3`);
+  const folder=lang==='sk'?'audio-sk':'audio';
+  voiceAudio=new Audio(`${folder}/${String(idx).padStart(3,'0')}.mp3`);
   voiceAudio.play().catch(()=>{});
 }
+function playCurrentEN(){playVoice(getRealIdx(),'en');}
+function playCurrentSK(){playVoice(getRealIdx(),'sk');}
 
 function doAlert(){
   if(notif==='sound'){
@@ -1068,23 +1087,21 @@ function chime(){
   });
 }
 
-let medAudio=null;
-function medPlayVoice(idx,cb){
+let medAudio=null,medLang='en';
+function medPlayVoice(idx,lang,cb){
   if(medAudio){medAudio.pause();medAudio=null;}
-  const src=`audio/${String(idx).padStart(3,'0')}.mp3`;
+  const folder=lang==='sk'?'audio-sk':'audio';
+  const src=`${folder}/${String(idx).padStart(3,'0')}.mp3`;
   medAudio=new Audio(src);
   medAudio.volume=1;
   medAudio.onended=()=>{medAudio=null;if(cb)cb();};
   medAudio.onerror=()=>{medAudio=null;if(cb)setTimeout(cb,1000);};
-  // Ensure audio context is active before playing
   ensureAudio();
   const p=medAudio.play();
   if(p)p.catch(()=>{
-    // Fallback: try again after short delay
     setTimeout(()=>{
       if(!medRunning)return;
-      medAudio=new Audio(src);
-      medAudio.volume=1;
+      medAudio=new Audio(src);medAudio.volume=1;
       medAudio.onended=()=>{medAudio=null;if(cb)cb();};
       medAudio.onerror=()=>{medAudio=null;if(cb)setTimeout(cb,1000);};
       medAudio.play().catch(()=>{medAudio=null;if(cb)setTimeout(cb,1000);});
@@ -1114,31 +1131,44 @@ function showMedTerm(localIdx){
     termEl.classList.add('visible');
     defEl.classList.add('visible');
 
-    // Play voice 1st time
-    medPlayVoice(ri,()=>{
+    function afterVoices(){
       if(!medRunning)return;
-      // 2s pause then play again (2nd time)
-      medTimeout=setTimeout(()=>{
-        if(!medRunning)return;
-        medPlayVoice(ri,()=>{
+      setTimeout(()=>{
+        chime();
+        medTimeout=setTimeout(()=>{
           if(!medRunning)return;
-          // Chime + pause then next
-          setTimeout(()=>{
-            chime();
-            medTimeout=setTimeout(()=>{
-              if(!medRunning)return;
-              medIdx=(medIdx+1)%getMedTotal();
-              showMedTerm(medIdx);
-            },4000);
-          },800);
-        });
-      },2000);
+          medIdx=(medIdx+1)%getMedTotal();
+          showMedTerm(medIdx);
+        },4000);
+      },800);
+    }
+
+    if(medLang==='en'){
+      // EN 2x
+      medPlayVoice(ri,'en',()=>{
+        if(!medRunning)return;
+        medTimeout=setTimeout(()=>{medPlayVoice(ri,'en',afterVoices);},2000);
+      });
+    }else if(medLang==='sk'){
+      // SK 2x
+      medPlayVoice(ri,'sk',()=>{
+        if(!medRunning)return;
+        medTimeout=setTimeout(()=>{medPlayVoice(ri,'sk',afterVoices);},2000);
+      });
+    }else{
+      // EN then SK
+      medPlayVoice(ri,'en',()=>{
+        if(!medRunning)return;
+        medTimeout=setTimeout(()=>{medPlayVoice(ri,'sk',afterVoices);},2000);
+      });
+    }
     });
   },600);
 }
 
-function startMeditation(){
+function startMeditation(lang){
   ensureAudio();
+  medLang=lang||'en';
   medRunning=true;
   medIdx=0;
   document.getElementById('medOverlay').classList.add('show');
