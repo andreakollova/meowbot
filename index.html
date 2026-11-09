@@ -1047,7 +1047,7 @@ function createDrone(){
   let vol=0;
   const fadeIn=setInterval(()=>{
     vol+=0.005;
-    if(vol>=0.15){vol=0.15;clearInterval(fadeIn);}
+    if(vol>=0.06){vol=0.06;clearInterval(fadeIn);}
     if(medBgMusic)medBgMusic.volume=vol;
   },50);
 }
