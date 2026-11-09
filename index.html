@@ -14,9 +14,9 @@
   .screen.active{display:flex}
 
   /* ===== CHAPTERS SCREEN ===== */
-  #chaptersScreen{background:#07ee7b;color:#111;align-items:center;justify-content:center;gap:0;padding:32px;position:relative}
+  #chaptersScreen{background:#07ee7b;color:#111;align-items:center;justify-content:center;gap:0;padding:32px;position:relative;overflow-y:auto}
 
-  .cs-title{z-index:1;user-select:none;width:80%;max-width:900px;margin-bottom:-30px}
+  .cs-title{z-index:1;user-select:none;width:80%;max-width:900px;margin-bottom:-30px;pointer-events:none}
   .cs-title img{width:100%;height:auto;display:block}
 
   .cs-logo{display:flex;align-items:center;justify-content:center;z-index:1;margin-bottom:12px}
@@ -264,13 +264,13 @@
 
   @media (max-width:768px){
     /* Homepage */
-    #chaptersScreen{padding:20px;gap:0}
-    .cs-title{width:92%;margin-bottom:-20px}
-    .cs-logo video{width:90px!important;height:90px!important}
-    .cs-logo{margin-bottom:10px}
+    #chaptersScreen{padding:20px 20px 60px;gap:8px}
+    .cs-title{width:92%;margin-bottom:-15px}
+    .cs-logo video{width:80px!important;height:80px!important}
+    .cs-logo{margin-bottom:8px}
     .cs-ch-card .ch-name{font-size:16px}
     .cs-ch-card .ch-num{font-size:12px}
-    .cs-search-btn{top:16px;right:16px;padding:6px 12px 6px 10px;font-size:12px}
+    .cs-search-btn{top:16px;right:16px;padding:8px 14px 8px 12px;font-size:12px}
     .cs-streak,.cs-days{bottom:16px;font-size:11px}
     .cs-streak{left:16px}
     .cs-days{right:16px}
