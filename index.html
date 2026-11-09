@@ -1091,24 +1091,23 @@ function chime(){
 }
 
 let medLang='en';
-// Single audio element created on user tap - MUST reuse for mobile
-let medVoiceEl=null;
+let medCurAudio=null;
 
 function medPlayVoice(idx,lang,cb){
-  if(!medVoiceEl)return cb&&cb();
+  // Stop previous
+  if(medCurAudio){try{medCurAudio.pause();}catch(e){} medCurAudio=null;}
+  if(!medRunning){if(cb)cb();return;}
+
   const folder=lang==='sk'?'audio-sk':'audio';
-  medVoiceEl.pause();
-  medVoiceEl.currentTime=0;
+  const a=new Audio(`${folder}/${String(idx).padStart(3,'0')}.mp3`);
+  medCurAudio=a;
 
   let done=false;
-  function finish(){if(done)return;done=true;medVoiceEl.onended=null;medVoiceEl.onerror=null;if(cb)cb();}
+  function finish(){if(done)return;done=true;medCurAudio=null;if(cb)cb();}
 
-  medVoiceEl.onended=finish;
-  medVoiceEl.onerror=finish;
-  medVoiceEl.src=`${folder}/${String(idx).padStart(3,'0')}.mp3`;
-  medVoiceEl.load();
-  medVoiceEl.play().catch(()=>{finish();});
-  // Fallback
+  a.onended=finish;
+  a.onerror=finish;
+  a.play().catch(()=>{finish();});
   setTimeout(finish,12000);
 }
 
@@ -1170,9 +1169,12 @@ function showMedTerm(localIdx){
 
 function startMeditation(lang){
   // Stop any running meditation first
-  if(medRunning)stopMeditation();
+  stopMeditation();
 
   ensureAudio();
+  // Warm up audio on mobile - play+pause a dummy sound during user gesture
+  try{const w=new Audio('audio/000.mp3');w.play().then(()=>w.pause()).catch(()=>{});}catch(e){}
+
   medLang=lang||'en';
   medRunning=true;
   medIdx=0;
@@ -1183,12 +1185,17 @@ function startMeditation(lang){
 
 function stopMeditation(){
   medRunning=false;
-  if(medTimeout)clearTimeout(medTimeout);
-  if(medVoiceEl){medVoiceEl.pause();medVoiceEl.onended=null;}
-  // Fade out music
-  if(medBgGain&&medBgMusic){
-    medBgGain.gain.linearRampToValueAtTime(0,actx.currentTime+1.5);
-    setTimeout(()=>{if(medBgMusic){medBgMusic.pause();medBgMusic=null;}medBgGain=null;},2000);
+  if(medTimeout){clearTimeout(medTimeout);medTimeout=null;}
+  // Stop voice
+  if(medCurAudio){try{medCurAudio.pause();}catch(e){} medCurAudio=null;}
+  // Stop music
+  if(medBgMusic){
+    try{medBgMusic.pause();}catch(e){}
+    medBgMusic=null;
+  }
+  if(medBgGain){
+    try{medBgGain.gain.value=0;}catch(e){}
+    medBgGain=null;
   }
   document.getElementById('medOverlay').classList.remove('show');
   document.getElementById('medTerm').classList.remove('visible');
