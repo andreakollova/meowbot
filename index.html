@@ -1003,7 +1003,7 @@ function createDrone(){
     const o=actx.createOscillator();
     const g=actx.createGain();
     o.type='sine';o.frequency.value=f;
-    g.gain.value=0.06;
+    g.gain.value=0.03;
     o.connect(g);g.connect(medDroneGain);
     o.start();
 
@@ -1042,9 +1042,23 @@ function medPlayVoice(idx,cb){
   if(medAudio){medAudio.pause();medAudio=null;}
   const src=`audio/${String(idx).padStart(3,'0')}.mp3`;
   medAudio=new Audio(src);
-  medAudio.onended=()=>{if(cb)cb();};
-  medAudio.onerror=()=>{console.log('audio error',idx);if(cb)setTimeout(cb,1000);};
-  medAudio.play().catch(e=>{console.log('play catch',idx,e);if(cb)setTimeout(cb,1000);});
+  medAudio.volume=1;
+  medAudio.onended=()=>{medAudio=null;if(cb)cb();};
+  medAudio.onerror=()=>{medAudio=null;if(cb)setTimeout(cb,1000);};
+  // Ensure audio context is active before playing
+  ensureAudio();
+  const p=medAudio.play();
+  if(p)p.catch(()=>{
+    // Fallback: try again after short delay
+    setTimeout(()=>{
+      if(!medRunning)return;
+      medAudio=new Audio(src);
+      medAudio.volume=1;
+      medAudio.onended=()=>{medAudio=null;if(cb)cb();};
+      medAudio.onerror=()=>{medAudio=null;if(cb)setTimeout(cb,1000);};
+      medAudio.play().catch(()=>{medAudio=null;if(cb)setTimeout(cb,1000);});
+    },300);
+  });
 }
 
 function getMedTotal(){return markedMode?markedList.length:TERMS.length;}
