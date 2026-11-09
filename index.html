@@ -876,9 +876,18 @@ function stopMascot(){
   v.pause();v.classList.remove('playing');v.onended=null;
 }
 
+// Wake Lock - prevent screen sleep
+let wakeLock=null;
+async function requestWakeLock(){
+  try{if('wakeLock' in navigator){wakeLock=await navigator.wakeLock.request('screen');}}catch(e){}
+}
+function releaseWakeLock(){
+  if(wakeLock){try{wakeLock.release();}catch(e){} wakeLock=null;}
+}
+
 function openChapter(){
   ensureAudio();
-  // Create audio element on user gesture for mobile
+  requestWakeLock();
   if(!termAudioEl){termAudioEl=new Audio();}
   termAudioEl.src='audio/000.mp3';termAudioEl.play().then(()=>termAudioEl.pause()).catch(()=>{});
   markStudied();
@@ -896,6 +905,7 @@ function openChapter(){
 function goBack(){
   if(rotT)clearInterval(rotT);
   stopMascot();
+  releaseWakeLock();
   document.getElementById('termScreen').classList.remove('active');
   document.getElementById('chapterDetail').classList.add('active');
 }
@@ -1174,10 +1184,9 @@ function showMedTerm(localIdx){
 }
 
 function startMeditation(lang){
-  // Stop any running meditation first
   stopMeditation();
-
   ensureAudio();
+  requestWakeLock();
   // Warm up audio on mobile - play+pause a dummy sound during user gesture
   try{const w=new Audio('audio/000.mp3');w.play().then(()=>w.pause()).catch(()=>{});}catch(e){}
 
@@ -1192,6 +1201,7 @@ function startMeditation(lang){
 function stopMeditation(){
   medRunning=false;
   if(medTimeout){clearTimeout(medTimeout);medTimeout=null;}
+  releaseWakeLock();
   // Stop voice
   if(medCurAudio){try{medCurAudio.pause();}catch(e){} medCurAudio=null;}
   // Stop music
