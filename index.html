@@ -1066,7 +1066,7 @@ function createDrone(){
   let vol=0;
   const fadeIn=setInterval(()=>{
     vol+=0.005;
-    if(vol>=0.03){vol=0.03;clearInterval(fadeIn);}
+    if(vol>=0.01){vol=0.01;clearInterval(fadeIn);}
     if(medBgMusic)medBgMusic.volume=vol;
   },50);
 }
@@ -1087,31 +1087,26 @@ function chime(){
   });
 }
 
-let medAudio=null,medLang='en';
-// Create a reusable audio element on user click (mobile needs this)
-let medAudioEl=null;
-function getMedAudioEl(){
-  if(!medAudioEl){medAudioEl=new Audio();medAudioEl.volume=1;}
-  return medAudioEl;
-}
+let medLang='en';
+// Single audio element created on user tap - MUST reuse for mobile
+let medVoiceEl=null;
 
 function medPlayVoice(idx,lang,cb){
+  if(!medVoiceEl)return cb&&cb();
   const folder=lang==='sk'?'audio-sk':'audio';
-  const src=`${folder}/${String(idx).padStart(3,'0')}.mp3`;
-  // Use fresh Audio each time (reusing src on same element fails on mobile)
-  const a=new Audio(src);
-  a.volume=1;
-  ensureAudio();
+  medVoiceEl.pause();
+  medVoiceEl.currentTime=0;
 
-  // Use both onended and timeout fallback
   let done=false;
-  function finish(){if(done)return;done=true;if(cb)cb();}
-  a.onended=finish;
-  a.onerror=()=>{finish();};
-  // Fallback: if onended doesn't fire after 15s
-  setTimeout(finish,15000);
+  function finish(){if(done)return;done=true;medVoiceEl.onended=null;medVoiceEl.onerror=null;if(cb)cb();}
 
-  a.play().catch(()=>{finish();});
+  medVoiceEl.onended=finish;
+  medVoiceEl.onerror=finish;
+  medVoiceEl.src=`${folder}/${String(idx).padStart(3,'0')}.mp3`;
+  medVoiceEl.load();
+  medVoiceEl.play().catch(()=>{finish();});
+  // Fallback
+  setTimeout(finish,12000);
 }
 
 function getMedTotal(){return markedMode?markedList.length:TERMS.length;}
@@ -1172,8 +1167,15 @@ function showMedTerm(localIdx){
 
 function startMeditation(lang){
   ensureAudio();
-  // Warm up audio on user gesture (mobile unlock)
-  try{const w=new Audio('audio/000.mp3');w.volume=0.01;w.play().then(()=>{setTimeout(()=>w.pause(),100);}).catch(()=>{});}catch(e){}
+  // Create single audio element on user gesture (mobile MUST have this)
+  if(!medVoiceEl){
+    medVoiceEl=document.createElement('audio');
+    document.body.appendChild(medVoiceEl);
+  }
+  medVoiceEl.volume=1;
+  // Unlock by playing tiny bit
+  medVoiceEl.src='audio/000.mp3';
+  medVoiceEl.play().then(()=>{medVoiceEl.pause();medVoiceEl.currentTime=0;}).catch(()=>{});
   medLang=lang||'en';
   medRunning=true;
   medIdx=0;
@@ -1186,7 +1188,7 @@ function startMeditation(lang){
 function stopMeditation(){
   medRunning=false;
   if(medTimeout)clearTimeout(medTimeout);
-  // Audio will stop naturally or via timeout
+  if(medVoiceEl){medVoiceEl.pause();medVoiceEl.onended=null;}
   // Fade out music
   if(medBgMusic){
     let vol=medBgMusic.volume;
