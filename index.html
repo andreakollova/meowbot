@@ -1169,22 +1169,15 @@ function showMedTerm(localIdx){
 }
 
 function startMeditation(lang){
+  // Stop any running meditation first
+  if(medRunning)stopMeditation();
+
   ensureAudio();
-  // Create single audio element on user gesture (mobile MUST have this)
-  if(!medVoiceEl){
-    medVoiceEl=document.createElement('audio');
-    document.body.appendChild(medVoiceEl);
-  }
-  medVoiceEl.volume=1;
-  // Unlock by playing tiny bit
-  medVoiceEl.src='audio/000.mp3';
-  medVoiceEl.play().then(()=>{medVoiceEl.pause();medVoiceEl.currentTime=0;}).catch(()=>{});
   medLang=lang||'en';
   medRunning=true;
   medIdx=0;
   document.getElementById('medOverlay').classList.add('show');
   createDrone();
-  // Start after 2s to let drone fade in
   medTimeout=setTimeout(()=>{showMedTerm(medIdx);},2000);
 }
 
