@@ -254,27 +254,73 @@
   @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   .fade{animation:fadeUp .25s ease}
 
-  @media (max-width:900px){
-    .term-left img{max-width:120px;max-height:18vh}
-    .term-word{font-size:32px}
-    .term-def{font-size:18px}
-    #termScreen{padding:24px 20px;padding-top:70px}
-    .term-topright{gap:6px;right:12px;top:16px;flex-wrap:wrap;max-width:70vw;justify-content:flex-end}
-    .term-back{top:16px;left:12px;padding:6px 14px;font-size:11px}
-    .mascot-corner{width:80px;height:80px;bottom:16px;right:16px}
-    .term-chapter{bottom:16px;left:16px;font-size:11px}
+  @media (max-width:768px){
+    /* Homepage */
+    #chaptersScreen{padding:20px;gap:0}
+    .cs-title{width:92%;margin-bottom:-20px}
+    .cs-logo video{width:90px!important;height:90px!important}
+    .cs-logo{margin-bottom:10px}
+    .cs-ch-card .ch-name{font-size:16px}
+    .cs-ch-card .ch-num{font-size:12px}
+    .cs-search-btn{top:16px;right:16px;padding:6px 12px 6px 10px;font-size:12px}
+    .cs-streak,.cs-days{bottom:16px;font-size:11px}
+    .cs-streak{left:16px}
+    .cs-days{right:16px}
+
+    /* Chapter detail */
+    .cd-back{top:16px;left:16px;padding:6px 14px;font-size:11px}
+    .cd-mascot video{width:80px!important;height:80px!important}
+    .cd-title{font-size:22px}
+    .cd-subtitle{font-size:12px}
+    .cd-menu{min-width:auto;width:92vw;max-width:360px}
+    .cd-menu-item{padding:14px 20px;font-size:14px}
+
+    /* Term screen */
+    #termScreen{padding:16px;padding-top:60px}
+    .term-left img{max-width:100px;max-height:16vh}
+    .term-word{font-size:28px;letter-spacing:-.8px}
+    .term-def{font-size:16px;line-height:1.5}
+    .term-topright{gap:5px;right:10px;top:12px}
+    .term-back{top:12px;left:10px;padding:5px 12px;font-size:10px}
+    .term-timer{font-size:13px}
+    .tr-btn{padding:4px 10px;font-size:10px}
+    .mark-btn{width:30px;height:30px;font-size:16px}
+    .term-nav button{width:30px;height:30px}
     .rot-pills{display:none}
     .rot-countdown{display:none}
     .tr-sep{display:none}
-    .cs-title{width:90%}
-    .cs-logo video{width:100px!important;height:100px!important}
-    .cs-ch-card .ch-name{font-size:18px}
-    .cd-menu{min-width:auto;width:90vw;max-width:360px}
-    .cd-title{font-size:24px}
-    .search-overlay{padding:60px 16px 16px}
-    .search-input{font-size:16px;padding:14px 16px}
-    .med-term{font-size:32px}
-    .med-def{font-size:18px}
+    .mascot-corner{width:70px;height:70px;bottom:12px;right:12px}
+    .term-chapter{bottom:12px;left:12px;font-size:10px}
+    .term-meta{margin-top:12px}
+    .progress-track{width:120px}
+
+    /* Search */
+    .search-overlay{padding:56px 16px 16px}
+    .search-input{font-size:16px;padding:14px 16px;border-radius:12px}
+    .search-close{top:16px;right:16px}
+    .search-item{padding:12px 14px}
+    .search-item .si-term{font-size:14px}
+
+    /* Meditation */
+    .med-term{font-size:26px;max-width:90vw}
+    .med-def{font-size:16px;max-width:90vw}
+    .med-close{top:16px;right:16px;padding:8px 16px;font-size:12px}
+    .med-count{font-size:11px;bottom:16px}
+
+    /* Overlays */
+    .anim-overlay video{max-width:250px;max-height:250px;border-radius:16px}
+    .green-overlay .green-title{font-size:24px}
+    .green-overlay .green-sub{font-size:14px}
+  }
+
+  @media (max-width:400px){
+    .term-word{font-size:24px}
+    .term-def{font-size:14px}
+    .term-left img{max-width:80px;max-height:14vh}
+    #termScreen{padding-top:50px}
+    .cs-title{width:95%}
+    .med-term{font-size:22px}
+    .med-def{font-size:14px}
   }
 </style>
 </head>
