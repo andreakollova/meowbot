@@ -1096,14 +1096,22 @@ function getMedAudioEl(){
 }
 
 function medPlayVoice(idx,lang,cb){
-  const a=getMedAudioEl();
-  a.pause();
   const folder=lang==='sk'?'audio-sk':'audio';
-  a.src=`${folder}/${String(idx).padStart(3,'0')}.mp3`;
-  a.onended=()=>{if(cb)cb();};
-  a.onerror=()=>{if(cb)setTimeout(cb,1000);};
+  const src=`${folder}/${String(idx).padStart(3,'0')}.mp3`;
+  // Use fresh Audio each time (reusing src on same element fails on mobile)
+  const a=new Audio(src);
+  a.volume=1;
   ensureAudio();
-  a.play().catch(()=>{if(cb)setTimeout(cb,1000);});
+
+  // Use both onended and timeout fallback
+  let done=false;
+  function finish(){if(done)return;done=true;if(cb)cb();}
+  a.onended=finish;
+  a.onerror=()=>{finish();};
+  // Fallback: if onended doesn't fire after 15s
+  setTimeout(finish,15000);
+
+  a.play().catch(()=>{finish();});
 }
 
 function getMedTotal(){return markedMode?markedList.length:TERMS.length;}
@@ -1164,10 +1172,8 @@ function showMedTerm(localIdx){
 
 function startMeditation(lang){
   ensureAudio();
-  // Create audio element during user gesture (required for mobile)
-  getMedAudioEl();
-  // Warm up: play silent to unlock
-  const a=getMedAudioEl();a.src='audio/000.mp3';a.volume=0;a.play().then(()=>{a.pause();a.volume=1;}).catch(()=>{});
+  // Warm up audio on user gesture (mobile unlock)
+  try{const w=new Audio('audio/000.mp3');w.volume=0.01;w.play().then(()=>{setTimeout(()=>w.pause(),100);}).catch(()=>{});}catch(e){}
   medLang=lang||'en';
   medRunning=true;
   medIdx=0;
@@ -1180,7 +1186,7 @@ function startMeditation(lang){
 function stopMeditation(){
   medRunning=false;
   if(medTimeout)clearTimeout(medTimeout);
-  if(medAudioEl){medAudioEl.pause();}
+  // Audio will stop naturally or via timeout
   // Fade out music
   if(medBgMusic){
     let vol=medBgMusic.volume;
