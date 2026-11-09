@@ -255,9 +255,26 @@
   .fade{animation:fadeUp .25s ease}
 
   @media (max-width:900px){
-    .term-left img{max-width:140px;max-height:22vh}
-    .term-word{font-size:36px}
-    .term-def{font-size:20px}
+    .term-left img{max-width:120px;max-height:18vh}
+    .term-word{font-size:32px}
+    .term-def{font-size:18px}
+    #termScreen{padding:24px 20px;padding-top:70px}
+    .term-topright{gap:6px;right:12px;top:16px;flex-wrap:wrap;max-width:70vw;justify-content:flex-end}
+    .term-back{top:16px;left:12px;padding:6px 14px;font-size:11px}
+    .mascot-corner{width:80px;height:80px;bottom:16px;right:16px}
+    .term-chapter{bottom:16px;left:16px;font-size:11px}
+    .rot-pills{display:none}
+    .rot-countdown{display:none}
+    .tr-sep{display:none}
+    .cs-title{width:90%}
+    .cs-logo video{width:100px!important;height:100px!important}
+    .cs-ch-card .ch-name{font-size:18px}
+    .cd-menu{min-width:auto;width:90vw;max-width:360px}
+    .cd-title{font-size:24px}
+    .search-overlay{padding:60px 16px 16px}
+    .search-input{font-size:16px;padding:14px 16px}
+    .med-term{font-size:32px}
+    .med-def{font-size:18px}
   }
 </style>
 </head>
@@ -1023,18 +1040,23 @@ function chime(){
 let medAudio=null;
 function medPlayVoice(idx,cb){
   if(medAudio){medAudio.pause();medAudio=null;}
-  medAudio=new Audio(`audio/${String(idx).padStart(3,'0')}.mp3`);
+  const src=`audio/${String(idx).padStart(3,'0')}.mp3`;
+  medAudio=new Audio(src);
   medAudio.onended=()=>{if(cb)cb();};
-  medAudio.onerror=()=>{if(cb)cb();};
-  medAudio.play().catch(()=>{if(cb)cb();});
+  medAudio.onerror=()=>{console.log('audio error',idx);if(cb)setTimeout(cb,1000);};
+  medAudio.play().catch(e=>{console.log('play catch',idx,e);if(cb)setTimeout(cb,1000);});
 }
 
-function showMedTerm(idx){
+function getMedTotal(){return markedMode?markedList.length:TERMS.length;}
+function getMedRealIdx(i){return markedMode?markedList[i]:i;}
+
+function showMedTerm(localIdx){
   if(!medRunning)return;
-  const [t,d]=TERMS[idx];
+  const ri=getMedRealIdx(localIdx);
+  const [t,d]=TERMS[ri];
   const termEl=document.getElementById('medTerm');
   const defEl=document.getElementById('medDef');
-  document.getElementById('medCount').textContent=`${idx+1} / ${TERMS.length}`;
+  document.getElementById('medCount').textContent=`${localIdx+1} / ${getMedTotal()}`;
 
   // Fade out
   termEl.classList.remove('visible');
@@ -1047,19 +1069,20 @@ function showMedTerm(idx){
     termEl.classList.add('visible');
     defEl.classList.add('visible');
 
-    // Play voice (1st time), then again (2nd time), then chime, then next
-    medPlayVoice(idx,()=>{
+    // Play voice 1st time
+    medPlayVoice(ri,()=>{
       if(!medRunning)return;
-      // 2s pause then play again
+      // 2s pause then play again (2nd time)
       medTimeout=setTimeout(()=>{
-        medPlayVoice(idx,()=>{
+        if(!medRunning)return;
+        medPlayVoice(ri,()=>{
           if(!medRunning)return;
-          // Chime + pause
+          // Chime + pause then next
           setTimeout(()=>{
             chime();
             medTimeout=setTimeout(()=>{
               if(!medRunning)return;
-              medIdx=(medIdx+1)%TERMS.length;
+              medIdx=(medIdx+1)%getMedTotal();
               showMedTerm(medIdx);
             },4000);
           },800);
