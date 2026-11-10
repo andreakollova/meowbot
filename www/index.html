@@ -290,35 +290,39 @@
     .cd-menu-item{padding:14px 18px;font-size:13px}
     .cd-menu-item svg{width:18px;height:18px}
 
-    /* Term screen - two rows: top bar + content centered */
-    #termScreen{padding:0 20px 60px;justify-content:center}
+    /* Term screen - stacked top bars */
+    #termScreen{
+      padding:0 16px;padding-top:calc(90px + env(safe-area-inset-top,0px));
+      padding-bottom:calc(60px + env(safe-area-inset-bottom,0px));
+      justify-content:center;
+    }
     .term-back{
-      position:fixed;top:env(safe-area-inset-top,8px);left:12px;
+      position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:12px;
       padding:6px 12px;font-size:10px;z-index:20;
     }
     .term-topright{
-      position:fixed;top:env(safe-area-inset-top,8px);right:12px;
-      gap:4px;z-index:20;flex-wrap:nowrap;
+      position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:100px;right:12px;
+      gap:6px;z-index:20;flex-wrap:wrap;justify-content:flex-end;
     }
-    .lang-btn{padding:4px 8px;font-size:9px}
-    .mark-btn{width:28px;height:28px;font-size:15px}
-    .term-nav button{width:28px;height:28px}
+    .lang-btn{padding:5px 10px;font-size:10px}
+    .mark-btn{width:30px;height:30px;font-size:16px}
+    .term-nav button{width:30px;height:30px}
     .term-nav button svg{width:14px;height:14px}
-    .notif-toggle{width:28px;height:28px}
+    .notif-toggle{width:30px;height:30px}
     .notif-toggle svg{width:16px;height:16px}
-    .term-timer{font-size:11px}
-    .tr-btn{padding:3px 8px;font-size:9px}
+    .term-timer{font-size:12px}
+    .tr-btn{padding:4px 10px;font-size:10px}
     .rot-pills,.rot-countdown,.tr-sep{display:none}
 
-    .term-left img{max-width:100px;max-height:18vh}
-    .term-word{font-size:26px;letter-spacing:-.6px}
-    .term-def{font-size:15px;line-height:1.5;padding:0 8px}
-    .term-meta{margin-top:10px}
+    .term-left img{max-width:90px;max-height:14vh}
+    .term-word{font-size:24px;letter-spacing:-.5px}
+    .term-def{font-size:14px;line-height:1.5;padding:0 4px}
+    .term-meta{margin-top:8px}
     .progress-track{width:100px}
     .term-count{font-size:11px}
 
-    .mascot-corner{width:60px;height:60px;bottom:8px;right:8px}
-    .term-chapter{bottom:10px;left:12px;font-size:9px}
+    .mascot-corner{width:55px;height:55px;bottom:calc(8px + env(safe-area-inset-bottom,0px));right:8px}
+    .term-chapter{bottom:calc(10px + env(safe-area-inset-bottom,0px));left:12px;font-size:9px}
 
     /* Search */
     .search-overlay{padding:env(safe-area-inset-top,50px) 16px 16px}
