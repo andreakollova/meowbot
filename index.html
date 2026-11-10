@@ -1452,15 +1452,19 @@ function showMedTerm(localIdx){
 }
 
 function startMeditation(lang){
+  const total=markedMode?markedList.length:TERMS.length;
+  const input=prompt(`Start from term number (1-${total}):`,'1');
+  if(input===null)return;
+  const startAt=Math.max(0,Math.min(total-1,parseInt(input)-1))||0;
+
   stopMeditation();
   ensureAudio();
   requestWakeLock();
-  // Init audio elements on user gesture
   medInit();
 
   medLang=lang||'en';
   medRunning=true;
-  medIdx=0;
+  medIdx=startAt;
   document.getElementById('medOverlay').classList.add('show');
   // Start music
   medMusicEl.currentTime=0;
