@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Meowbot</title>
 <link rel="icon" href="meowbot.png" type="image/png">
 <style>
@@ -22,7 +22,7 @@
   .cs-logo{display:flex;align-items:center;justify-content:center;z-index:1;margin-bottom:12px}
 
   .cs-streak{
-    position:fixed;bottom:24px;left:24px;z-index:2;
+    position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0px));left:24px;z-index:2;
     display:flex;align-items:center;gap:6px;
     font-size:13px;font-weight:700;color:#fff;
   }
@@ -30,7 +30,7 @@
   .cs-streak .streak-num{font-weight:900;font-size:16px}
 
   .cs-days{
-    position:fixed;bottom:24px;right:24px;z-index:2;
+    position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0px));right:24px;z-index:2;
     font-size:13px;font-weight:700;color:#fff;
     display:flex;align-items:center;gap:6px;
   }
@@ -276,9 +276,10 @@
       padding:6px 14px 6px 10px;font-size:12px;
       background:rgba(255,255,255,.25);color:rgba(255,255,255,.7);
     }
-    .cs-streak,.cs-days{bottom:12px;font-size:11px}
+    .cs-streak,.cs-days{bottom:calc(12px + env(safe-area-inset-bottom,0px));font-size:11px}
     .cs-streak{left:16px}
     .cs-days{right:16px}
+    #chaptersScreen{padding-bottom:calc(60px + env(safe-area-inset-bottom,0px))}
 
     /* Chapter detail */
     .cd-back{top:env(safe-area-inset-top,16px);left:16px;padding:6px 14px;font-size:11px}

@@ -1,0 +1,9 @@
+{
+  "appId": "sk.meowbot.app",
+  "appName": "Meowbot",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "always",
+    "allowsLinkPreview": false
+  }
+}

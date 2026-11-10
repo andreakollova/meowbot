@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Meowbot</title>
+<link rel="icon" href="meowbot.png" type="image/png">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden}
+  body{font-family:-apple-system,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;color:#111;background:#07ee7b;-webkit-font-smoothing:antialiased}
+
+  .screen{position:fixed;inset:0;display:none;flex-direction:column}
+  .screen.active{display:flex}
+
+  /* ===== CHAPTERS SCREEN ===== */
+  #chaptersScreen{background:#07ee7b;color:#111;align-items:center;justify-content:center;gap:0;padding:32px;position:relative;overflow-y:auto}
+
+  .cs-title{z-index:1;user-select:none;width:80%;max-width:900px;margin-bottom:-30px;pointer-events:none}
+  .cs-title img{width:100%;height:auto;display:block}
+
+  .cs-logo{display:flex;align-items:center;justify-content:center;z-index:1;margin-bottom:12px}
+
+  .cs-streak{
+    position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0px));left:24px;z-index:2;
+    display:flex;align-items:center;gap:6px;
+    font-size:13px;font-weight:700;color:#fff;
+  }
+  .cs-streak svg{color:#fff}
+  .cs-streak .streak-num{font-weight:900;font-size:16px}
+
+  .cs-days{
+    position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0px));right:24px;z-index:2;
+    font-size:13px;font-weight:700;color:#fff;
+    display:flex;align-items:center;gap:6px;
+  }
+  .cs-days svg{color:#fff}
+  .cs-days span{font-weight:900;font-size:16px}
+
+  .cs-search-btn{
+    position:fixed;top:24px;right:24px;z-index:2;
+    background:rgba(0,0,0,.06);border:none;border-radius:100px;
+    padding:8px 16px 8px 12px;cursor:pointer;font-family:inherit;
+    font-size:13px;font-weight:500;color:rgba(0,0,0,.35);
+    display:flex;align-items:center;gap:6px;transition:all .2s;
+  }
+  .cs-search-btn:hover{background:rgba(0,0,0,.1);color:rgba(0,0,0,.5)}
+
+  .search-overlay{
+    position:fixed;inset:0;background:rgba(255,255,255,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    z-index:200;display:flex;flex-direction:column;align-items:center;
+    padding:80px 32px 32px;opacity:0;pointer-events:none;transition:opacity .25s;
+  }
+  .search-overlay.show{opacity:1;pointer-events:auto}
+  .search-input{
+    width:100%;max-width:500px;background:#f5f5f5;border:none;border-radius:14px;
+    padding:16px 20px;font-size:17px;font-family:inherit;font-weight:500;
+    color:#111;outline:none;margin-bottom:20px;
+  }
+  .search-input::placeholder{color:#bbb}
+  .search-results{
+    width:100%;max-width:500px;max-height:60vh;overflow-y:auto;
+    display:flex;flex-direction:column;gap:2px;
+  }
+  .search-item{
+    background:none;border:none;cursor:pointer;font-family:inherit;
+    padding:14px 16px;border-radius:12px;text-align:left;transition:background .15s;
+  }
+  .search-item:hover{background:#f5f5f5}
+  .search-item .si-term{font-size:15px;font-weight:700;color:#111;margin-bottom:3px}
+  .search-item .si-def{font-size:13px;color:#888;line-height:1.4}
+  .search-item .si-sub{font-size:11px;color:#ccc;margin-top:2px}
+  .search-close{
+    position:fixed;top:24px;right:24px;z-index:210;
+    background:#f0f0f0;border:none;border-radius:100px;
+    width:36px;height:36px;cursor:pointer;font-size:18px;color:#999;
+    display:flex;align-items:center;justify-content:center;transition:all .2s;
+  }
+  .search-close:hover{background:#e0e0e0;color:#111}
+  .search-empty{font-size:14px;color:#ccc;margin-top:20px}
+
+  .cs-chapters{display:flex;flex-direction:column;gap:6px;align-items:center;z-index:1}
+  .cs-ch-card{
+    background:none;border:none;cursor:pointer;
+    transition:all .2s;display:flex;align-items:center;gap:10px;
+    font-family:inherit;padding:6px 0;
+  }
+  .cs-ch-card:hover{opacity:.7}
+  .cs-ch-card.empty{opacity:.3;cursor:default}
+  .cs-ch-card.empty:hover{opacity:.3}
+  .cs-ch-card .ch-num{font-size:15px;font-weight:700;color:rgba(255,255,255,.5);min-width:22px}
+  .cs-ch-card .ch-name{font-size:22px;font-weight:700;color:rgba(255,255,255,.9)}
+
+  /* Chapter detail screen */
+  #chapterDetail{background:#fff;color:#111;align-items:center;justify-content:center;gap:0;padding:32px}
+  .cd-back{
+    position:fixed;top:24px;left:24px;background:#f5f5f5;border:none;
+    border-radius:100px;padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer;
+    font-family:inherit;color:#999;transition:all .2s;z-index:10;
+    display:flex;align-items:center;gap:6px;
+  }
+  .cd-back:hover{background:#eee;color:#111}
+  .cd-mascot{margin-bottom:24px}
+  .cd-mascot video{width:120px;height:120px;object-fit:contain}
+  .cd-title{font-size:28px;font-weight:800;color:#111;letter-spacing:-.5px;margin-bottom:6px}
+  .cd-subtitle{font-size:14px;color:#bbb;font-weight:500;margin-bottom:32px}
+  .cd-menu{
+    display:flex;flex-direction:column;gap:0;
+    background:#f8f8f8;
+    border-radius:20px;overflow:hidden;min-width:300px;
+  }
+  .cd-menu-item{
+    background:none;border:none;cursor:pointer;
+    padding:18px 28px;font-family:inherit;font-size:15px;font-weight:600;
+    color:#555;transition:all .15s;
+    display:flex;align-items:center;gap:14px;text-align:left;
+  }
+  .cd-menu-item:hover{background:#f0f0f0}
+  .cd-menu-item+.cd-menu-item{border-top:1px solid #eee}
+  .cd-menu-item svg{color:#ccc;flex-shrink:0}
+  .cd-menu-item .cd-sub{font-size:11px;font-weight:500;color:#bbb;margin-top:2px}
+  .cd-marked-info{font-size:12px;color:#ccc;margin-top:12px}
+
+
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+  /* ===== TERM SCREEN ===== */
+  #termScreen{background:#ffffff;padding:32px 48px;flex-direction:column;align-items:center;justify-content:center;gap:0}
+
+  .term-back{
+    position:fixed;top:24px;left:24px;
+    background:none;border:1.5px solid #e0e0e0;border-radius:100px;
+    padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer;
+    font-family:inherit;color:#999;transition:all .2s;z-index:10;
+    display:flex;align-items:center;gap:6px;
+  }
+  .term-back:hover{border-color:#07ee7b;color:#07ee7b}
+
+  .term-topright{
+    position:fixed;top:24px;right:24px;
+    display:flex;align-items:center;gap:10px;z-index:10;
+  }
+  .term-timer{font-size:15px;font-weight:600;color:#bbb;font-variant-numeric:tabular-nums;letter-spacing:-.3px;cursor:pointer}
+  .term-timer.done{color:#07ee7b;animation:pulse 1s infinite}
+  .tr-btn{
+    background:#f5f5f5;border:none;border-radius:100px;
+    padding:5px 14px;font-size:11px;font-weight:600;cursor:pointer;
+    font-family:inherit;color:#999;transition:all .15s;
+  }
+  .tr-btn:hover{background:#eee;color:#111}
+  .tr-sep{width:1px;height:20px;background:#e8e8e8}
+  .rot-pills{display:flex;gap:3px}
+  .rot-pill{
+    background:none;border:1px solid #ddd;border-radius:100px;
+    padding:3px 8px;font-size:10px;font-weight:600;cursor:pointer;
+    font-family:inherit;color:#bbb;transition:all .15s;
+  }
+  .rot-pill:hover{color:#111;border-color:#999}
+  .rot-pill.on{background:#111;color:#fff;border-color:#111}
+  .rot-countdown{font-size:11px;font-weight:600;color:#bbb;font-variant-numeric:tabular-nums;min-width:28px}
+
+  .mark-btn{
+    background:none;border:none;cursor:pointer;
+    color:#ddd;transition:all .2s;display:flex;align-items:center;justify-content:center;
+    width:36px;height:36px;font-size:20px;
+  }
+  .mark-btn:hover{color:#f5c518}
+  .mark-btn.marked{color:#f5c518}
+
+  .lang-btns{display:flex;gap:3px}
+  .lang-btn{
+    background:#f5f5f5;border:none;border-radius:100px;
+    padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;
+    font-family:inherit;color:#bbb;transition:all .15s;
+  }
+  .lang-btn:hover{background:#eee;color:#111}
+  .lang-btn.on{background:#111;color:#fff}
+  .notif-toggle{
+    background:none;border:none;cursor:pointer;color:#bbb;
+    transition:color .2s;display:flex;align-items:center;justify-content:center;
+    width:32px;height:32px;
+  }
+  .notif-toggle:hover{color:#111}
+  .notif-toggle.active{color:#07ee7b}
+  .term-nav{
+    display:flex;gap:6px;
+  }
+  .term-nav button{
+    background:#f5f5f5;border:none;border-radius:100px;
+    width:36px;height:36px;cursor:pointer;font-family:inherit;
+    color:#999;transition:all .15s;display:flex;align-items:center;justify-content:center;
+  }
+  .term-nav button:hover{background:#eee;color:#111}
+
+  .term-left{display:flex;align-items:center;justify-content:center}
+  .term-left img{max-width:200px;max-height:28vh;object-fit:contain;border-radius:16px}
+
+  .term-right{display:flex;flex-direction:column;align-items:center;text-align:center;max-width:600px}
+  .term-chapter{
+    position:fixed;bottom:32px;left:32px;z-index:10;
+    font-size:12px;font-weight:500;color:#ccc;text-transform:uppercase;letter-spacing:1.2px;
+  }
+  .term-word{font-size:56px;font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:16px;color:#111}
+  .term-def{font-size:26px;font-weight:400;line-height:1.65;color:#555}
+  .term-meta{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:20px}
+  .term-count{font-size:13px;color:#ccc;font-weight:500;font-variant-numeric:tabular-nums}
+  .progress-track{width:160px;height:3px;background:#e8e8e8;border-radius:2px;overflow:hidden}
+  .progress-fill{height:100%;background:#07ee7b;border-radius:2px;transition:width .3s}
+
+  .mascot-corner{
+    position:fixed;bottom:48px;right:80px;z-index:10;
+    width:140px;height:140px;
+  }
+  .mascot-corner img{width:100%;height:100%;object-fit:contain;display:block}
+  .mascot-corner video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .2s}
+  .mascot-corner video.playing{opacity:1}
+
+  /* Overlays */
+  .anim-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .3s}
+  .anim-overlay.show{opacity:1;pointer-events:auto}
+  .anim-overlay video{max-width:360px;max-height:360px;border-radius:24px}
+  .anim-overlay.white{background:rgba(255,255,255,.97)}
+  .anim-overlay.green{background:rgba(0,200,83,.97)}
+
+  .green-overlay{position:fixed;inset:0;background:#00c853;z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s}
+  .green-overlay.show{opacity:1;pointer-events:auto}
+  .green-overlay .green-title{color:#fff;font-size:32px;font-weight:800;margin-bottom:8px}
+  .green-overlay .green-sub{color:rgba(255,255,255,.7);font-size:16px;font-weight:500;margin-bottom:32px}
+  .green-overlay .green-dismiss{background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:100px;padding:12px 32px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .2s}
+  .green-overlay .green-dismiss:hover{background:rgba(255,255,255,.35)}
+
+  /* Meditation mode */
+  .med-btn{
+    background:rgba(0,0,0,.08);border:none;border-radius:50px;
+    padding:12px 32px;cursor:pointer;
+    color:rgba(0,0,0,.45);font-family:inherit;font-size:14px;font-weight:600;
+    transition:all .2s;letter-spacing:-.2px;
+  }
+  .med-btn:hover{background:rgba(0,0,0,.12);color:rgba(0,0,0,.6)}
+
+  .med-overlay{
+    position:fixed;inset:0;background:#111;z-index:200;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;transition:opacity .8s;
+  }
+  .med-overlay.show{opacity:1;pointer-events:auto}
+  .med-term{font-size:48px;font-weight:700;color:#fff;margin-bottom:12px;text-align:center;
+    opacity:0;transition:opacity .8s;max-width:80vw}
+  .med-term.visible{opacity:1}
+  .med-def{font-size:22px;font-weight:400;color:rgba(255,255,255,.5);line-height:1.6;
+    text-align:center;max-width:700px;opacity:0;transition:opacity .8s .3s}
+  .med-def.visible{opacity:1}
+  .med-count{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);
+    font-size:13px;color:rgba(255,255,255,.2);font-variant-numeric:tabular-nums}
+  .med-close{
+    position:fixed;top:24px;right:24px;z-index:210;
+    background:rgba(255,255,255,.1);border:none;border-radius:100px;
+    padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;
+    font-family:inherit;color:rgba(255,255,255,.5);transition:all .2s;
+  }
+  .med-close:hover{background:rgba(255,255,255,.2);color:#fff}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .fade{animation:fadeUp .25s ease}
+
+  @media (max-width:768px){
+    /* Homepage */
+    #chaptersScreen{padding:env(safe-area-inset-top,20px) 20px 60px;gap:6px}
+    .cs-title{width:75%;margin-bottom:-5px}
+    .cs-logo video{width:70px!important;height:70px!important}
+    .cs-logo{margin-bottom:6px}
+    .cs-ch-card .ch-name{font-size:16px}
+    .cs-ch-card .ch-num{font-size:12px}
+    .cs-search-btn{
+      position:static;margin-bottom:8px;align-self:flex-end;
+      padding:6px 14px 6px 10px;font-size:12px;
+      background:rgba(255,255,255,.25);color:rgba(255,255,255,.7);
+    }
+    .cs-streak,.cs-days{bottom:calc(12px + env(safe-area-inset-bottom,0px));font-size:11px}
+    .cs-streak{left:16px}
+    .cs-days{right:16px}
+    #chaptersScreen{padding-bottom:calc(60px + env(safe-area-inset-bottom,0px))}
+
+    /* Chapter detail */
+    .cd-back{top:env(safe-area-inset-top,16px);left:16px;padding:6px 14px;font-size:11px}
+    .cd-mascot video{width:70px!important;height:70px!important}
+    .cd-title{font-size:20px}
+    .cd-subtitle{font-size:11px;margin-bottom:20px}
+    .cd-menu{min-width:auto;width:90vw;max-width:340px}
+    .cd-menu-item{padding:14px 18px;font-size:13px}
+    .cd-menu-item svg{width:18px;height:18px}
+
+    /* Term screen - two rows: top bar + content centered */
+    #termScreen{padding:0 20px 60px;justify-content:center}
+    .term-back{
+      position:fixed;top:env(safe-area-inset-top,8px);left:12px;
+      padding:6px 12px;font-size:10px;z-index:20;
+    }
+    .term-topright{
+      position:fixed;top:env(safe-area-inset-top,8px);right:12px;
+      gap:4px;z-index:20;flex-wrap:nowrap;
+    }
+    .lang-btn{padding:4px 8px;font-size:9px}
+    .mark-btn{width:28px;height:28px;font-size:15px}
+    .term-nav button{width:28px;height:28px}
+    .term-nav button svg{width:14px;height:14px}
+    .notif-toggle{width:28px;height:28px}
+    .notif-toggle svg{width:16px;height:16px}
+    .term-timer{font-size:11px}
+    .tr-btn{padding:3px 8px;font-size:9px}
+    .rot-pills,.rot-countdown,.tr-sep{display:none}
+
+    .term-left img{max-width:100px;max-height:18vh}
+    .term-word{font-size:26px;letter-spacing:-.6px}
+    .term-def{font-size:15px;line-height:1.5;padding:0 8px}
+    .term-meta{margin-top:10px}
+    .progress-track{width:100px}
+    .term-count{font-size:11px}
+
+    .mascot-corner{width:60px;height:60px;bottom:8px;right:8px}
+    .term-chapter{bottom:10px;left:12px;font-size:9px}
+
+    /* Search */
+    .search-overlay{padding:env(safe-area-inset-top,50px) 16px 16px}
+    .search-input{font-size:16px;padding:14px 16px;border-radius:12px}
+    .search-close{top:env(safe-area-inset-top,12px);right:16px}
+    .search-item{padding:12px 14px}
+    .search-item .si-term{font-size:14px}
+
+    /* Meditation */
+    .med-term{font-size:24px;max-width:90vw}
+    .med-def{font-size:15px;max-width:90vw;padding:0 12px}
+    .med-close{top:env(safe-area-inset-top,12px);right:16px;padding:8px 16px;font-size:12px}
+    .med-count{font-size:11px;bottom:12px}
+
+    /* Overlays */
+    .anim-overlay video{max-width:200px;max-height:200px;border-radius:16px}
+    .green-overlay .green-title{font-size:22px}
+    .green-overlay .green-sub{font-size:13px}
+  }
+
+  @media (max-width:400px){
+    .cs-title{width:85%}
+    .term-word{font-size:22px}
+    .term-def{font-size:14px}
+    .term-left img{max-width:80px;max-height:15vh}
+    .med-term{font-size:20px}
+    .med-def{font-size:13px}
+  }
+</style>
+</head>
+<body>
+
+<!-- CHAPTERS SCREEN (green) -->
+<div class="screen active" id="chaptersScreen">
+  <button class="cs-search-btn" onclick="openSearch()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Search
+  </button>
+  <div class="cs-title"><img src="meowbot-logo.png" alt="MEOWBOT"></div>
+  <div class="cs-logo"><video id="csLogoVideo" muted playsinline autoplay loop style="width:140px;height:140px;object-fit:contain"></video></div>
+  <div class="cs-streak" id="csStreak"></div>
+  <div class="cs-chapters" id="csChapters"></div>
+  <div class="cs-days" id="csDays"></div>
+</div>
+
+<!-- CHAPTER DETAIL (green) -->
+<div class="screen" id="chapterDetail">
+  <button class="cd-back" onclick="goHome()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back
+  </button>
+  <div class="cd-mascot"><video id="cdMascotVideo" muted playsinline autoplay loop style="width:120px;height:120px;object-fit:contain"></video></div>
+  <div class="cd-title" id="cdTitle"></div>
+  <div class="cd-subtitle">Chapter 1</div>
+  <div class="cd-menu">
+    <button class="cd-menu-item" onclick="openChapter()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <div>Start learning<div class="cd-sub">Continue where you left off</div></div>
+    </button>
+    <button class="cd-menu-item" onclick="startMeditation('en')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+      <div>Meditation EN<div class="cd-sub">English voice, 2x repeat</div></div>
+    </button>
+    <button class="cd-menu-item" onclick="startMeditation('sk')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+      <div>Meditation SK<div class="cd-sub">Slovak voice, 2x repeat</div></div>
+    </button>
+    <button class="cd-menu-item" onclick="startMeditation('ensk')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+      <div>Meditation EN + SK<div class="cd-sub">English then Slovak</div></div>
+    </button>
+    <button class="cd-menu-item" onclick="openMarked()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <div>Marked only<div class="cd-sub" id="markedCount">No terms marked yet</div></div>
+    </button>
+  </div>
+</div>
+
+<!-- Meditation overlay -->
+<div class="med-overlay" id="medOverlay">
+  <button class="med-close" onclick="stopMeditation()">Stop</button>
+  <div class="med-term" id="medTerm"></div>
+  <div class="med-def" id="medDef"></div>
+  <div class="med-count" id="medCount"></div>
+</div>
+
+<!-- TERM SCREEN (white) -->
+<div class="screen" id="termScreen">
+  <button class="term-back" onclick="goBack()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Chapters
+  </button>
+
+  <div class="term-topright">
+    <div class="lang-btns">
+      <button class="lang-btn" onclick="playCurrentEN()">EN</button>
+      <button class="lang-btn" onclick="playCurrentSK()">SK</button>
+    </div>
+    <button class="mark-btn" id="markBtn" onclick="toggleMark()">&#9734;</button>
+    <div class="term-nav">
+      <button onclick="prevTerm()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <button onclick="nextTerm()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+    <div class="tr-sep"></div>
+    <div class="rot-pills">
+      <button class="rot-pill" data-i="60" onclick="setRot(60)">1m</button>
+      <button class="rot-pill" data-i="120" onclick="setRot(120)">2m</button>
+      <button class="rot-pill on" data-i="300" onclick="setRot(300)">5m</button>
+      <button class="rot-pill" data-i="600" onclick="setRot(600)">10m</button>
+    </div>
+    <span class="rot-countdown" id="rotCountdown">5:00</span>
+    <div class="tr-sep"></div>
+    <button class="notif-toggle active" id="notifToggle" onclick="cycleNotif()" title="Sound on">
+      <svg id="notifIconOff" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+      <svg id="notifIconOn" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </button>
+    <div class="tr-sep"></div>
+    <div class="term-timer" id="termTimer" onclick="cycleTimerPreset()" title="Click to change">25:00</div>
+    <button class="tr-btn" id="startBtn" onclick="toggleTimer()">Start</button>
+    <button class="tr-btn" onclick="resetTimer()">Reset</button>
+  </div>
+
+  <div class="term-left">
+    <img id="termImg" src="" alt="">
+  </div>
+  <div class="term-right" id="termRight">
+    <div class="term-chapter" id="termCh"></div>
+    <div class="term-word" id="termWord"></div>
+    <div class="term-def" id="termDef"></div>
+    <div class="term-meta">
+      <span class="term-count" id="termCount"></span>
+      <div class="progress-track"><div class="progress-fill" id="termProg"></div></div>
+    </div>
+  </div>
+
+  <div class="mascot-corner">
+    <img src="mascot-still.png" alt="">
+    <video id="mascotVideo" muted playsinline></video>
+  </div>
+</div>
+
+<!-- Overlays -->
+<div class="anim-overlay white" id="animWhite"><video id="animWhiteVideo" muted playsinline></video></div>
+<div class="anim-overlay green" id="animGreen"><video id="animGreenVideo" muted playsinline></video></div>
+<div class="green-overlay" id="pomodoroOverlay">
+  <video id="pomodoroVideo" muted playsinline style="max-width:280px;max-height:280px;border-radius:24px;margin-bottom:24px"></video>
+  <div class="green-title">Time's up!</div>
+  <div class="green-sub">Great study session</div>
+  <button class="green-dismiss" onclick="dismissPomodoro()">Continue</button>
+</div>
+
+<!-- Search overlay -->
+<div class="search-overlay" id="searchOverlay">
+  <button class="search-close" onclick="closeSearch()">&times;</button>
+  <input class="search-input" id="searchInput" type="text" placeholder="Search terms..." oninput="doSearch()">
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<script>
+const IMGS=[
+"001-robotics.png","002-robot.png","003-robota.png","004-automation.png","005-flexible-automation.png","006-industrial-robot.png","007-mobile-robot.png","008-autonomous-mobile-robot-amr.png","009-manipulator.png","010-end-effector.png","011-gripper.png","012-control-unit.png","013-sensor.png","014-actuator.png","015-actuation.png","016-workpiece.png",
+"017-robot-classification.png","018-jira.png","019-manual-handling-device-class-1.png","020-fixed-sequence-robot-class-2.png","021-variable-sequence-robot-class-3.png","022-playback-robot-class-4.png","023-numerically-controlled-robot-class-5.png","024-intelligent-robot-class-6.png",
+"025-link.png","026-joint.png","027-axis.png","028-degree-of-freedom-dof.png","029-six-degrees-of-freedom.png","030-rotation.png","031-translation.png","032-revolute-joint-r.png","033-prismatic-joint-p.png","034-parallel-axes.png","035-orthogonal-axes.png","036-perpendicular-arrangement.png","037-geometric-robot-classification.png","038-r-r-p-configuration.png","039-kinematics.png","040-robot-configuration.png","041-position.png","042-orientation.png","043-trajectory.png",
+"044-coordinate-system.png","045-origin.png","046-coordinate-axes.png","047-vector.png","048-coordinate-transformation.png","049-cartesian-coordinates.png","050-joint-coordinates.png","051-world-coordinate-system.png","052-base-coordinate-system.png","053-joint-coordinate-system.png","054-tool-coordinate-system.png","055-object-coordinate-system.png","056-mechanical-interface-coordinate-system.png","057-flange.png","058-workpiece-coordinate-system.png","059-cartesian-coordinate-system.png","060-polar-coordinate-system.png","061-cylindrical-coordinate-system.png","062-radius-r.png","063-rotation-angle.png",
+"064-mechanical-engineering.png","065-electrical-engineering.png","066-computer-science.png","067-manufacturing-technology.png","068-systems-engineering.png","069-measurement-technology.png","070-sensor-technology.png","071-robot-control.png","072-regulation.png","073-hardware.png","074-software.png","075-ethics-in-robotics.png","076-regulatory-framework.png","077-workplace-safety.png","078-social-acceptance.png",
+"079-artifact.png","080-water-clock.png","081-stanford-arm.png","082-mit-arm.png","083-puma.png","084-scara.png","085-parallel-robot.png","086-electro-light-sensitive-internal-external.png","087-shakey.png","088-hierarchical-control.png","089-low-level-routine.png","090-cognitive-robot.png","091-world-model.png","092-localization.png","093-navigation.png","094-triangulation-sensor.png","095-stereo-vision.png","096-stanford-cart.png","097-wave.png","098-micromouse-robot.png","099-kamro.png","100-mars-rover.png",
+"101-production-cell.png","102-human-machine-interaction.png","103-human-friendly-task-specification.png","104-mobile-manipulation.png","105-low-cost-actuation.png","106-subsystem.png","107-composition-of-subsystems.png","108-standardized-interface.png","109-embodiment-of-engineering-and-research-results.png","110-open-dependable-system.png","111-interconnectivity.png","112-sustainable-manufacturing.png","113-robot-synchronization.png","114-multi-robot-system.png","115-robot-networking.png","116-microprocessor.png","117-computational-power.png","118-moore-s-law.png","119-vision-system.png","120-cybersecurity.png","121-remote-control.png",
+"122-robotics-1-0.png","123-4ds-dull-dirty-dumb-dangerous.png","124-robotics-2-0.png","125-personal-robot.png","126-4ss-smarter-safer-sensors-simple.png","127-robotics-3-0.png","128-4ms-multitasking-emotive-morphing-multiagent.png","129-multitasking.png","130-emotive-robotics.png","131-morphing.png","132-multiagent-system.png","133-context-awareness.png","134-ubiquitous-robotics.png","135-networked-robot.png","136-cloud-robotics.png","137-cloud-computing-infrastructure.png","138-computation-offloading.png","139-social-awareness.png","140-affective-interaction.png","141-ubirobots-engineering.png",
+"142-humanoid-robot.png","143-asimo.png","144-social-robot.png","145-service-robot.png","146-pepper.png","147-wearable-robotics.png","148-exoskeleton.png","149-exosuit.png","150-wearable-user-interface.png","151-rehabilitation-robotics.png","152-walking-assist-system.png","153-robotic-prosthesis.png","154-soft-robotics.png","155-soft-robot.png","156-rigid-body.png","157-deformation.png","158-pneumatic-control.png","159-hydraulic-control.png","160-bio-inspired-robotics.png","161-bio-inspired-robot.png",
+"162-artificial-intelligence-ai.png","163-autonomy.png","164-adaptability.png","165-structured-environment.png","166-unstructured-environment.png","167-dynamic-environment.png","168-robotic-perception.png","169-computer-vision.png","170-pattern-recognition.png","171-object-detection.png","172-object-recognition.png","173-image-classification.png","174-scene-understanding.png","175-spatial-relationship.png","176-semantic-information.png","177-semantic-perception.png","178-lidar.png","179-sonar.png","180-touch-sensor.png","181-tactile-feedback.png","182-depth-sensor.png","183-sensor-fusion.png","184-multimodal-perception.png","185-slam.png","186-loop-closure.png","187-probabilistic-ai.png","188-bayesian-estimation.png","189-natural-language-processing-nlp.png","190-speech-recognition.png","191-gesture-recognition.png","192-facial-expression-recognition.png",
+"193-decision-making.png","194-planning.png","195-motion-planning.png","196-path-planning.png","197-collision-free-trajectory.png","198-search-space.png","199-graph-search.png","200-sampling-based-planner.png","201-optimization.png","202-heuristic.png","203-autonomous-navigation.png","204-obstacle-avoidance.png","205-high-level-planning.png","206-automated-planning.png","207-symbolic-ai.png","208-symbolic-planner.png","209-reasoning.png","210-replanning.png","211-task-allocation.png","212-coordination.png","213-control-law.png","214-controller.png","215-adaptive-control.png","216-intelligent-control.png","217-learning-based-controller.png","218-control-policy.png","219-dynamics.png","220-gait.png","221-predictive-model.png","222-decision-network.png","223-game-theoretic-planning.png","224-cognitive-architecture.png","225-knowledge-base.png","226-human-robot-interaction.png","227-human-robot-collaboration.png",
+"228-machine-learning-ml.png","229-supervised-learning.png","230-unsupervised-learning.png","231-reinforcement-learning-rl.png","232-deep-learning.png","233-neural-network.png","234-deep-neural-network.png","235-convolutional-neural-network-cnn.png","236-deep-reinforcement-learning.png","237-training-data.png","238-labeled-data.png","239-feature-learning.png","240-generalization.png","241-trial-and-error-learning.png","242-reward.png","243-penalty.png","244-cumulative-reward.png","245-learning-from-demonstration.png","246-imitation-learning.png","247-online-learning.png","248-calibration.png","249-learning-based-calibration.png","250-simulation.png","251-simulator.png","252-sim-to-real-transfer.png","253-big-data.png","254-collective-learning.png","255-robot-fleet.png","256-black-box-system.png","257-explainability.png","258-trust-in-robots.png","259-safety-constraint.png","260-robot-locomotion.png","261-robotic-manipulation.png","262-robotic-grasping.png","263-multi-agent-reinforcement-learning.png","264-lifelong-learning.png"
+];
+
+const whiteAnims=['anim-white-1.mp4','anim-white-2.mp4','anim-white-3.mp4','anim-white-4.mp4'];
+const greenAnims=['anim1.mp4','anim2.mp4','anim3.mp4'];
+let whiteIdx=0;
+function shuffleWhite(){for(let i=whiteAnims.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[whiteAnims[i],whiteAnims[j]]=[whiteAnims[j],whiteAnims[i]];}whiteIdx=0;}
+shuffleWhite();
+function nextWhiteAnim(){if(whiteIdx>=whiteAnims.length)shuffleWhite();return whiteAnims[whiteIdx++];}
+
+// All 264 terms: [term, definition, subchapter, imageIndex]
+const TERMS=[
+["Automation","The use of technology to perform tasks with reduced human involvement.","Introduction",3],
+["Robotics","The interdisciplinary field concerned with designing, building, programming, operating, and applying robots.","Basics and Definitions",0],
+["Robot","A programmable physical machine that performs tasks through controlled movements and actions.","Basics and Definitions",1],
+["Robota","The Slavic word meaning subordinate or forced labour from which the word \"robot\" originated.","Basics and Definitions",2],
+["Industrial robot","An automatically controlled, programmable, multipurpose manipulator with at least three programmable axes, used for industrial tasks.","Industrial Robots and Mobile Robots",5],
+["Mobile robot","A robot that moves through its environment and adapts its actions using information from sensors.","Industrial Robots and Mobile Robots",6],
+["Manipulator","A mechanical structure, usually a robotic arm, used to move or handle objects.","Industrial Robots and Mobile Robots",8],
+["End effector","A tool or device attached to the end of a robot arm to perform a task.","Industrial Robots and Mobile Robots",9],
+["Gripper","An end effector used to grasp, hold, and release objects.","Industrial Robots and Mobile Robots",10],
+["Control unit","The hardware and software that process instructions and control a robot's actions.","Industrial Robots and Mobile Robots",11],
+["Sensor","A device that measures properties of a robot or its environment.","Industrial Robots and Mobile Robots",12],
+["Flexible automation","Automation that can be adapted to different tasks or production requirements.","Classification of Robots",4],
+["Robot classification","The grouping of robots according to characteristics such as intelligence, application, control, or geometry.","Classification of Robots",16],
+["Japanese Industrial Robot Association (JIRA)","The association associated with the six-category robot classification presented in the lesson.","Classification of Robots",17],
+["Manual handling device - Class 1","A device with multiple axes that is directly operated by a person.","Classification of Robots",18],
+["Fixed-sequence robot - Class 2","A robot that repeats a predefined sequence of actions that is difficult to change.","Classification of Robots",19],
+["Variable-sequence robot - Class 3","A robot whose predefined sequence of actions can be changed to support flexible automation.","Classification of Robots",20],
+["Playback robot - Class 4","A robot that records movements demonstrated by an operator and repeats them automatically.","Classification of Robots",21],
+["Numerically controlled robot - Class 5","A robot whose movements are specified through numerical instructions in program code.","Classification of Robots",22],
+["Intelligent robot - Class 6","A robot that uses information about its environment to perform tasks under changing conditions.","Classification of Robots",23],
+["Link","A rigid part of a robot that can move relative to other parts.","Classification of Robots",24],
+["Joint","A connection between links that allows relative movement.","Classification of Robots",25],
+["Axis","A reference line along which translation occurs or around which rotation occurs.","Classification of Robots",26],
+["Degree of freedom (DOF)","An independent movement available to a mechanical system, such as translation or rotation.","Classification of Robots",27],
+["Six degrees of freedom","Three independent translational movements and three independent rotational movements in three-dimensional space.","Classification of Robots",28],
+["Rotation","Movement around an axis.","Classification of Robots",29],
+["Translation","Linear movement without a change in orientation.","Classification of Robots",30],
+["Revolute joint (R)","A joint that allows rotation around an axis.","Classification of Robots",31],
+["Prismatic joint (P)","A joint that allows linear movement along an axis.","Classification of Robots",32],
+["Parallel axes","Axes that run in the same direction and remain a constant distance apart.","Classification of Robots",33],
+["Orthogonal axes","Axes whose directions form a right angle.","Classification of Robots",34],
+["Perpendicular arrangement","The lesson's notation for an axis relationship described using a right angle relative to the axes' common normal.","Classification of Robots",35],
+["Geometric robot classification","The classification of robots according to the arrangement of their joints, links, and axes.","Classification of Robots",36],
+["R||R||P configuration","A joint arrangement with two revolute joints and one prismatic joint whose axes are parallel.","Classification of Robots",37],
+["Robot configuration","The arrangement of a robot's joints and links, or their positions at a particular moment.","Classification of Robots",39],
+["Kinematics","The study of motion without considering the forces that cause it.","Coordinate Systems for Robots",38],
+["Position","The location of an object relative to a reference system.","Coordinate Systems for Robots",40],
+["Orientation","The rotational alignment of an object relative to a reference system.","Coordinate Systems for Robots",41],
+["Trajectory","A description of how a robot's position or joint values change over time.","Coordinate Systems for Robots",42],
+["Coordinate system","A reference framework used to describe positions and movements.","Coordinate Systems for Robots",43],
+["Origin","The reference point at which all coordinates are zero.","Coordinate Systems for Robots",44],
+["Coordinate axes","Reference directions used to specify coordinates.","Coordinate Systems for Robots",45],
+["Vector","A mathematical quantity with magnitude and direction, used to represent position or displacement.","Coordinate Systems for Robots",46],
+["Coordinate transformation","A mathematical conversion of coordinates from one reference system to another.","Coordinate Systems for Robots",47],
+["Cartesian coordinates","Coordinates that describe a position using distances along the x, y, and z axes.","Coordinate Systems for Robots",48],
+["Joint coordinates","Values describing the position of each robot joint, such as its angle or linear displacement.","Coordinate Systems for Robots",49],
+["World coordinate system","A fixed reference system associated with the robot's overall environment.","Coordinate Systems for Robots",50],
+["Base coordinate system","A reference system attached to the robot's base.","Coordinate Systems for Robots",51],
+["Joint coordinate system","A reference system associated with a joint and described relative to another joint or frame.","Coordinate Systems for Robots",52],
+["Tool coordinate system","A reference system attached to the robot's tool.","Coordinate Systems for Robots",53],
+["Object coordinate system","A reference system attached to the object being handled.","Coordinate Systems for Robots",54],
+["Mechanical interface coordinate system","A reference system attached to the flange where the end effector is mounted.","Coordinate Systems for Robots",55],
+["Flange","The mechanical mounting surface used to attach an end effector to a robot.","Coordinate Systems for Robots",56],
+["Workpiece coordinate system","A reference system associated with a workpiece or its placement.","Coordinate Systems for Robots",57],
+["Cartesian coordinate system","A coordinate system using mutually perpendicular axes, usually x, y, and z.","Coordinate Systems for Robots",58],
+["Polar coordinate system","A two-dimensional coordinate system describing a point by its distance r from the origin and its angle \u03c6.","Coordinate Systems for Robots",59],
+["Cylindrical coordinate system","A three-dimensional coordinate system describing a point using radius r, angle \u03c6, and height z.","Coordinate Systems for Robots",60],
+["Radius (r)","The distance from an origin or axis of rotation.","Coordinate Systems for Robots",61],
+["Rotation angle (\u03c6)","The angular displacement measured from a reference direction.","Coordinate Systems for Robots",62],
+["Workpiece","An object being handled, processed, or manufactured by a robot.","Coordinate Systems for Robots",15],
+["Mechanical engineering","The discipline concerned with mechanical structures, motion, and physical systems.","Aspects of Robotics",63],
+["Electrical engineering","The discipline concerned with electrical power, circuits, electronics, and related systems.","Aspects of Robotics",64],
+["Computer science","The study of computation, algorithms, software, and information processing.","Aspects of Robotics",65],
+["Manufacturing technology","The methods and equipment used to produce goods.","Aspects of Robotics",66],
+["Systems engineering","An interdisciplinary approach to designing and integrating components into a functioning system.","Aspects of Robotics",67],
+["Measurement technology","The methods and devices used to measure physical quantities.","Aspects of Robotics",68],
+["Sensor technology","The development and application of devices that collect information about physical conditions.","Aspects of Robotics",69],
+["Robot control","The process of directing a robot's movements and actions.","Aspects of Robotics",70],
+["Regulation","The use of feedback to keep a measured quantity close to a desired value.","Aspects of Robotics",71],
+["Hardware","The physical components of a robotic system.","Aspects of Robotics",72],
+["Software","The programs and instructions that determine how a robotic system operates.","Aspects of Robotics",73],
+["Ethics in robotics","The consideration of moral questions about the design, use, and effects of robots.","Aspects of Robotics",74],
+["Regulatory framework","The rules and requirements governing the development and use of robots.","Aspects of Robotics",75],
+["Workplace safety","Measures that protect people from hazards in working environments.","Aspects of Robotics",76],
+["Social acceptance","People's willingness to use, trust, or support robots.","Aspects of Robotics",77],
+["Artifact","An object created by humans.","History and Cultural Influence",78],
+["Water clock","A device that measures time through the controlled flow of water.","History and Cultural Influence",79],
+["Human-robot interaction","The ways people and robots communicate and respond to one another.","History and Cultural Influence",225],
+["Stanford Arm","A robot arm developed in 1969 with six degrees of freedom and a design that simplified movement calculations.","History of Industrial Robots",80],
+["MIT Arm","A robot arm developed by Victor Scheinman in 1972 that contributed to the development of programmable industrial manipulators.","History of Industrial Robots",81],
+["PUMA","Programmable Universal Manipulation Arm; a programmable industrial robot arm associated with the development of Scheinman's designs.","History of Industrial Robots",82],
+["SCARA","Selective Compliance Assembly Robot Arm; a robot arm designed for efficient assembly, with compliance in selected directions.","History of Industrial Robots",83],
+["Parallel robot","A robot whose moving platform or end effector is connected to its base through multiple mechanical chains.","History of Industrial Robots",84],
+["Autonomous mobile robot (AMR)","A mobile robot that navigates and performs tasks without continuous human control.","History of Mobile Robots",7],
+["Electro-light-sensitive Internal-External","An early mobile robotic device that responded to light and interacted with its surroundings.","History of Mobile Robots",85],
+["Shakey","An early mobile robot that combined sensing, environmental reasoning, and action planning.","History of Mobile Robots",86],
+["Hierarchical control","A control structure organised into levels, from basic movements to complex planning.","History of Mobile Robots",87],
+["Low-level routine","A basic control operation used as a building block for more complex actions.","History of Mobile Robots",88],
+["Cognitive robot","A robot that uses internal representations and reasoning to plan and perform actions.","History of Mobile Robots",89],
+["World model","An internal representation of the environment used for reasoning and planning.","History of Mobile Robots",90],
+["Localization","The process of estimating a robot's position within an environment.","History of Mobile Robots",91],
+["Navigation","The process of determining and following a route to a destination.","History of Mobile Robots",92],
+["Triangulation sensor","A sensor that estimates distance using geometric relationships between observation points and a target.","History of Mobile Robots",93],
+["Stereo vision","The use of images from two viewpoints to estimate depth and three-dimensional structure.","History of Mobile Robots",94],
+["Stanford Cart","An early mobile robot that used camera-based perception to navigate around obstacles.","History of Mobile Robots",95],
+["WAVE","A programming language described in the lesson as having been developed specifically for robotics.","History of Mobile Robots",96],
+["Micromouse robot","A small mobile robot designed to navigate a maze.","History of Mobile Robots",97],
+["KAMRO","Karlsruhe Autonomous Mobile Robot; a mobile robotic system developed to perform autonomous assembly tasks.","History of Mobile Robots",98],
+["Mars rover","A mobile robot designed to explore and investigate the surface of Mars.","History of Mobile Robots",99],
+["Production cell","A group of machines and equipment organised to carry out a set of manufacturing tasks.","Production at Different Scales",100],
+["Human-machine interaction","The exchange of commands and information between people and machines.","Technological Thresholds",101],
+["Human-friendly task specification","A way of describing robot tasks that is easy for human operators to understand and use.","Technological Thresholds",102],
+["Mobile manipulation","The combination of mobility and object handling in one robotic system.","Technological Thresholds",103],
+["Actuator","A component that converts energy into physical movement.","Technological Thresholds",13],
+["Actuation","The process of producing movement through an actuator.","Technological Thresholds",14],
+["Low-cost actuation","The use of affordable components to generate robotic movement.","Technological Thresholds",104],
+["Subsystem","A component system that performs a specific function within a larger system.","Technological Thresholds",105],
+["Composition of subsystems","The integration of separate modules into a complete robotic system.","Technological Thresholds",106],
+["Standardized interface","A shared connection or communication specification that allows different components to work together.","Technological Thresholds",107],
+["Embodiment of engineering and research results","The practical implementation of research findings in working robotic systems.","Technological Thresholds",108],
+["Open dependable system","A system intended to support interoperability while maintaining reliable operation.","Technological Thresholds",109],
+["Interconnectivity","The ability of devices or systems to connect and exchange information.","Technological Thresholds",110],
+["Sustainable manufacturing","Production that reduces resource consumption, waste, and environmental impact.","Technological Thresholds",111],
+["Robot synchronization","The coordination of robots' actions and timing.","Technological Thresholds",112],
+["Multi-robot system","A group of robots that operate together or share a working environment.","Technological Thresholds",113],
+["Robot networking","The connection of robots to exchange data or coordinate control and maintenance.","Technological Thresholds",114],
+["Microprocessor","An electronic processor that executes computational instructions.","Technological Thresholds",115],
+["Computational power","The capacity of a system to process information and perform calculations.","Technological Thresholds",116],
+["Moore's law","The historical observation that the number of transistors on integrated circuits tends to double approximately every two years.","Technological Thresholds",117],
+["Vision system","A combination of sensors and software used to obtain and interpret visual information.","Technological Thresholds",118],
+["Cybersecurity","The protection of robotic systems, networks, and data against unauthorized access or attacks.","Technological Thresholds",119],
+["Remote control","The operation of a robot from another location through a communication connection.","Different Generations of Robotics",120],
+["Robotics 1.0","The first generation of robotics, focused on repetitive industrial automation in structured environments.","Different Generations of Robotics",121],
+["4Ds","Dull, dirty, dumb, and dangerous; the lesson's description of tasks associated with Robotics 1.0.","Different Generations of Robotics",122],
+["Robotics 2.0","The generation characterised by improved intelligence, sensing, safety, mobility, and ease of use.","Different Generations of Robotics",123],
+["Personal robot","A robot intended to assist individual users, associated in the lesson with second-generation robotics.","Different Generations of Robotics",124],
+["4Ss","Smarter, safer, sensors, and simple; the lesson's description of the transition to Robotics 2.0.","Different Generations of Robotics",125],
+["Robotics 3.0","The emerging vision of connected, context-aware robots that interact with people and perform complex tasks autonomously.","Different Generations of Robotics",126],
+["4Ms","Multitasking, emotive, morphing, and multiagent systems; the lesson's description of Robotics 3.0.","Different Generations of Robotics",127],
+["Multitasking","The ability to manage or perform multiple tasks.","Different Generations of Robotics",128],
+["Emotive robotics","Robotics involving the recognition, expression, or simulation of emotional signals.","Different Generations of Robotics",129],
+["Morphing","The ability to change physical shape or configuration.","Different Generations of Robotics",130],
+["Multiagent system","A system containing multiple agents that interact, coordinate, or cooperate.","Different Generations of Robotics",131],
+["Context awareness","The ability to use information about the current situation to choose appropriate actions.","Different Generations of Robotics",132],
+["Ubiquitous robotics","Robotics in which robots are widely present and exchange information with other robots and surrounding devices.","New Fields of Robotics",133],
+["Networked robot","A robot connected to other robots or systems through a communication network.","New Fields of Robotics",134],
+["Cloud robotics","The use of remote computing resources, shared data, and network services to support robots.","New Fields of Robotics",135],
+["Cloud computing infrastructure","Remote computing and storage resources accessed through a network.","New Fields of Robotics",136],
+["Computation offloading","The transfer of computational work from a robot to another computer or cloud service.","New Fields of Robotics",137],
+["Social awareness","The ability to recognise people, social situations, and relevant social expectations.","New Fields of Robotics",138],
+["Affective interaction","Interaction involving emotional signals or responses.","New Fields of Robotics",139],
+["Ubirobots' engineering","The design and integration of robots within interconnected, ubiquitous environments.","New Fields of Robotics",140],
+["Humanoid robot","A robot whose physical structure resembles the human body.","New Fields of Robotics",141],
+["ASIMO","A humanoid robot developed by Honda.","New Fields of Robotics",142],
+["Social robot","A robot designed to interact socially with people.","New Fields of Robotics",143],
+["Wearable robotics","The field of robotic devices worn on the body to assist, restore, or enhance human abilities.","New Fields of Robotics",146],
+["Exoskeleton","An external wearable structure that supports or assists body movements.","New Fields of Robotics",147],
+["Exosuit","A wearable assistive device that mainly uses soft structures to support movement.","New Fields of Robotics",148],
+["Wearable user interface","A body-worn device used to send commands to or receive feedback from a robotic system.","New Fields of Robotics",149],
+["Rehabilitation robotics","The use of robotic systems to help people recover or practise physical abilities.","New Fields of Robotics",150],
+["Walking assist system","A device that supports a person's walking movements.","New Fields of Robotics",151],
+["Robotic prosthesis","An artificial body part using robotic mechanisms or control to replace lost function.","New Fields of Robotics",152],
+["Soft robotics","The field concerned with robots made partly or mainly from flexible, deformable materials.","New Fields of Robotics",153],
+["Soft robot","A robot whose flexible components allow substantial deformation during operation.","New Fields of Robotics",154],
+["Rigid body","An idealised object whose shape and internal distances do not change.","New Fields of Robotics",155],
+["Deformation","A change in an object's shape or size.","New Fields of Robotics",156],
+["Pneumatic control","The use of pressurized gas to produce or regulate movement.","New Fields of Robotics",157],
+["Hydraulic control","The use of pressurized liquid to produce or regulate movement.","New Fields of Robotics",158],
+["Bio-inspired robotics","The design of robots using principles or solutions found in living organisms.","New Fields of Robotics",159],
+["Bio-inspired robot","A robot whose design or behaviour draws inspiration from biological systems.","New Fields of Robotics",160],
+["Artificial intelligence (AI)","Computational methods that enable machines to perform tasks involving perception, reasoning, planning, or learning.","AI in Robotics",161],
+["Autonomy","The ability to perform tasks and make operational decisions without continuous human control.","AI in Robotics",162],
+["Adaptability","The ability to adjust behaviour to new tasks or changing conditions.","AI in Robotics",163],
+["Structured environment","An environment whose layout and operating conditions are relatively predictable.","AI in Robotics",164],
+["Unstructured environment","An environment that is variable and not fully arranged or known in advance.","AI in Robotics",165],
+["Dynamic environment","An environment that changes while a robot operates.","AI in Robotics",166],
+["Robotic perception","The process of interpreting sensor data to understand the robot and its surroundings.","AI for Robotic Perception",167],
+["Computer vision","Methods that extract useful information from images or video.","AI for Robotic Perception",168],
+["Pattern recognition","The identification of meaningful patterns in data.","AI for Robotic Perception",169],
+["Object detection","The identification and location of objects in sensor data, especially images.","AI for Robotic Perception",170],
+["Object recognition","The identification of what an observed object is.","AI for Robotic Perception",171],
+["Image classification","The assignment of an image or image region to a category.","AI for Robotic Perception",172],
+["Scene understanding","The interpretation of objects, relationships, and activities within an environment.","AI for Robotic Perception",173],
+["Spatial relationship","The position or orientation of one object relative to another.","AI for Robotic Perception",174],
+["Semantic information","Information about what objects or observations mean.","AI for Robotic Perception",175],
+["Semantic perception","The interpretation of sensor data in terms of meaningful objects, categories, and relationships.","AI for Robotic Perception",176],
+["Lidar","A sensing technology that measures distance using laser light.","AI for Robotic Perception",177],
+["Sonar","A sensing technology that detects objects or measures distance using sound waves.","AI for Robotic Perception",178],
+["Touch sensor","A device that detects physical contact or related quantities such as pressure.","AI for Robotic Perception",179],
+["Tactile feedback","Information obtained through physical contact.","AI for Robotic Perception",180],
+["Depth sensor","A sensor that measures distances to surfaces or objects.","AI for Robotic Perception",181],
+["Sensor fusion","The combination of information from multiple sensors to obtain a more reliable estimate.","AI for Robotic Perception",182],
+["Multimodal perception","The combined interpretation of different types of sensory input, such as vision, sound, and touch.","AI for Robotic Perception",183],
+["Simultaneous localization and mapping (SLAM)","The process of building a map while estimating the robot's location within it.","AI for Robotic Perception",184],
+["Loop closure","The recognition that a robot has returned to a previously visited place, allowing mapping and localization errors to be corrected.","AI for Robotic Perception",185],
+["Probabilistic AI","AI methods that represent and reason about uncertainty using probabilities.","AI for Robotic Perception",186],
+["Bayesian estimation","The updating of an estimate by combining prior knowledge with new evidence.","AI for Robotic Perception",187],
+["Natural language processing (NLP)","Methods that allow computers to process and interpret human language.","AI for Robotic Perception",188],
+["Speech recognition","The conversion of spoken language into a machine-processable representation.","AI for Robotic Perception",189],
+["Gesture recognition","The identification and interpretation of body or hand movements.","AI for Robotic Perception",190],
+["Facial expression recognition","The identification of facial movements associated with expressions.","AI for Robotic Perception",191],
+["Service robot","A robot that performs useful tasks for people or equipment outside industrial automation.","AI for Robotic Perception",144],
+["Pepper","A social robot used in the lesson as an example of speech- and gesture-based human interaction.","AI for Robotic Perception",145],
+["Decision-making","The selection of actions based on goals, available information, and possible outcomes.","AI for Decision-Making and Planning",192],
+["Planning","The process of determining actions needed to achieve a goal.","AI for Decision-Making and Planning",193],
+["Motion planning","The computation of feasible robot movements that achieve a task while respecting constraints.","AI for Decision-Making and Planning",194],
+["Path planning","The computation of a route from a starting point to a destination.","AI for Decision-Making and Planning",195],
+["Collision-free trajectory","A sequence of movements over time that avoids contact with obstacles.","AI for Decision-Making and Planning",196],
+["Search space","The set of possible states or solutions explored by an algorithm.","AI for Decision-Making and Planning",197],
+["Graph search","A method that explores connected states to find a route or solution.","AI for Decision-Making and Planning",198],
+["Sampling-based planner","A motion-planning method that samples possible configurations and attempts to connect them into a feasible path.","AI for Decision-Making and Planning",199],
+["Optimization","The process of finding the best solution according to a defined objective and constraints.","AI for Decision-Making and Planning",200],
+["Heuristic","A practical estimate or rule that guides a search toward promising solutions.","AI for Decision-Making and Planning",201],
+["Autonomous navigation","The ability to determine and follow routes without continuous human guidance.","AI for Decision-Making and Planning",202],
+["Obstacle avoidance","The adjustment of movement to prevent collisions.","AI for Decision-Making and Planning",203],
+["High-level planning","The selection and ordering of broader actions needed to complete a task.","AI for Decision-Making and Planning",204],
+["Automated planning","The automatic generation of action sequences from descriptions of goals and available actions.","AI for Decision-Making and Planning",205],
+["Symbolic AI","AI that uses explicit symbols, rules, and logical representations.","AI for Decision-Making and Planning",206],
+["Symbolic planner","A planning system that uses symbolic descriptions of actions, conditions, and goals.","AI for Decision-Making and Planning",207],
+["Reasoning","The use of available knowledge to draw conclusions or choose actions.","AI for Decision-Making and Planning",208],
+["Replanning","The revision of a plan when conditions or information change.","AI for Decision-Making and Planning",209],
+["Task allocation","The assignment of tasks to robots or other agents.","AI for Decision-Making and Planning",210],
+["Coordination","The organisation of actions so that multiple robots or agents work effectively together.","AI for Decision-Making and Planning",211],
+["Control law","A rule that determines control commands from a system's state and desired behaviour.","AI for Decision-Making and Planning",212],
+["Controller","A component that calculates commands to guide a system toward desired behaviour.","AI for Decision-Making and Planning",213],
+["Adaptive control","Control that adjusts its parameters in response to changes or uncertainty.","AI for Decision-Making and Planning",214],
+["Intelligent control","Control that uses AI methods to select or improve actions.","AI for Decision-Making and Planning",215],
+["Learning-based controller","A controller whose behaviour is learned from data or experience.","AI for Decision-Making and Planning",216],
+["Control policy","A rule or strategy that maps observations or states to actions.","AI for Decision-Making and Planning",217],
+["Dynamics","The study of motion in relation to forces and torques.","AI for Decision-Making and Planning",218],
+["Gait","A coordinated pattern of movements used for walking or other locomotion.","AI for Decision-Making and Planning",219],
+["Predictive model","A model used to estimate future states or outcomes.","AI for Decision-Making and Planning",220],
+["Decision network","A model representing relationships among uncertain events, decisions, and their consequences.","AI for Decision-Making and Planning",221],
+["Game-theoretic planning","Planning that considers how other decision-makers may act.","AI for Decision-Making and Planning",222],
+["Cognitive architecture","An integrated framework connecting perception, memory, reasoning, planning, and learning.","AI for Decision-Making and Planning",223],
+["Knowledge base","An organised collection of information used for reasoning and decision-making.","AI for Decision-Making and Planning",224],
+["Human-robot collaboration","People and robots working together toward a shared goal.","Machine Learning and Adaptation",226],
+["Machine learning (ML)","Methods that enable a system to improve or acquire capabilities through data and experience.","Machine Learning and Adaptation",227],
+["Supervised learning","Learning from examples that include the correct labels or outputs.","Machine Learning and Adaptation",228],
+["Unsupervised learning","Learning patterns or structure from data without provided target labels.","Machine Learning and Adaptation",229],
+["Reinforcement learning (RL)","Learning through interaction by selecting actions and using rewards to improve future behaviour.","Machine Learning and Adaptation",230],
+["Deep learning","Machine learning using neural networks with multiple processing layers.","Machine Learning and Adaptation",231],
+["Neural network","A computational model made of connected processing units whose parameters are adjusted during learning.","Machine Learning and Adaptation",232],
+["Deep neural network","A neural network containing multiple layers that learn increasingly complex representations.","Machine Learning and Adaptation",233],
+["Convolutional neural network (CNN)","A neural network architecture especially suited to processing images and other grid-like data.","Machine Learning and Adaptation",234],
+["Deep reinforcement learning","Reinforcement learning that uses deep neural networks to represent policies or other learned functions.","Machine Learning and Adaptation",235],
+["Training data","Examples or experiences used to adjust a machine-learning model.","Machine Learning and Adaptation",236],
+["Labeled data","Data paired with information specifying the desired category or output.","Machine Learning and Adaptation",237],
+["Feature learning","The automatic discovery of useful representations from data.","Machine Learning and Adaptation",238],
+["Generalization","The ability to apply learned knowledge to new examples or situations.","Machine Learning and Adaptation",239],
+["Trial-and-error learning","Learning by attempting actions and using their outcomes to improve.","Machine Learning and Adaptation",240],
+["Reward","A numerical feedback signal indicating how desirable an outcome or action is.","Machine Learning and Adaptation",241],
+["Penalty","Negative feedback that discourages an action or outcome.","Machine Learning and Adaptation",242],
+["Cumulative reward","The total reward collected over a sequence of interactions, sometimes weighted by time.","Machine Learning and Adaptation",243],
+["Learning from demonstration","Learning how to perform a task from examples provided by a human or another robot.","Machine Learning and Adaptation",244],
+["Imitation learning","Learning a policy by reproducing or generalizing demonstrated behaviour.","Machine Learning and Adaptation",245],
+["Online learning","Updating a model while new data arrive during operation.","Machine Learning and Adaptation",246],
+["Calibration","The adjustment of system parameters so that measurements or actions match relevant references.","Machine Learning and Adaptation",247],
+["Learning-based calibration","The use of learning methods to adjust a robot's parameters from data or feedback.","Machine Learning and Adaptation",248],
+["Simulation","A computer-based representation of a robot and its environment used for testing or training.","Machine Learning and Adaptation",249],
+["Simulator","Software that reproduces relevant aspects of a physical system and its behaviour.","Machine Learning and Adaptation",250],
+["Sim-to-real transfer","The application of knowledge or behaviours learned in simulation to a physical robot.","Machine Learning and Adaptation",251],
+["Big data","Large or complex datasets used to support analysis and learning.","Machine Learning and Adaptation",252],
+["Collective learning","Learning in which experience or knowledge is shared among multiple robots.","Machine Learning and Adaptation",253],
+["Robot fleet","A group of robots managed or operated together.","Machine Learning and Adaptation",254],
+["Black-box system","A system whose internal decision process is difficult to inspect or understand.","Machine Learning and Adaptation",255],
+["Explainability","The ability to provide understandable reasons for a system's outputs or actions.","Machine Learning and Adaptation",256],
+["Trust in robots","Confidence that a robot will behave reliably and appropriately.","Machine Learning and Adaptation",257],
+["Safety constraint","A restriction intended to prevent unsafe actions or outcomes.","Machine Learning and Adaptation",258],
+["Robot locomotion","The movement of a robot from one place to another.","Machine Learning and Adaptation",259],
+["Robotic manipulation","The controlled movement and handling of objects.","Machine Learning and Adaptation",260],
+["Robotic grasping","The process of securing and holding an object with a robotic hand or gripper.","Machine Learning and Adaptation",261],
+["Multi-agent reinforcement learning","Reinforcement learning involving multiple interacting agents.","Machine Learning and Adaptation",262],
+["Lifelong learning","The continued acquisition and refinement of knowledge or skills throughout operation.","Machine Learning and Adaptation",263]
+];
+
+const TERMS_SK=[
+["Automatizácia","Používanie technológií na vykonávanie úloh s menšou potrebou ľudského zásahu."],
+["Robotika","Medziodborová oblasť zaoberajúca sa navrhovaním, výrobou, programovaním, riadením a využívaním robotov."],
+["Robot","Programovateľný fyzický stroj, ktorý vykonáva úlohy prostredníctvom riadených pohybov a činností."],
+["Robota","Slovanské slovo označujúce namáhavú alebo nútenú prácu, z ktorého vzniklo pomenovanie robot."],
+["Priemyselný robot","Automaticky riadený, programovateľný a viacúčelový manipulátor s najmenej tromi programovateľnými osami, používaný v priemysle."],
+["Mobilný robot","Robot, ktorý sa dokáže premiestňovať v prostredí a pomocou snímačov prispôsobovať svoje správanie."],
+["Manipulátor","Mechanická konštrukcia, zvyčajne robotické rameno, určená na premiestňovanie alebo obsluhu predmetov."],
+["Koncový efektor","Nástroj alebo zariadenie na konci robotického ramena, ktoré priamo vykonáva požadovanú úlohu."],
+["Uchopovač","Koncový efektor určený na uchopenie, držanie a uvoľnenie predmetov."],
+["Riadiaca jednotka","Hardvér a softvér, ktoré spracúvajú pokyny a riadia činnosť robota."],
+["Snímač","Zariadenie, ktoré zisťuje alebo meria vlastnosti robota či jeho okolia."],
+["Flexibilná automatizácia","Automatizácia, ktorú možno prispôsobiť rôznym úlohám alebo výrobným požiadavkám."],
+["Klasifikácia robotov","Rozdeľovanie robotov do skupín podľa vlastností, napríklad inteligencie, použitia, riadenia alebo geometrie."],
+["JIRA","Japonská asociácia priemyselných robotov, s ktorou sa spája šesťtriedna klasifikácia uvedená v lekcii."],
+["Ručne ovládané manipulačné zariadenie, trieda 1","Viacosové zariadenie, ktorého pohyb priamo ovláda človek."],
+["Robot s pevnou postupnosťou, trieda 2","Robot opakujúci vopred určenú postupnosť činností, ktorú nie je jednoduché meniť."],
+["Robot s meniteľnou postupnosťou, trieda 3","Robot, pri ktorom možno meniť vopred určenú postupnosť činností."],
+["Robot s prehrávaním naučeného pohybu, trieda 4","Robot, ktorý zaznamená pohyby predvedené operátorom a následne ich automaticky opakuje."],
+["Číslicovo riadený robot, trieda 5","Robot, ktorého pohyby určujú číselné pokyny zapísané v programe."],
+["Inteligentný robot, trieda 6","Robot, ktorý využíva informácie o prostredí na vykonávanie úloh aj pri meniacich sa podmienkach."],
+["Článok robota","Pevná časť mechanickej konštrukcie robota, ktorá sa môže pohybovať vzhľadom na ostatné články."],
+["Kĺb","Spojenie dvoch článkov, ktoré umožňuje ich vzájomný pohyb."],
+["Os","Referenčná priamka, pozdĺž ktorej prebieha posuv alebo okolo ktorej prebieha otáčanie."],
+["Stupeň voľnosti","Jeden nezávislý spôsob pohybu mechanickej sústavy, napríklad posuv alebo otáčanie."],
+["Šesť stupňov voľnosti","Tri nezávislé posuvné pohyby a tri nezávislé rotačné pohyby v trojrozmernom priestore."],
+["Rotácia","Otáčavý pohyb okolo osi."],
+["Translácia","Posuvný pohyb, pri ktorom sa nemení orientácia predmetu."],
+["Rotačný kĺb","Kĺb umožňujúci otáčanie okolo jednej osi."],
+["Prizmatický kĺb","Kĺb umožňujúci priamočiary posuv pozdĺž jednej osi."],
+["Rovnobežné osi","Osi, ktoré majú rovnaký smer a nemenia svoju vzájomnú vzdialenosť."],
+["Ortogonálne osi","Osi, ktorých smery zvierajú pravý uhol."],
+["Kolmé usporiadanie","Usporiadanie osí s pravouhlým vzťahom."],
+["Geometrická klasifikácia robotov","Rozdelenie robotov podľa usporiadania ich článkov, kĺbov a osí."],
+["Konfigurácia R R P","Usporiadanie dvoch rotačných a jedného prizmatického kĺbu, ktorých osi sú rovnobežné."],
+["Konfigurácia robota","Usporiadanie jeho mechanických častí alebo konkrétna poloha všetkých jeho kĺbov."],
+["Kinematika","Náuka o pohybe, ktorá neberie do úvahy sily spôsobujúce tento pohyb."],
+["Poloha","Umiestnenie predmetu vzhľadom na zvolený referenčný systém."],
+["Orientácia","Natočenie predmetu vzhľadom na zvolený referenčný systém."],
+["Trajektória","Opis toho, ako sa poloha robota alebo hodnoty jeho kĺbov menia v čase."],
+["Súradnicový systém","Referenčný rámec používaný na opis polohy a pohybu."],
+["Počiatok súradnicového systému","Referenčný bod, v ktorom majú všetky súradnice nulovú hodnotu."],
+["Súradnicové osi","Referenčné smery, pomocou ktorých sa určujú súradnice."],
+["Vektor","Matematická veličina s veľkosťou a smerom, používaná napríklad na opis polohy alebo posunutia."],
+["Transformácia súradníc","Matematický prevod súradníc medzi rôznymi súradnicovými systémami."],
+["Kartézske súradnice","Hodnoty opisujúce polohu pomocou vzdialeností pozdĺž navzájom kolmých osí x, y a z."],
+["Kĺbové súradnice","Hodnoty určujúce stav jednotlivých kĺbov, napríklad uhol natočenia alebo veľkosť posuvu."],
+["Svetový súradnicový systém","Pevný referenčný systém spojený s celkovým prostredím robota."],
+["Súradnicový systém základne","Referenčný systém pripevnený k základni robota."],
+["Súradnicový systém kĺbu","Referenčný systém spojený s konkrétnym kĺbom robota."],
+["Súradnicový systém nástroja","Referenčný systém pripevnený k nástroju alebo koncovému efektoru."],
+["Súradnicový systém objektu","Referenčný systém spojený s predmetom, s ktorým robot manipuluje."],
+["Súradnicový systém mechanického rozhrania","Referenčný systém umiestnený pri prírube, ku ktorej sa pripája koncový efektor."],
+["Príruba","Mechanická montážna plocha používaná na pripojenie nástroja alebo koncového efektora."],
+["Súradnicový systém obrobku","Referenčný systém spojený s obrobkom alebo jeho umiestnením."],
+["Kartézsky súradnicový systém","Súradnicový systém používajúci navzájom kolmé osi, najčastejšie x, y a z."],
+["Polárny súradnicový systém","Dvojrozmerný systém určujúci bod pomocou vzdialenosti od počiatku a uhla."],
+["Valcový súradnicový systém","Trojrozmerný systém určujúci bod pomocou polomeru, uhla a výšky."],
+["Polomer","Vzdialenosť bodu od stredu alebo od osi otáčania."],
+["Uhol otočenia","Uhlová odchýlka od zvoleného referenčného smeru."],
+["Obrobok","Predmet, ktorý robot uchopuje, premiestňuje, opracúva alebo inak spracúva."],
+["Strojárstvo","Technický odbor zaoberajúci sa mechanickými konštrukciami, strojmi a ich pohybom."],
+["Elektrotechnika","Odbor zaoberajúci sa elektrickými obvodmi, elektronikou, elektrickou energiou a súvisiacimi zariadeniami."],
+["Informatika","Odbor skúmajúci výpočty, algoritmy, softvér a spracovanie informácií."],
+["Výrobná technológia","Súbor postupov a zariadení používaných na výrobu výrobkov."],
+["Systémové inžinierstvo","Medziodborový prístup k navrhovaniu a prepájaniu častí do fungujúceho celku."],
+["Meracia technika","Metódy a zariadenia používané na meranie fyzikálnych veličín."],
+["Snímacia technika","Vývoj a využívanie snímačov na získavanie informácií o fyzických podmienkach."],
+["Riadenie robota","Určovanie a ovládanie pohybov a činností robota."],
+["Regulácia","Riadenie využívajúce spätnú väzbu na udržiavanie veličiny blízko požadovanej hodnoty."],
+["Hardvér","Fyzické súčiastky a zariadenia robotického systému."],
+["Softvér","Programy a pokyny určujúce fungovanie robotického systému."],
+["Etika v robotike","Posudzovanie morálnych otázok spojených s vývojom, používaním a dôsledkami nasadenia robotov."],
+["Regulačný rámec","Súbor pravidiel a požiadaviek upravujúcich vývoj a používanie robotov."],
+["Bezpečnosť na pracovisku","Opatrenia chrániace ľudí pred nebezpečenstvami pri práci."],
+["Spoločenské prijatie","Ochota ľudí roboty používať, dôverovať im a podporovať ich zavádzanie."],
+["Artefakt","Predmet vytvorený človekom."],
+["Vodné hodiny","Zariadenie merajúce čas pomocou riadeného prietoku vody."],
+["Interakcia človeka s robotom","Vzájomná komunikácia a reagovanie medzi človekom a robotom."],
+["Stanfordské rameno","Robotické rameno vyvinuté v roku 1969 so šiestimi stupňami voľnosti."],
+["Rameno MIT","Robotické rameno Victora Scheinmana z roku 1972."],
+["PUMA","Programovateľné priemyselné robotické rameno na manipulačné a montážne úlohy."],
+["SCARA","Robotické rameno s poddajnosťou vo vybraných smeroch, vhodné na rýchlu montáž."],
+["Paralelný robot","Robot, ktorého pohyblivá platforma je spojená so základňou viacerými mechanickými reťazcami."],
+["Autonómny mobilný robot","Robot, ktorý sa premiestňuje a vykonáva úlohy bez nepretržitého ovládania človekom."],
+["Svetlocitlivý robot ELSIE","Raný mobilný robot, ktorý reagoval na svetlo a interagoval s okolím."],
+["Shakey","Raný mobilný robot prepájajúci snímanie prostredia, uvažovanie a plánovanie činností."],
+["Hierarchické riadenie","Riadenie rozdelené do úrovní, od základných pohybov až po plánovanie zložitých úloh."],
+["Nízkoúrovňová rutina","Jednoduchá riadiaca operácia používaná ako stavebný prvok zložitejších činností."],
+["Kognitívny robot","Robot využívajúci vnútorné reprezentácie a uvažovanie na plánovanie a vykonávanie činností."],
+["Model sveta","Vnútorná reprezentácia prostredia, ktorú robot používa pri plánovaní a rozhodovaní."],
+["Lokalizácia","Odhadovanie polohy robota v prostredí."],
+["Navigácia","Určovanie a sledovanie cesty k cieľu."],
+["Triangulačný snímač","Snímač určujúci vzdialenosť pomocou geometrických vzťahov."],
+["Stereovidenie","Využívanie obrazov z dvoch pohľadov na odhad hĺbky a priestorovej štruktúry."],
+["Stanfordský vozík","Raný mobilný robot využívajúci kamery na vnímanie prostredia a obchádzanie prekážok."],
+["WAVE","Programovací jazyk vyvinutý pre potreby robotiky."],
+["Robotická mikromyš","Malý mobilný robot navrhnutý na orientáciu a pohyb v bludisku."],
+["KAMRO","Autonómny mobilný robot z Karlsruhe vyvinutý na montážne úlohy."],
+["Marsovské vozidlo","Mobilný robot určený na skúmanie povrchu Marsu."],
+["Výrobná bunka","Skupina strojov a zariadení usporiadaných na vykonávanie výrobných úloh."],
+["Interakcia človeka so strojom","Výmena pokynov a informácií medzi človekom a technickým zariadením."],
+["Používateľsky zrozumiteľné zadávanie úloh","Spôsob určovania úloh robota, ktorý je pre operátora jednoduchý a zrozumiteľný."],
+["Mobilná manipulácia","Spojenie schopnosti premiestňovať sa a manipulovať s predmetmi v jednom systéme."],
+["Akčný člen","Súčiastka premieňajúca energiu na mechanický pohyb."],
+["Akčné pôsobenie","Vytváranie fyzického pohybu alebo účinku pomocou akčných členov."],
+["Nízkonákladový pohon","Vytváranie pohybu pomocou cenovo dostupných akčných členov a súčiastok."],
+["Podsystém","Časť väčšieho systému, ktorá zabezpečuje konkrétnu funkciu."],
+["Spájanie podsystémov","Integrácia samostatných funkčných častí do jedného robotického systému."],
+["Štandardizované rozhranie","Spoločné pravidlá pripojenia alebo komunikácie umožňujúce spoluprácu rôznych súčiastok."],
+["Praktické uplatnenie výsledkov výskumu a vývoja","Premena nových poznatkov na funkčné robotické riešenia."],
+["Otvorený a spoľahlivý systém","Systém umožňujúci prepájanie s inými systémami pri zachovaní spoľahlivého fungovania."],
+["Vzájomná prepojiteľnosť","Schopnosť zariadení alebo systémov nadväzovať spojenia a vymieňať si informácie."],
+["Udržateľná výroba","Výroba obmedzujúca spotrebu zdrojov, vznik odpadu a negatívne vplyvy na životné prostredie."],
+["Synchronizácia robotov","Zosúladenie časovania a pohybov viacerých robotov."],
+["Systém viacerých robotov","Skupina robotov pracujúcich spoločne alebo v spoločnom prostredí."],
+["Sieťové prepojenie robotov","Prepájanie robotov na výmenu údajov, koordináciu, riadenie alebo údržbu."],
+["Mikroprocesor","Elektronický procesor vykonávajúci výpočtové a riadiace pokyny."],
+["Výpočtový výkon","Schopnosť systému spracúvať informácie a vykonávať výpočty."],
+["Moorov zákon","Historické pozorovanie zdvojnásobovania počtu tranzistorov na čipe každé dva roky."],
+["Systém strojového videnia","Súbor snímačov a softvéru na získavanie a vyhodnocovanie obrazových informácií."],
+["Kybernetická bezpečnosť","Ochrana robotických systémov, sietí a údajov pred neoprávneným prístupom a útokmi."],
+["Diaľkové ovládanie","Ovládanie robota z iného miesta prostredníctvom komunikačného spojenia."],
+["Robotika 1.0","Prvá generácia robotiky zameraná na opakované priemyselné úlohy v predvídateľnom prostredí."],
+["4D","Štyri charakteristiky úloh robotiky 1.0: jednotvárne, špinavé, nevyžadujúce inteligenciu a nebezpečné."],
+["Robotika 2.0","Generácia robotiky s lepším snímaním, inteligenciou, bezpečnosťou, mobilitou a jednoduchším používaním."],
+["Osobný robot","Robot určený na pomoc jednotlivému používateľovi."],
+["4S","Charakteristiky robotiky 2.0: inteligentnejšie roboty, vyššia bezpečnosť, snímače a jednoduchosť."],
+["Robotika 3.0","Vízia prepojených robotov, ktoré chápu kontext a autonómne vykonávajú zložité úlohy."],
+["4M","Charakteristiky robotiky 3.0: viacero úloh, emocionálna interakcia, zmena tvaru a viacagentové systémy."],
+["Vykonávanie viacerých úloh","Schopnosť riadiť alebo vykonávať viacero úloh."],
+["Emotívna robotika","Robotika zahŕňajúca rozpoznávanie, vyjadrovanie alebo napodobňovanie emocionálnych signálov."],
+["Zmena tvaru alebo konfigurácie","Schopnosť robota meniť svoju fyzickú podobu alebo mechanické usporiadanie."],
+["Viacagentový systém","Systém obsahujúci viacero samostatne konajúcich jednotiek, ktoré spolu komunikujú alebo spolupracujú."],
+["Uvedomovanie si kontextu","Schopnosť využívať informácie o aktuálnej situácii na výber vhodného správania."],
+["Všadeprítomná robotika","Robotika, pri ktorej sú roboty rozšírené v rôznych prostrediach a komunikujú s okolitými zariadeniami."],
+["Sieťovo prepojený robot","Robot pripojený prostredníctvom siete k ďalším robotom alebo systémom."],
+["Cloudová robotika","Využívanie vzdialených výpočtových zdrojov a sieťových služieb pri prevádzke robotov."],
+["Cloudová výpočtová infraštruktúra","Vzdialené počítače a úložiská dostupné prostredníctvom siete."],
+["Presun výpočtov","Prenesenie výpočtovej úlohy z robota na iný počítač alebo do cloudu."],
+["Sociálne uvedomovanie","Schopnosť rozpoznávať ľudí, sociálne situácie a očakávané správanie."],
+["Afektívna interakcia","Interakcia zahŕňajúca emocionálne signály alebo reakcie."],
+["Inžinierstvo všadeprítomných robotov","Navrhovanie a začleňovanie robotov do vzájomne prepojených prostredí."],
+["Humanoidný robot","Robot, ktorého telesná stavba pripomína človeka."],
+["ASIMO","Humanoidný robot vyvinutý spoločnosťou Honda."],
+["Sociálny robot","Robot navrhnutý na sociálnu komunikáciu a interakciu s ľuďmi."],
+["Nositeľná robotika","Oblasť robotických zariadení nosených na tele na podporu ľudských schopností."],
+["Exoskelet","Vonkajšia nositeľná konštrukcia podporujúca alebo uľahčujúca pohyby tela."],
+["Mäkký exosuit","Nositeľné podporné zariadenie využívajúce najmä mäkké materiály a popruhy."],
+["Nositeľné používateľské rozhranie","Zariadenie nosené na tele na zadávanie pokynov robotu alebo prijímanie spätnej väzby."],
+["Rehabilitačná robotika","Využívanie robotických zariadení na obnovovanie alebo precvičovanie pohybových schopností."],
+["Systém podpory chôdze","Zariadenie pomáhajúce človeku pri pohyboch potrebných na chôdzu."],
+["Robotická protéza","Umelá náhrada časti tela využívajúca robotické mechanizmy alebo riadenie."],
+["Mäkká robotika","Oblasť zaoberajúca sa robotmi s pružnými a výrazne deformovateľnými časťami."],
+["Mäkký robot","Robot, ktorého pružné súčiastky sa môžu počas činnosti výrazne deformovať."],
+["Tuhé teleso","Idealizované teleso, ktorého tvar a vzájomné vzdialenosti jeho bodov sa nemenia."],
+["Deformácia","Zmena tvaru alebo rozmerov predmetu."],
+["Pneumatické riadenie","Vytváranie alebo ovládanie pohybu pomocou stlačeného plynu."],
+["Hydraulické riadenie","Vytváranie alebo ovládanie pohybu pomocou kvapaliny pod tlakom."],
+["Biologicky inšpirovaná robotika","Navrhovanie robotov podľa princípov alebo riešení pozorovaných v prírode."],
+["Biologicky inšpirovaný robot","Robot, ktorého konštrukcia alebo správanie vychádza zo živých organizmov."],
+["Umelá inteligencia","Výpočtové metódy umožňujúce strojom vykonávať úlohy vyžadujúce vnímanie, uvažovanie, plánovanie alebo učenie."],
+["Autonómnosť","Schopnosť vykonávať úlohy a robiť prevádzkové rozhodnutia bez nepretržitého ľudského riadenia."],
+["Prispôsobivosť","Schopnosť meniť správanie podľa nových úloh alebo podmienok."],
+["Štruktúrované prostredie","Prostredie s pomerne predvídateľným usporiadaním a podmienkami."],
+["Neštruktúrované prostredie","Prostredie, ktoré je premenlivé a nie je úplne usporiadané alebo vopred známe."],
+["Dynamické prostredie","Prostredie, ktoré sa počas činnosti robota mení."],
+["Robotické vnímanie","Vyhodnocovanie údajov zo snímačov s cieľom porozumieť robotu a jeho okoliu."],
+["Počítačové videnie","Metódy získavania užitočných informácií z obrazov alebo videa."],
+["Rozpoznávanie vzorov","Vyhľadávanie a identifikovanie významových pravidelností v údajoch."],
+["Detekcia objektov","Zisťovanie prítomnosti objektov a určovanie ich polohy."],
+["Rozpoznávanie objektov","Určovanie, aký predmet robot pozoruje."],
+["Klasifikácia obrazu","Priradenie obrazu alebo jeho časti do určitej kategórie."],
+["Porozumenie scéne","Vyhodnocovanie predmetov, vzťahov a činností v pozorovanom prostredí."],
+["Priestorový vzťah","Vzájomná poloha alebo orientácia predmetov."],
+["Sémantická informácia","Informácia o význame pozorovaných objektov alebo javov."],
+["Sémantické vnímanie","Interpretácia údajov zo snímačov pomocou významových kategórií, objektov a vzťahov."],
+["Lidar","Technológia merajúca vzdialenosť pomocou laserového svetla."],
+["Sonar","Technológia zisťujúca objekty alebo vzdialenosť pomocou zvukových vĺn."],
+["Dotykový snímač","Zariadenie zisťujúce fyzický kontakt alebo súvisiace veličiny."],
+["Hmatová spätná väzba","Informácie získané prostredníctvom fyzického kontaktu s predmetom alebo povrchom."],
+["Hĺbkový snímač","Snímač merajúci vzdialenosti k povrchom alebo predmetom."],
+["Fúzia údajov zo snímačov","Spájanie informácií z viacerých snímačov s cieľom získať spoľahlivejší odhad."],
+["Multimodálne vnímanie","Spoločné spracovanie rôznych druhov zmyslových údajov."],
+["Súčasná lokalizácia a mapovanie","Vytváranie mapy prostredia pri súčasnom odhadovaní polohy robota."],
+["Uzavretie slučky","Rozpoznanie návratu na už navštívené miesto, ktoré umožňuje opraviť chyby mapy a lokalizácie."],
+["Pravdepodobnostná umelá inteligencia","Metódy AI, ktoré opisujú neistotu a pracujú s ňou pomocou pravdepodobností."],
+["Bayesovský odhad","Aktualizácia odhadu spojením predchádzajúcich znalostí s novými dôkazmi."],
+["Spracovanie prirodzeného jazyka","Metódy umožňujúce počítačom spracúvať a interpretovať ľudský jazyk."],
+["Rozpoznávanie reči","Prevod hovoreného jazyka do podoby, ktorú dokáže spracovať počítač."],
+["Rozpoznávanie gest","Identifikovanie a interpretovanie pohybov rúk alebo tela."],
+["Rozpoznávanie výrazov tváre","Identifikovanie pohybov a čŕt tváre súvisiacich s určitým výrazom."],
+["Servisný robot","Robot vykonávajúci užitočné úlohy pre ľudí alebo zariadenia mimo priemyselnej automatizácie."],
+["Pepper","Sociálny robot používaný ako príklad komunikácie s ľuďmi pomocou reči a gest."],
+["Rozhodovanie","Výber činnosti podľa cieľov, dostupných informácií a možných následkov."],
+["Plánovanie","Určovanie činností potrebných na dosiahnutie cieľa."],
+["Plánovanie pohybu","Výpočet uskutočniteľných pohybov robota pri zohľadnení prekážok a ďalších obmedzení."],
+["Plánovanie cesty","Výpočet trasy zo začiatočného miesta do cieľa."],
+["Bezkolízna trajektória","Postupnosť pohybov v čase, pri ktorej robot nenarazí do prekážok."],
+["Priestor prehľadávania","Súbor možných stavov alebo riešení, ktoré algoritmus skúma."],
+["Prehľadávanie grafu","Hľadanie cesty alebo riešenia skúmaním navzájom prepojených stavov."],
+["Plánovač založený na vzorkovaní","Metóda plánovania vyberajúca vzorky možných konfigurácií a spájajúca ich do uskutočniteľnej cesty."],
+["Optimalizácia","Hľadanie najlepšieho riešenia podľa zvoleného cieľa a obmedzení."],
+["Heuristika","Praktické pravidlo alebo odhad, ktorý usmerňuje hľadanie k sľubným riešeniam."],
+["Autonómna navigácia","Samostatné určovanie a sledovanie trás bez nepretržitého ľudského vedenia."],
+["Vyhýbanie sa prekážkam","Prispôsobovanie pohybu tak, aby sa predišlo zrážkam."],
+["Vysokoúrovňové plánovanie","Výber a usporiadanie všeobecných činností potrebných na splnenie úlohy."],
+["Automatizované plánovanie","Automatické vytváranie postupnosti činností podľa cieľov a dostupných možností."],
+["Symbolická umelá inteligencia","AI používajúca explicitné symboly, pravidlá a logické reprezentácie."],
+["Symbolický plánovač","Plánovací systém využívajúci symbolické opisy činností, podmienok a cieľov."],
+["Uvažovanie","Vyvodzovanie záverov alebo výber činností na základe dostupných znalostí."],
+["Preplánovanie","Úprava pôvodného plánu po zmene podmienok alebo získaní nových informácií."],
+["Prideľovanie úloh","Rozdeľovanie úloh medzi roboty alebo iných účastníkov systému."],
+["Koordinácia","Organizovanie činností tak, aby viaceré roboty alebo jednotky spolupracovali účinne."],
+["Riadiaci zákon","Pravidlo určujúce riadiace pokyny podľa stavu systému a požadovaného správania."],
+["Riadiaci člen","Súčasť systému, ktorá vypočítava pokyny na dosiahnutie požadovaného správania."],
+["Adaptívne riadenie","Riadenie upravujúce svoje parametre podľa zmien podmienok alebo neistoty."],
+["Inteligentné riadenie","Riadenie využívajúce metódy umelej inteligencie na výber alebo zlepšovanie činností."],
+["Riadiaci člen založený na učení","Riadiaci člen, ktorého správanie sa učí z údajov alebo skúseností."],
+["Riadiaca stratégia","Pravidlo priraďujúce pozorovanému stavu vhodnú činnosť."],
+["Dynamika","Náuka o pohybe v súvislosti so silami a momentmi síl."],
+["Vzorec chôdze","Koordinovaný spôsob pohybu končatín pri chôdzi alebo inom premiestňovaní."],
+["Prediktívny model","Model používaný na odhad budúcich stavov alebo výsledkov."],
+["Rozhodovacia sieť","Model vzťahov medzi neistými udalosťami, rozhodnutiami a ich následkami."],
+["Plánovanie pomocou teórie hier","Plánovanie zohľadňujúce možné rozhodnutia a správanie ďalších účastníkov."],
+["Kognitívna architektúra","Integrovaná štruktúra prepájajúca vnímanie, pamäť, uvažovanie, plánovanie a učenie."],
+["Znalostná báza","Usporiadaný súbor informácií používaný pri uvažovaní a rozhodovaní."],
+["Spolupráca človeka s robotom","Spoločné vykonávanie činností človekom a robotom s cieľom dosiahnuť spoločný výsledok."],
+["Strojové učenie","Metódy umožňujúce systému získavať alebo zlepšovať schopnosti pomocou údajov a skúseností."],
+["Učenie s učiteľom","Učenie z príkladov, ktoré obsahujú správne označenia alebo požadované výsledky."],
+["Učenie bez učiteľa","Hľadanie vzorov a štruktúr v údajoch bez poskytnutých správnych odpovedí."],
+["Posilňované učenie","Učenie prostredníctvom interakcie s prostredím, pri ktorom odmeny usmerňujú budúce správanie."],
+["Hlboké učenie","Strojové učenie využívajúce neurónové siete s viacerými spracovateľskými vrstvami."],
+["Neurónová sieť","Výpočtový model tvorený prepojenými jednotkami, ktorých parametre sa upravujú počas učenia."],
+["Hlboká neurónová sieť","Neurónová sieť s viacerými vrstvami, ktoré sa učia čoraz zložitejšie reprezentácie údajov."],
+["Konvolučná neurónová sieť","Neurónová sieť vhodná najmä na spracovanie obrazov a údajov usporiadaných do mriežky."],
+["Hlboké posilňované učenie","Posilňované učenie využívajúce hlboké neurónové siete."],
+["Trénovacie údaje","Príklady alebo skúsenosti používané na učenie modelu."],
+["Označené údaje","Údaje doplnené správnou kategóriou alebo požadovaným výsledkom."],
+["Učenie príznakov","Automatické objavovanie užitočných vlastností a reprezentácií vstupných údajov."],
+["Zovšeobecnenie","Schopnosť použiť naučené poznatky na nové príklady alebo situácie."],
+["Učenie metódou pokusu a omylu","Učenie skúšaním rôznych činností a zlepšovaním správania podľa ich výsledkov."],
+["Odmena","Číselná spätná väzba vyjadrujúca žiaducnosť činnosti alebo výsledku."],
+["Trest","Záporná spätná väzba, ktorá odrádza od určitého správania alebo výsledku."],
+["Kumulatívna odmena","Súčet odmien získaných počas postupnosti činností."],
+["Učenie z predvedenia","Osvojovanie úlohy z príkladov, ktoré predvedie človek alebo iný robot."],
+["Imitačné učenie","Učenie stratégie napodobňovaním alebo zovšeobecňovaním predvedeného správania."],
+["Priebežné učenie","Aktualizovanie modelu počas prevádzky podľa nových prichádzajúcich údajov."],
+["Kalibrácia","Nastavenie parametrov systému tak, aby merania alebo činnosti zodpovedali referenčným hodnotám."],
+["Kalibrácia založená na učení","Upravovanie parametrov robota pomocou údajov, skúseností a spätnej väzby."],
+["Simulácia","Počítačové napodobnenie robota a jeho prostredia používané na testovanie alebo tréning."],
+["Simulátor","Softvér napodobňujúci dôležité vlastnosti a správanie fyzického systému."],
+["Prenos zo simulácie do reality","Použitie schopností naučených vo virtuálnom prostredí na skutočnom robotovi."],
+["Veľké dáta","Rozsiahle alebo zložité súbory údajov využívané na analýzu a učenie."],
+["Kolektívne učenie","Učenie, pri ktorom si viaceré roboty odovzdávajú skúsenosti alebo spoločné poznatky."],
+["Flotila robotov","Skupina robotov prevádzkovaných alebo spravovaných spoločne."],
+["Systém typu čierna skrinka","Systém, ktorého vnútorný rozhodovací postup je ťažké preskúmať alebo pochopiť."],
+["Vysvetliteľnosť","Schopnosť poskytnúť človeku zrozumiteľné dôvody výstupov alebo rozhodnutí systému."],
+["Dôvera v roboty","Presvedčenie, že robot bude konať spoľahlivo a primerane situácii."],
+["Bezpečnostné obmedzenie","Pravidlo alebo hranica zabraňujúca nebezpečnej činnosti či následku."],
+["Robotická lokomócia","Premiestňovanie robota z jedného miesta na druhé."],
+["Robotická manipulácia","Riadené premiestňovanie a obsluha predmetov robotom."],
+["Robotické uchopovanie","Zachytenie a bezpečné držanie predmetu pomocou robotickej ruky alebo uchopovača."],
+["Viacagentové posilňované učenie","Posilňované učenie zahŕňajúce viacero navzájom pôsobiacich agentov."],
+["Celoživotné učenie","Priebežné získavanie a zdokonaľovanie znalostí alebo schopností počas celej prevádzky systému."]
+];
+
+let termDispLang='en'; // current display language on term screen
+let ti=0,rot=300,rotT=null,notif='sound';
+let pTotal=25*60,pLeft=25*60,pRun=false,pT=null,actx=null;
+
+function getImgIndex(){return ti;}
+
+function ensureAudio(){if(!actx){actx=new(window.AudioContext||window.webkitAudioContext)();}if(actx.state==='suspended')actx.resume();}
+// Keep unlocking audio on every click (some browsers re-suspend)
+document.addEventListener('click',()=>{ensureAudio();});
+
+function beep(){
+  ensureAudio();
+  // First tone
+  const o=actx.createOscillator(),g=actx.createGain();
+  o.connect(g);g.connect(actx.destination);
+  o.frequency.value=800;o.type='sine';g.gain.value=0.5;
+  g.gain.setValueAtTime(0.5,actx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.01,actx.currentTime+0.3);
+  o.start(actx.currentTime);o.stop(actx.currentTime+0.3);
+  // Second tone
+  setTimeout(()=>{
+    const o2=actx.createOscillator(),g2=actx.createGain();
+    o2.connect(g2);g2.connect(actx.destination);
+    o2.frequency.value=1200;o2.type='sine';g2.gain.value=0.5;
+    g2.gain.setValueAtTime(0.5,actx.currentTime);
+    g2.gain.exponentialRampToValueAtTime(0.01,actx.currentTime+0.3);
+    o2.start(actx.currentTime);o2.stop(actx.currentTime+0.3);
+  },200);
+}
+let voiceAudio=null;
+let termAudioEl=null;
+function playVoice(idx,lang){
+  if(termAudioEl){try{termAudioEl.pause();}catch(e){}}
+  const folder=lang==='sk'?'audio-sk':'audio';
+  if(!termAudioEl){termAudioEl=new Audio();}
+  termAudioEl.src=`${folder}/${String(idx).padStart(3,'0')}.mp3`;
+  termAudioEl.load();
+  termAudioEl.play().catch(()=>{});
+}
+function updateLangBtns(){
+  document.querySelectorAll('.lang-btn').forEach(b=>{
+    b.classList.toggle('on',b.textContent===termDispLang.toUpperCase());
+  });
+}
+function playCurrentEN(){termDispLang='en';renderTerm();updateLangBtns();playVoice(getRealIdx(),'en');}
+function playCurrentSK(){termDispLang='sk';renderTerm();updateLangBtns();playVoice(getRealIdx(),'sk');}
+
+function doAlert(){
+  if(notif==='sound'){
+    try{ensureAudio();beep();}catch(e){}
+    setTimeout(()=>{playVoice(getRealIdx());},500);
+  }
+  if(notif==='vibration'&&navigator.vibrate)navigator.vibrate([80,40,80]);
+}
+
+function playWhiteAnim(cb){
+  const ov=document.getElementById('animWhite'),v=document.getElementById('animWhiteVideo');
+  let finished=false;
+  function done(){if(finished)return;finished=true;ov.classList.remove('show');if(cb)cb();}
+  v.src=nextWhiteAnim();
+  ov.classList.add('show');
+  const p=v.play();
+  if(p)p.catch(()=>{done();});
+  v.onended=()=>{done();};
+  v.onerror=()=>{done();};
+  setTimeout(done,5000); // fallback
+}
+function playGreenAnim(cb){
+  const ov=document.getElementById('animGreen'),v=document.getElementById('animGreenVideo');
+  v.src=greenAnims[Math.floor(Math.random()*greenAnims.length)];ov.classList.add('show');v.play();
+  v.onended=()=>{ov.classList.remove('show');if(cb)cb();};
+}
+
+function showPomodoroDone(){
+  const ov=document.getElementById('pomodoroOverlay'),v=document.getElementById('pomodoroVideo');
+  v.src=greenAnims[Math.floor(Math.random()*greenAnims.length)];ov.classList.add('show');v.play();
+  v.onended=()=>{v.src=greenAnims[Math.floor(Math.random()*greenAnims.length)];v.play();};
+}
+function dismissPomodoro(){document.getElementById('pomodoroOverlay').classList.remove('show');document.getElementById('pomodoroVideo').pause();}
+
+// Build chapter buttons (only chapters that have data)
+const CHAPTERS=[
+  {name:'Introduction to Robotics',hasContent:true},
+  {name:'Coming soon',hasContent:false},
+];
+function buildChapters(){
+  document.getElementById('csChapters').innerHTML=CHAPTERS.map((ch,i)=>
+    ch.hasContent
+      ? `<button class="cs-ch-card" onclick="openChapterDetail(${i})"><span class="ch-num">Chapter ${i+1}</span><span class="ch-name">${ch.name}</span></button>`
+      : `<div class="cs-ch-card empty"><span class="ch-num">Chapter ${i+1}</span><span class="ch-name">${ch.name}</span></div>`
+  ).join('');
+}
+function openChapterDetail(i){
+  document.getElementById('cdTitle').textContent=CHAPTERS[i].name;
+  updateMarkedCount();
+  // Loop white anims on chapter detail mascot
+  const v=document.getElementById('cdMascotVideo');
+  let wi=0;
+  function nextW(){v.src=whiteAnims[wi%whiteAnims.length];wi++;v.play().catch(()=>{});}
+  v.onended=nextW;nextW();
+  document.getElementById('chaptersScreen').classList.remove('active');
+  document.getElementById('chapterDetail').classList.add('active');
+}
+function goHome(){
+  document.getElementById('chapterDetail').classList.remove('active');
+  document.getElementById('chaptersScreen').classList.add('active');
+  updateStreak();
+}
+
+// Mascot: sits still, occasionally plays animation
+let mascotIdx=0,mascotTimer=null;
+function startMascot(){
+  scheduleMascotAnim();
+}
+function scheduleMascotAnim(){
+  const delay=8000+Math.random()*15000; // 8-23 seconds
+  mascotTimer=setTimeout(()=>{
+    const v=document.getElementById('mascotVideo');
+    v.src=whiteAnims[mascotIdx%whiteAnims.length];
+    mascotIdx++;
+    v.classList.add('playing');
+    v.play();
+    v.onended=()=>{v.classList.remove('playing');scheduleMascotAnim();};
+  },delay);
+}
+function stopMascot(){
+  if(mascotTimer)clearTimeout(mascotTimer);
+  const v=document.getElementById('mascotVideo');
+  v.pause();v.classList.remove('playing');v.onended=null;
+}
+
+// Wake Lock - prevent screen sleep
+let wakeLock=null;
+async function requestWakeLock(){
+  try{if('wakeLock' in navigator){wakeLock=await navigator.wakeLock.request('screen');}}catch(e){}
+}
+function releaseWakeLock(){
+  if(wakeLock){try{wakeLock.release();}catch(e){} wakeLock=null;}
+}
+
+function openChapter(){
+  ensureAudio();
+  requestWakeLock();
+  if(!termAudioEl){termAudioEl=new Audio();}
+  termAudioEl.src='audio/000.mp3';termAudioEl.play().then(()=>termAudioEl.pause()).catch(()=>{});
+  markStudied();
+  markedMode=false;
+  const saved=localStorage.getItem('meowbot-ti');
+  ti=saved?parseInt(saved):0;
+  if(ti>=TERMS.length)ti=0;
+  document.getElementById('chapterDetail').classList.remove('active');
+  document.getElementById('termScreen').classList.add('active');
+  renderTerm();
+  resetRot();
+  startMascot();
+}
+
+function goBack(){
+  if(rotT)clearInterval(rotT);
+  stopMascot();
+  releaseWakeLock();
+  document.getElementById('termScreen').classList.remove('active');
+  document.getElementById('chapterDetail').classList.add('active');
+}
+
+function getRealIdx(){return markedMode?markedList[ti]:ti;}
+function getTotal(){return markedMode?markedList.length:TERMS.length;}
+
+function renderTerm(){
+  const ri=getRealIdx();
+  const [t,d,sub,imgIdx]=TERMS[ri];
+  if(!markedMode)localStorage.setItem('meowbot-ti',ti);
+  const r=document.getElementById('termRight');
+  r.classList.remove('fade');void r.offsetWidth;r.classList.add('fade');
+  document.getElementById('termCh').textContent=sub;
+  document.getElementById('termImg').src='img/'+IMGS[imgIdx];
+  if(termDispLang==='sk'&&TERMS_SK[ri]){
+    document.getElementById('termWord').textContent=TERMS_SK[ri][0];
+    document.getElementById('termDef').textContent=TERMS_SK[ri][1];
+  }else{
+    document.getElementById('termWord').textContent=t;
+    document.getElementById('termDef').textContent=d;
+  }
+  document.getElementById('termCount').textContent=`${ti+1} / ${getTotal()}`;
+  document.getElementById('termProg').style.width=`${((ti+1)/getTotal())*100}%`;
+  updateMarkBtn();
+}
+
+function nextTerm(){ti=(ti+1)%getTotal();renderTerm();doAlert();resetRot();}
+function prevTerm(){ti=(ti-1+getTotal())%getTotal();renderTerm();doAlert();resetRot();}
+function autoNext(){
+  ti=(ti+1)%getTotal();
+  doAlert();
+  playWhiteAnim(()=>{renderTerm();});
+}
+let rotLeft=300,rotTick=null;
+function fmtRot(s){const m=Math.floor(s/60),sec=s%60;return sec>0?`${m}:${String(sec).padStart(2,'0')}`:`${m}:00`;}
+function resetRot(){
+  if(rotT)clearInterval(rotT);if(rotTick)clearInterval(rotTick);
+  rotLeft=rot;
+  document.getElementById('rotCountdown').textContent=fmtRot(rotLeft);
+  rotTick=setInterval(()=>{rotLeft--;document.getElementById('rotCountdown').textContent=fmtRot(Math.max(0,rotLeft));},1000);
+  rotT=setInterval(()=>{rotLeft=rot;autoNext();},rot*1000);
+}
+
+function setNotif(m){notif=m;updateNotifIcon();if(m==='sound')beep();if(m==='vibration'&&navigator.vibrate)navigator.vibrate(80);}
+function cycleNotif(){const modes=['none','sound','vibration'];notif=modes[(modes.indexOf(notif)+1)%3];setNotif(notif);}
+function updateNotifIcon(){const on=notif!=='none';document.getElementById('notifIconOff').style.display=on?'none':'block';document.getElementById('notifIconOn').style.display=on?'block':'none';document.getElementById('notifToggle').classList.toggle('active',on);document.getElementById('notifToggle').title=notif==='none'?'Alerts off':notif==='sound'?'Sound on':'Vibrate on';}
+function setRot(s){rot=s;document.querySelectorAll('.rot-pill').forEach(b=>b.classList.toggle('on',+b.dataset.i===s));if(rotT)resetRot();}
+
+function fmt(s){return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;}
+const timerPresets=[10,15,25,30,45,60];let tpIdx=2;
+function cycleTimerPreset(){if(pRun)return;tpIdx=(tpIdx+1)%timerPresets.length;setTimer(timerPresets[tpIdx]);}
+function setTimer(m){pTotal=m*60;pLeft=m*60;pRun=false;if(pT)clearInterval(pT);document.getElementById('startBtn').textContent='Start';document.getElementById('termTimer').classList.remove('done');document.getElementById('termTimer').textContent=fmt(pLeft);}
+function toggleTimer(){
+  if(pRun){pRun=false;clearInterval(pT);document.getElementById('startBtn').textContent='Start';}
+  else{pRun=true;document.getElementById('startBtn').textContent='Pause';
+    pT=setInterval(()=>{pLeft--;document.getElementById('termTimer').textContent=fmt(pLeft);
+      if(pLeft<=0){clearInterval(pT);pRun=false;document.getElementById('startBtn').textContent='Start';
+        document.getElementById('termTimer').classList.add('done');beep();
+        if(navigator.vibrate)navigator.vibrate([200,100,200,100,200]);showPomodoroDone();}
+    },1000);}
+}
+function resetTimer(){pRun=false;if(pT)clearInterval(pT);pLeft=pTotal;document.getElementById('startBtn').textContent='Start';document.getElementById('termTimer').classList.remove('done');document.getElementById('termTimer').textContent=fmt(pLeft);}
+
+// Keyboard nav
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('termScreen').classList.contains('active'))return;
+  if(e.key==='ArrowRight'||e.key===' ')nextTerm();
+  if(e.key==='ArrowLeft')prevTerm();
+  if(e.key==='Escape')goBack();
+});
+
+// Streak tracking
+function updateStreak(){
+  const today=new Date().toDateString();
+  const lastDay=localStorage.getItem('meowbot-last-day');
+  let streak=parseInt(localStorage.getItem('meowbot-streak')||'0');
+  if(lastDay===today){
+    // Already studied today
+  }else{
+    const yesterday=new Date(Date.now()-86400000).toDateString();
+    if(lastDay===yesterday){streak++;}
+    else if(lastDay){streak=1;}
+    else{streak=1;}
+    localStorage.setItem('meowbot-streak',streak);
+    localStorage.setItem('meowbot-last-day',today);
+  }
+  document.getElementById('csStreak').innerHTML=
+    streak>0?`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-4.97 0-9-2.69-9-6 0-4 5-8 5-8s1 2 3 3c2-4 5-7 5-7s4 4 4 8c0 5.5-3.5 10-8 10z"/></svg><span class="streak-num">${streak}</span> day${streak>1?'s':''} streak`:'';
+}
+function markStudied(){
+  const today=new Date().toDateString();
+  const lastDay=localStorage.getItem('meowbot-last-day');
+  if(lastDay!==today){
+    const yesterday=new Date(Date.now()-86400000).toDateString();
+    let streak=parseInt(localStorage.getItem('meowbot-streak')||'0');
+    if(lastDay===yesterday){streak++;}else{streak=1;}
+    localStorage.setItem('meowbot-streak',streak);
+    localStorage.setItem('meowbot-last-day',today);
+  }
+}
+// Marked terms
+let marked=JSON.parse(localStorage.getItem('meowbot-marked')||'[]');
+let markedMode=false; // when true, only cycle through marked terms
+let markedList=[]; // filtered indices
+
+function toggleMark(){
+  const idx=markedMode?markedList[ti]:ti;
+  const pos=marked.indexOf(idx);
+  if(pos>=0){marked.splice(pos,1);}else{marked.push(idx);}
+  localStorage.setItem('meowbot-marked',JSON.stringify(marked));
+  updateMarkBtn();
+}
+
+function updateMarkBtn(){
+  const idx=markedMode?markedList[ti]:ti;
+  const isMarked=marked.includes(idx);
+  const btn=document.getElementById('markBtn');
+  btn.innerHTML=isMarked?'&#9733;':'&#9734;';
+  btn.classList.toggle('marked',isMarked);
+}
+
+function openMarked(){
+  markedList=[...marked];
+  if(markedList.length===0){alert('No marked terms yet. Mark terms with the star button while learning.');return;}
+  markedMode=true;
+  ti=0;
+  ensureAudio();
+  document.getElementById('chapterDetail').classList.remove('active');
+  document.getElementById('termScreen').classList.add('active');
+  renderTerm();resetRot();startMascot();
+}
+
+function startMeditationMarked(){
+  markedList=[...marked];
+  if(markedList.length===0){alert('No marked terms yet.');return;}
+  markedMode=true;
+  startMeditation();
+}
+
+function updateMarkedCount(){
+  const el=document.getElementById('markedCount');
+  if(el)el.textContent=marked.length>0?`${marked.length} term${marked.length>1?'s':''} marked`:'No terms marked yet';
+}
+
+function updateDaysSinceStart(){
+  let start=localStorage.getItem('meowbot-start');
+  if(!start){start=new Date().toISOString();localStorage.setItem('meowbot-start',start);}
+  const days=Math.floor((Date.now()-new Date(start).getTime())/86400000);
+  document.getElementById('csDays').innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`+(days>0?`<span>${days}</span> day${days>1?'s':''} since start`:'Day 1');
+}
+
+updateStreak();
+updateDaysSinceStart();
+buildChapters();
+// Loop all anims on chapters screen logo (green + white mixed)
+(function loopCsLogo(){
+  const v=document.getElementById('csLogoVideo');
+  const allAnims=[...greenAnims,...whiteAnims];
+  let gi=0;
+  function next(){
+    v.src=allAnims[gi%allAnims.length];gi++;
+    const p=v.play();if(p)p.catch(()=>{});
+  }
+  v.onended=next;
+  next();
+})();
+
+// ===== MEDITATION MODE =====
+let medRunning=false,medIdx=0,medTimeout=null,medLang='en';
+// Two persistent audio elements - created once on user tap, reused forever
+let medMusicEl=null,medVoiceEl=null;
+
+function medInit(){
+  // MUST be called during user gesture (click/tap)
+  if(!medMusicEl){
+    medMusicEl=document.createElement('audio');
+    medMusicEl.loop=true;
+    medMusicEl.src='meditation-bg.mp3';
+    document.body.appendChild(medMusicEl);
+  }
+  if(!medVoiceEl){
+    medVoiceEl=document.createElement('audio');
+    document.body.appendChild(medVoiceEl);
+  }
+  // Unlock both by playing during user gesture
+  medMusicEl.play().then(()=>medMusicEl.pause()).catch(()=>{});
+  medVoiceEl.src='audio/000.mp3';
+  medVoiceEl.play().then(()=>medVoiceEl.pause()).catch(()=>{});
+}
+
+function chime(){
+  ensureAudio();
+  const notes=[523.25,659.25,783.99];
+  notes.forEach((f,i)=>{
+    setTimeout(()=>{
+      const o=actx.createOscillator(),g=actx.createGain();
+      o.type='sine';o.frequency.value=f;
+      g.gain.value=0.15;
+      g.gain.setValueAtTime(0.15,actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+2);
+      o.connect(g);g.connect(actx.destination);
+      o.start();o.stop(actx.currentTime+2);
+    },i*300);
+  });
+}
+
+function medPlayVoice(idx,lang,cb){
+  if(!medVoiceEl||!medRunning){if(cb)cb();return;}
+  const folder=lang==='sk'?'audio-sk':'audio';
+
+  let done=false;
+  function finish(){if(done)return;done=true;if(cb)cb();}
+
+  medVoiceEl.onended=finish;
+  medVoiceEl.onerror=finish;
+  medVoiceEl.src=`${folder}/${String(idx).padStart(3,'0')}.mp3`;
+  medVoiceEl.play().catch(()=>{finish();});
+  setTimeout(finish,12000);
+}
+
+function getMedTotal(){return markedMode?markedList.length:TERMS.length;}
+function getMedRealIdx(i){return markedMode?markedList[i]:i;}
+
+function showMedTerm(localIdx){
+  if(!medRunning)return;
+  const ri=getMedRealIdx(localIdx);
+  const [t,d]=TERMS[ri];
+  const termEl=document.getElementById('medTerm');
+  const defEl=document.getElementById('medDef');
+  document.getElementById('medCount').textContent=`${localIdx+1} / ${getMedTotal()}`;
+
+  termEl.classList.remove('visible');
+  defEl.classList.remove('visible');
+
+  setTimeout(()=>{
+    if(!medRunning)return;
+    termEl.textContent=t;
+    defEl.textContent=d;
+    termEl.classList.add('visible');
+    defEl.classList.add('visible');
+
+    function afterVoices(){
+      if(!medRunning)return;
+      chime();
+      medTimeout=setTimeout(()=>{
+        if(!medRunning)return;
+        medIdx=(medIdx+1)%getMedTotal();
+        showMedTerm(medIdx);
+      },4000);
+    }
+
+    if(medLang==='en'){
+      medPlayVoice(ri,'en',()=>{
+        if(!medRunning)return;
+        medTimeout=setTimeout(()=>{medPlayVoice(ri,'en',afterVoices);},2000);
+      });
+    }else if(medLang==='sk'){
+      medPlayVoice(ri,'sk',()=>{
+        if(!medRunning)return;
+        medTimeout=setTimeout(()=>{medPlayVoice(ri,'sk',afterVoices);},2000);
+      });
+    }else{
+      medPlayVoice(ri,'en',()=>{
+        if(!medRunning)return;
+        medTimeout=setTimeout(()=>{medPlayVoice(ri,'sk',afterVoices);},2000);
+      });
+    }
+  },600);
+}
+
+function startMeditation(lang){
+  const total=markedMode?markedList.length:TERMS.length;
+  const input=prompt(`Start from term number (1-${total}):`,'1');
+  if(input===null)return;
+  const startAt=Math.max(0,Math.min(total-1,parseInt(input)-1))||0;
+
+  stopMeditation();
+  ensureAudio();
+  requestWakeLock();
+  medInit();
+
+  medLang=lang||'en';
+  medRunning=true;
+  medIdx=startAt;
+  document.getElementById('medOverlay').classList.add('show');
+  // Start music
+  medMusicEl.currentTime=0;
+  medMusicEl.play().catch(()=>{});
+  // Start first term after 2s
+  medTimeout=setTimeout(()=>{showMedTerm(medIdx);},2000);
+}
+
+function stopMeditation(){
+  medRunning=false;
+  if(medTimeout){clearTimeout(medTimeout);medTimeout=null;}
+  releaseWakeLock();
+  if(medVoiceEl){medVoiceEl.pause();medVoiceEl.onended=null;}
+  if(medMusicEl){medMusicEl.pause();}
+  document.getElementById('medOverlay').classList.remove('show');
+  document.getElementById('medTerm').classList.remove('visible');
+  document.getElementById('medDef').classList.remove('visible');
+}
+
+// Search
+function openSearch(){
+  document.getElementById('searchOverlay').classList.add('show');
+  document.getElementById('searchInput').value='';
+  document.getElementById('searchResults').innerHTML='';
+  setTimeout(()=>document.getElementById('searchInput').focus(),100);
+}
+function closeSearch(){
+  document.getElementById('searchOverlay').classList.remove('show');
+}
+function doSearch(){
+  const q=document.getElementById('searchInput').value.toLowerCase().trim();
+  const res=document.getElementById('searchResults');
+  if(!q){res.innerHTML='';return;}
+  const matches=[];
+  TERMS.forEach((t,i)=>{
+    if(t[0].toLowerCase().includes(q)||t[1].toLowerCase().includes(q)){
+      matches.push(i);
+    }
+  });
+  if(matches.length===0){
+    res.innerHTML='<div class="search-empty">No results</div>';
+    return;
+  }
+  res.innerHTML=matches.slice(0,20).map(i=>{
+    const [term,def,sub]=TERMS[i];
+    return `<button class="search-item" onclick="goToTerm(${i})"><div class="si-term">${term}</div><div class="si-def">${def.substring(0,80)}${def.length>80?'...':''}</div><div class="si-sub">${sub}</div></button>`;
+  }).join('');
+}
+function goToTerm(i){
+  closeSearch();
+  markedMode=false;
+  ti=i;
+  ensureAudio();
+  document.getElementById('chaptersScreen').classList.remove('active');
+  document.getElementById('chapterDetail').classList.remove('active');
+  document.getElementById('termScreen').classList.add('active');
+  renderTerm();resetRot();startMascot();
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&document.getElementById('searchOverlay').classList.contains('show')){closeSearch();}
+});
+</script>
+</body>
+</html>
