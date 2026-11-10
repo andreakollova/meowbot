@@ -265,71 +265,86 @@
 
   @media (max-width:768px){
     /* Homepage */
-    #chaptersScreen{padding:20px 20px 60px;gap:8px}
-    .cs-title{width:70%;margin-bottom:-8px}
-    .cs-logo video{width:80px!important;height:80px!important}
-    .cs-logo{margin-bottom:8px}
+    #chaptersScreen{padding:env(safe-area-inset-top,20px) 20px 60px;gap:6px}
+    .cs-title{width:75%;margin-bottom:-5px}
+    .cs-logo video{width:70px!important;height:70px!important}
+    .cs-logo{margin-bottom:6px}
     .cs-ch-card .ch-name{font-size:16px}
     .cs-ch-card .ch-num{font-size:12px}
-    .cs-search-btn{top:16px;right:16px;padding:8px 14px 8px 12px;font-size:12px}
-    .cs-streak,.cs-days{bottom:16px;font-size:11px}
+    .cs-search-btn{
+      position:static;margin-bottom:8px;align-self:flex-end;
+      padding:6px 14px 6px 10px;font-size:12px;
+      background:rgba(255,255,255,.25);color:rgba(255,255,255,.7);
+    }
+    .cs-streak,.cs-days{bottom:12px;font-size:11px}
     .cs-streak{left:16px}
     .cs-days{right:16px}
 
     /* Chapter detail */
-    .cd-back{top:16px;left:16px;padding:6px 14px;font-size:11px}
-    .cd-mascot video{width:80px!important;height:80px!important}
-    .cd-title{font-size:22px}
-    .cd-subtitle{font-size:12px}
-    .cd-menu{min-width:auto;width:92vw;max-width:360px}
-    .cd-menu-item{padding:14px 20px;font-size:14px}
+    .cd-back{top:env(safe-area-inset-top,16px);left:16px;padding:6px 14px;font-size:11px}
+    .cd-mascot video{width:70px!important;height:70px!important}
+    .cd-title{font-size:20px}
+    .cd-subtitle{font-size:11px;margin-bottom:20px}
+    .cd-menu{min-width:auto;width:90vw;max-width:340px}
+    .cd-menu-item{padding:14px 18px;font-size:13px}
+    .cd-menu-item svg{width:18px;height:18px}
 
-    /* Term screen */
-    #termScreen{padding:16px;padding-top:60px}
-    .term-left img{max-width:100px;max-height:16vh}
-    .term-word{font-size:28px;letter-spacing:-.8px}
-    .term-def{font-size:16px;line-height:1.5}
-    .term-topright{gap:5px;right:10px;top:12px}
-    .term-back{top:12px;left:10px;padding:5px 12px;font-size:10px}
-    .term-timer{font-size:13px}
-    .tr-btn{padding:4px 10px;font-size:10px}
-    .mark-btn{width:30px;height:30px;font-size:16px}
-    .term-nav button{width:30px;height:30px}
-    .rot-pills{display:none}
-    .rot-countdown{display:none}
-    .tr-sep{display:none}
-    .mascot-corner{width:70px;height:70px;bottom:12px;right:12px}
-    .term-chapter{bottom:12px;left:12px;font-size:10px}
-    .term-meta{margin-top:12px}
-    .progress-track{width:120px}
+    /* Term screen - two rows: top bar + content centered */
+    #termScreen{padding:0 20px 60px;justify-content:center}
+    .term-back{
+      position:fixed;top:env(safe-area-inset-top,8px);left:12px;
+      padding:6px 12px;font-size:10px;z-index:20;
+    }
+    .term-topright{
+      position:fixed;top:env(safe-area-inset-top,8px);right:12px;
+      gap:4px;z-index:20;flex-wrap:nowrap;
+    }
+    .lang-btn{padding:4px 8px;font-size:9px}
+    .mark-btn{width:28px;height:28px;font-size:15px}
+    .term-nav button{width:28px;height:28px}
+    .term-nav button svg{width:14px;height:14px}
+    .notif-toggle{width:28px;height:28px}
+    .notif-toggle svg{width:16px;height:16px}
+    .term-timer{font-size:11px}
+    .tr-btn{padding:3px 8px;font-size:9px}
+    .rot-pills,.rot-countdown,.tr-sep{display:none}
+
+    .term-left img{max-width:100px;max-height:18vh}
+    .term-word{font-size:26px;letter-spacing:-.6px}
+    .term-def{font-size:15px;line-height:1.5;padding:0 8px}
+    .term-meta{margin-top:10px}
+    .progress-track{width:100px}
+    .term-count{font-size:11px}
+
+    .mascot-corner{width:60px;height:60px;bottom:8px;right:8px}
+    .term-chapter{bottom:10px;left:12px;font-size:9px}
 
     /* Search */
-    .search-overlay{padding:56px 16px 16px}
+    .search-overlay{padding:env(safe-area-inset-top,50px) 16px 16px}
     .search-input{font-size:16px;padding:14px 16px;border-radius:12px}
-    .search-close{top:16px;right:16px}
+    .search-close{top:env(safe-area-inset-top,12px);right:16px}
     .search-item{padding:12px 14px}
     .search-item .si-term{font-size:14px}
 
     /* Meditation */
-    .med-term{font-size:26px;max-width:90vw}
-    .med-def{font-size:16px;max-width:90vw}
-    .med-close{top:16px;right:16px;padding:8px 16px;font-size:12px}
-    .med-count{font-size:11px;bottom:16px}
+    .med-term{font-size:24px;max-width:90vw}
+    .med-def{font-size:15px;max-width:90vw;padding:0 12px}
+    .med-close{top:env(safe-area-inset-top,12px);right:16px;padding:8px 16px;font-size:12px}
+    .med-count{font-size:11px;bottom:12px}
 
     /* Overlays */
-    .anim-overlay video{max-width:250px;max-height:250px;border-radius:16px}
-    .green-overlay .green-title{font-size:24px}
-    .green-overlay .green-sub{font-size:14px}
+    .anim-overlay video{max-width:200px;max-height:200px;border-radius:16px}
+    .green-overlay .green-title{font-size:22px}
+    .green-overlay .green-sub{font-size:13px}
   }
 
   @media (max-width:400px){
-    .term-word{font-size:24px}
+    .cs-title{width:85%}
+    .term-word{font-size:22px}
     .term-def{font-size:14px}
-    .term-left img{max-width:80px;max-height:14vh}
-    #termScreen{padding-top:50px}
-    .cs-title{width:95%}
-    .med-term{font-size:22px}
-    .med-def{font-size:14px}
+    .term-left img{max-width:80px;max-height:15vh}
+    .med-term{font-size:20px}
+    .med-def{font-size:13px}
   }
 </style>
 </head>
